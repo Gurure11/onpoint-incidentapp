@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>OnPoint Fleet · accident report (with image attach)</title>
+    <title>OnPoint Fleet · accident report (image as link)</title>
     <!-- Font & icons (Font Awesome & Google Font) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
@@ -366,11 +366,11 @@
             </div>
 
             <hr>
-            <!-- PHOTO UPLOAD AREA -->
+            <!-- PHOTO UPLOAD AREA (image will be converted to a shareable link) -->
             <div class="photo-upload-area" id="dropZone">
                 <i class="fas fa-cloud-upload-alt"></i>
                 <div class="upload-text">attach accident image</div>
-                <div class="upload-hint">tap to browse or drag — high quality</div>
+                <div class="upload-hint">tap to browse or drag — will become a link</div>
                 <input type="file" id="fileInput" accept="image/*" capture="environment">
             </div>
 
@@ -381,15 +381,14 @@
                 <button type="button" id="clearImageBtn" style="background: none; border:none; color:#b00; margin-left:auto; font-size:1.5rem; cursor:pointer;"><i class="fas fa-times-circle"></i></button>
             </div>
 
-            <!-- NEW: we'll keep base64 for preview, but sending will be via native mail attachment technique? we will use a slightly different approach: generate a dataURI and also try to attach via mailto? not possible. so we use fallback: download .eml draft or use mailto with image as link. To actually attach we'd need a backend. However as per request "image as an attachment or embedded" we can embed as inline image using cid or dataURI. Since mailto doesn't support attachments, we embed dataURI in body and instruct user. For better UX we add hidden file reader and generate an .ics? no: we keep body with image link. But to make it feel like attachment, we will generate an HTML email body with embedded image using base64 dataURI. The user can copy the image from the email body. That's the best we can do without SMTP. We'll embed the image as <img src="data:.."> inside body and encourage user to use an email client that renders. -->
-            <!-- We'll keep the base64 hidden field to embed image in body -->
+            <!-- store base64 data to generate a link later -->
             <input type="hidden" id="imageBase64" value="">
 
             <button type="submit" class="submit-btn">
-                <i class="fas fa-paper-plane"></i> email full report + image
+                <i class="fas fa-paper-plane"></i> email full report + image link
             </button>
             <div class="info-note">
-                <i class="fas fa-shield-alt"></i> Image embedded in email body (as inline picture) · works in most clients.
+                <i class="fas fa-link"></i> Image will be included as a direct link (data: URI) · copy & paste into browser to view.
             </div>
         </form>
         <footer>
@@ -409,7 +408,7 @@
             const form = document.getElementById('accidentForm');
 
             let selectedFile = null;
-            let currentBase64 = '';
+            let currentBase64 = '';   // stores data URL
 
             function handleFileSelect(file) {
                 if (!file) return;
@@ -470,10 +469,11 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('accidentDate').value = today;
 
-            // Form submit – build email body with embedded image (as dataURI)
+            // Form submit – build email body with EVERYTHING from Date to the End (including image as clickable link)
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
 
+                // ---- GATHER ALL FIELDS (from Date to the end) ----
                 const date = document.getElementById('accidentDate').value;
                 const time = document.getElementById('accidentTime').value;
                 const vehicleReg = document.getElementById('vehicleReg').value;
@@ -492,75 +492,67 @@
                 const policeReportNo = document.getElementById('policeReportNo').value || 'N/A';
                 const atFault = document.querySelector('input[name="atFault"]:checked')?.value || 'Not specified';
 
-                // Basic validation
+                // Basic required check
                 if (!date || !time || !vehicleReg || !location || !accidentType || !unitNumber || !driverName || !driverPhone || !description) {
-                    alert('Please fill all required fields.');
+                    alert('Please fill all required fields (Date, Time, Vehicle, Location, Type, Unit, Driver Name, Phone, Description).');
                     return;
                 }
 
-                // Build email subject
+                // recipient & subject
                 const recipient = 'fleet@onpointontime.co.za';
                 const subject = `🚨 Accident report - Unit ${unitNumber} / ${vehicleReg} - ${date}`;
 
-                // Compose plain text body first, then append embedded image
-                let plainBody = '';
-                plainBody += `ONPOINT FLEET – COMPLETE ACCIDENT REPORT\n\n`;
-                plainBody += `📅 DATE: ${date} at ${time}\n`;
-                plainBody += `🚗 VEHICLE REG: ${vehicleReg}\n`;
-                plainBody += `📍 LOCATION: ${location}\n`;
-                plainBody += `🚧 TYPE: ${accidentType}\n`;
-                plainBody += `🚛 UNIT: ${unitNumber} | DRIVER: ${driverName} | PHONE: ${driverPhone}\n`;
-                plainBody += `📄 DESCRIPTION: ${description}\n`;
-                plainBody += `🚙 OTHER PARTIES: ${otherParties || 'none'}\n\n`;
+                // ----- COMPOSE BODY – from DATE to OFFICER JUDGEMENT + image link at the end -----
+                let bodyText = '';
 
-                plainBody += `👮 OFFICIAL INFORMATION\n`;
-                plainBody += `🏛️ REPORTED TO METRO: ${reportedMetro}\n`;
-                plainBody += `🛡️ OFFICER NAME: ${officerName} | CELL: ${officerPhone}\n`;
-                plainBody += `🍷 DRUNKEN DRIVING INVOLVED: ${drunkenDriving}\n`;
-                plainBody += `📋 POLICE REPORT #: ${policeReportNo}\n`;
-                plainBody += `⚖️ OFFICER’S JUDGEMENT (AT FAULT?): ${atFault}\n\n`;
+                // 1) Date / time block
+                bodyText += `ONPOINT FLEET – COMPLETE ACCIDENT REPORT\n\n`;
+                bodyText += `📅 DATE: ${date} at ${time}\n`;
+                bodyText += `🚗 VEHICLE REG: ${vehicleReg}\n`;
+                bodyText += `📍 LOCATION: ${location}\n`;
+                bodyText += `🚧 TYPE: ${accidentType}\n`;
+                bodyText += `🚛 UNIT: ${unitNumber}\n`;
+                bodyText += `🧑‍✈️ DRIVER: ${driverName}  |  PHONE: ${driverPhone}\n`;
+                bodyText += `📄 DESCRIPTION: ${description}\n`;
+                bodyText += `🚙 OTHER PARTIES: ${otherParties || 'none reported'}\n\n`;
 
-                // image embedded as HTML (since mail clients render HTML, we can include a multipart? not with mailto)
-                // We will construct a body that includes the image as an embedded base64 img tag, but mailto only supports plain text / url encoded.
-                // Workaround: we can create a dataURI that contains both text and html? No.
-                // To make it feel like an attachment, we add the base64 image as a link and also mention it is attached as base64.
-                // Better: we provide the image as a separate HTML block. Most mail apps will show clickable link to dataURI.
-                // We'll combine both text and image using the fact that some mail clients render inline dataURIs if properly encoded? Not reliable.
-                // Actually, we'll output the base64 image as a downloadable link: "Image data: ... (click to open in browser)"
-                // And also include the base64 string at the end so the user can reconstruct. That's the best we can do without a server.
+                // 2) Police / official section
+                bodyText += `👮 OFFICIAL / POLICE INFORMATION\n`;
+                bodyText += `🏛️ REPORTED TO METRO: ${reportedMetro}\n`;
+                bodyText += `🛡️ OFFICER NAME: ${officerName}  |  CELL: ${officerPhone}\n`;
+                bodyText += `🍷 DRUNKEN DRIVING INVOLVED: ${drunkenDriving}\n`;
+                bodyText += `📋 INCIDENT POLICE REPORT #: ${policeReportNo}\n`;
+                bodyText += `⚖️ OFFICER’S JUDGEMENT (AT FAULT?): ${atFault}\n\n`;
 
-                let imageBlock = '';
+                // 3) IMAGE as a clickable link (data URI) – placed at the end as requested
                 if (currentBase64) {
-                    // truncate if too long for mailto (limit ~8000 characters). We'll check length
-                    const base64Data = currentBase64;
-                    if (base64Data.length < 6000) {
-                        imageBlock = `\n📸 ACCIDENT IMAGE (embedded - view in HTML capable client):\n${base64Data}\n`;
-                    } else {
-                        // Provide console fallback, and include a shorter dataURI preview? Actually we can keep full but might break mailto.
-                        // We'll still include full but with warning, and also log.
-                        imageBlock = `\n📸 ACCIDENT IMAGE (base64 length ${base64Data.length} chars - may be long, but included below):\n${base64Data}\n`;
-                        console.log('Full image base64:', base64Data);
-                    }
+                    // Provide the image as a direct data URI link (works in any email client that supports links)
+                    // Shorten display: show first 50 chars for readability but keep full link clickable.
+                    const shortBase = currentBase64.substring(0, 70) + '…' + currentBase64.slice(-20);
+                    bodyText += `📸 ACCIDENT IMAGE (click the link below — if it doesn't open, paste into browser)\n`;
+                    bodyText += `🔗 Image link: ${currentBase64}\n\n`;
+                    // also include a hint to open in browser
+                    bodyText += `(Most email clients allow clicking. If the link is very long, copy the entire line into a browser address bar.)\n\n`;
                 } else {
-                    imageBlock = `\n📷 No image attached.\n`;
+                    bodyText += `📷 No image attached.\n\n`;
                 }
 
-                // Final body (plain text + base64 image string)
-                let fullBody = plainBody + imageBlock + `\n-- \nOnPoint Fleet safety report – generated from mobile app (v2) · 71 Pretorius Rd, Midrand`;
+                bodyText += `-- \nOnPoint Fleet safety report – generated from mobile app · 71 Pretorius Rd, Midrand`;
 
-                // URL encode
-                const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
+                // URL encode the entire body
+                const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
 
-                // If the mailto string is too long (> 8192), we warn and open anyway.
-                if (mailtoLink.length > 8192) {
-                    alert('The mailto link is very long because of the image. It might not open in all email apps. The image base64 is also available in the browser console (F12).');
+                // Mailto length warning (though data URIs can be huge)
+                if (mailtoLink.length > 9000) {
+                    alert('The mailto link is very long because of the image data. If your email client does not open, please use the browser console to copy the image link manually. The image is also shown in the preview.');
                 }
 
+                // Open default email client
                 window.location.href = mailtoLink;
 
-                // extra small delay hint
+                // For debugging / long image fallback
                 setTimeout(() => {
-                    console.log('Full report data prepared. If email did not open, copy details manually.');
+                    console.log('Full email body prepared. If image link troubles, here is the base64:', currentBase64);
                 }, 300);
             });
         })();
