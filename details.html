@@ -1,246 +1,701 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
-<html>
+<html lang="af">
 <head>
-	<title>Giant Steps Tree Felling</title>
-	<meta name="description" content="BK Tree Felling">
-	<meta name="keywords" content="tree felling, BK tree felling, tree cutting, tree stump removal">
-	<style type="text/css">
-		h4{
-			text-decoration: underline;
-			color: white;
-			background-color: black;
-			font-size: 30px;
-		}
-		body{
-			text-align: center;
-			color: blue;
-			align-items: center;
-		}
-		#home{
-			margin-right: 12px;
-		}
-		#contacts{
-			margin-right: 12px;
-		}
-		#about{
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>OnPoint Vloot · ongelukverslag (met aanhegsel)</title>
+    <!-- Font & icons (Font Awesome & Google Font) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: #0b2b5c;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.06) 0%, transparent 20%),
+                              radial-gradient(circle at 80% 70%, rgba(255,215,0,0.08) 0%, transparent 25%);
+            animation: bgShift 18s infinite alternate ease-in-out;
+        }
+        @keyframes bgShift {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 5% 5%; }
+        }
 
-		}
-		#home:hover{
-			background-color: blue;
-			color: white;
-			cursor: pointer;
-			transition: 0.15s;
-			opacity: 0.7;
-		}
-		#contacts:hover{
-			background-color: blue;
-			color: white;
-			cursor: pointer;
-			transition: 0.15s;
-			opacity: 0.7;
-		}
-		#about:hover{
-			background-color: blue;
-			color: white;
-			cursor: pointer;
-			transition: 0.15s;
-			opacity: 0.7;
-		}
-		h1{
-			color: white;
-			background-color: blue;
-			display: block;
-			text-decoration: underline;
-		}
-		#a{
-			width: 700px;
-			border-radius: 5px;
-			height: 800px;
-		}
-		#b{
-			width: 700px;
-			border-radius: 5px;
-			height: 800px;
-		}
-		#c{
-			width: 700px;
-			border-radius: 5px;
-			height: 800px;
-		}
-		#l{
-			width: 300px;
-			border-radius: 150px;
-			
+        .verslag-kaart {
+            max-width: 750px;
+            width: 100%;
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 42px;
+            box-shadow: 0 30px 55px -10px rgba(0,10,40,0.65), inset 0 1px 3px rgba(255,255,255,0.9);
+            padding: 2rem 1.8rem;
+            border: 1px solid rgba(255,255,255,0.7);
+            transition: all 0.2s ease;
+            position: relative;
+            z-index: 5;
+        }
+        .logo-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .logo-prent {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow: 0 12px 18px -8px #0e2a46;
+            border: 2px solid #ffc107;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .logo-prent:hover {
+            transform: scale(1.02) rotate(-1deg);
+        }
+        .logo-prent img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        .logo-teks {
+            font-weight: 800;
+            font-size: 1.9rem;
+            letter-spacing: -0.02em;
+            color: #0b1f3b;
+            line-height: 1.1;
+        }
+        .logo-teks small {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #2d4e8c;
+            display: block;
+        }
+        .adres-kenteken {
+            background: #ffffffc0;
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #10345e;
+            border: 1px solid #ffc107;
+            box-shadow: 0 6px 14px rgba(0,30,70,0.1);
+            backdrop-filter: blur(4px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .adres-kenteken i {
+            color: #e63946;
+            font-size: 1rem;
+        }
+        .subopskrif {
+            font-size: 1rem;
+            color: #2f4b74;
+            font-weight: 500;
+            margin: 0 0 1.8rem 0;
+            border-left: 4px solid #2d7aff;
+            padding-left: 16px;
+            background: rgba(45, 122, 255, 0.04);
+            border-radius: 0 12px 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .kaart-mini-houer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+            background: white;
+            border-radius: 40px;
+            padding: 4px 12px 4px 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .kaart-mini-houer a {
+            color: #0b2b5c;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .kaart-mini-houer i {
+            color: #ea4335;
+            font-size: 1.2rem;
+        }
 
-		}
-		#m{
-			width: 300px;
-			border-radius: 150px;
-			
-		}
-		#n{
-			width: 300px;
-			border-radius: 150px;
-			
-		}
-		#o{
-			width: 700px;
-			border-radius: 5px;
-			height: 800px;
-		}
-		#i{
-			width: 300px;
-			border-radius: 150px;
-			
-		}
-		#z{
-			width: 700px;
-			border-radius: 5px;
-		}
-		#w{
-			width: 700px;
-			border-radius: 5px;
-		}
-		#v{
-			width: 700px;
-			border-radius: 5px;
-			height: 800px;
-		}
-		#p{
-			width: 700px;
-			border-radius: 5px;
-			height: 800px;
-		
-		}
-		#ba{
-			width: 700px;
-			border-radius: 5px;
-		}
-		#be{
-			width: 700px;
-			border-radius: 5px;
-		}
-		#bo{
-			width: 700px;
-			border-radius: 5px;
-		}
-		#bu{
-			width: 700px;
-			border-radius: 5px;
-		}
-		#bi{
-			width: 200px;
-			border-radius: 100px;
-			border:	2px;
-		}
-	</style>
-	<body>
-	<h1>GIANT STEPS TREE FELLING</h1><br>
-	<br>
-	<img id="bi" src="images/bi.jpeg"><br>
-	<br>
-	<a id="home" href="index.html">Home Page</a>
-	<a id="contacts" href="contacts.html">Contacts</a><br>
-	<br>
+        .lewende-karakters {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-bottom: 12px;
+            height: 45px;
+        }
+        .karakter {
+            width: 45px;
+            height: 45px;
+            background: #ffb703;
+            border-radius: 50% 50% 20px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.7rem;
+            animation: bons 2.2s infinite ease-in-out;
+            box-shadow: 0 8px 0 #b26500, 0 12px 20px rgba(0,0,0,0.2);
+            border: 2px solid white;
+            transform-origin: center bottom;
+        }
+        .karakter:nth-child(2) {
+            animation-delay: 0.3s;
+            background: #48cae4;
+            box-shadow: 0 8px 0 #0077b6;
+        }
+        .karakter:nth-child(3) {
+            animation-delay: 0.6s;
+            background: #a7c957;
+            box-shadow: 0 8px 0 #6b8e4c;
+        }
+        @keyframes bons {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            40% { transform: translateY(-12px) rotate(2deg); }
+            70% { transform: translateY(-4px) rotate(-1deg); }
+        }
 
-<h4 id="about">ABOUT US</h4><br>
-<br>
-<p>
-Welcome to GIANT STEPS Tree Felling – Your Trusted Partner in Tree Care Solutions!<br>
+        .vorm-rooster { display: flex; flex-direction: column; gap: 1.5rem; }
+        .twee-kolomme { display: flex; flex-wrap: wrap; gap: 1rem; }
+        .twee-kolomme > div { flex: 1 1 180px; }
+        .inset-veld { display: flex; flex-direction: column; gap: 6px; }
+        .inset-veld label { font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.3px; color: #1f3a60; display: flex; align-items: center; gap: 8px; }
+        .inset-veld label i { color: #2d7aff; width: 20px; font-size: 1rem; }
+        .inset-veld input, .inset-veld select, .inset-veld textarea {
+            background: white; border: 1.5px solid #dbe3f0; border-radius: 20px; padding: 15px 20px; font-size: 1rem;
+            font-weight: 500; color: #0b1f3b; outline: none; transition: all 0.2s; box-shadow: 0 4px 10px -5px rgba(0,0,0,0.02);
+        }
+        .inset-veld input:focus, .inset-veld select:focus, .inset-veld textarea:focus {
+            border-color: #2d7aff; box-shadow: 0 8px 18px -10px #2d7aff, 0 0 0 4px rgba(45,122,255,0.15);
+        }
+        .inset-veld textarea { min-height: 90px; resize: vertical; }
+        .ja-nee-groep { display: flex; gap: 24px; align-items: center; background: #f4f9ff; border-radius: 30px; padding: 10px 20px; border: 1px solid #d2e0f5; }
+        .ja-nee-groep label { font-weight: 500; text-transform: none; font-size: 1rem; color: #10345e; gap: 6px; }
+        .ja-nee-groep input[type="radio"] { accent-color: #1e4f8a; width: 18px; height: 18px; margin-right: 4px; }
+        .foto-laai-area { background: #f1f7ff; border-radius: 28px; padding: 1.8rem 1.2rem; border: 2px dashed #9bb8f0; text-align: center; cursor: pointer; transition: background 0.2s, border-color 0.2s; margin-top: 0.5rem; position: relative; }
+        .foto-laai-area:hover { background: #e3edff; border-color: #2d7aff; }
+        .foto-laai-area i { font-size: 3rem; color: #2d7aff; opacity: 0.8; margin-bottom: 0.5rem; }
+        .foto-laai-area .laai-teks { font-weight: 700; font-size: 1.1rem; color: #103056; }
+        .foto-laai-area .laai-wenk { font-size: 0.85rem; color: #476b9f; margin-top: 6px; }
+        #lêerInset { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+        .prent-voorskou-ry { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 15px; align-items: center; }
+        .voorskou-duim { width: 70px; height: 70px; border-radius: 18px; object-fit: cover; border: 3px solid white; box-shadow: 0 10px 18px -10px #1e3a5f; }
+        .lêer-naam-kenteken { background: #ffffffd0; border-radius: 40px; padding: 8px 18px; font-size: 0.9rem; font-weight: 500; color: #092033; box-shadow: 0 4px 12px #d4e2fc; backdrop-filter: blur(2px); }
+        .datumtyd-ry { display: flex; flex-direction: row; gap: 1rem; flex-wrap: wrap; }
+        .datumtyd-ry .inset-veld { flex: 1 1 160px; }
+        .dien-in-knoppie { background: #0a1f38; border: none; border-radius: 50px; padding: 1.3rem 1.8rem; color: white; font-weight: 700; font-size: 1.3rem; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 14px; cursor: pointer; transition: all 0.3s; margin: 2rem 0 0.8rem; border: 1px solid #2d4e7b; box-shadow: 0 20px 35px -12px #0f2542; }
+        .dien-in-knoppie:hover { background: #123456; transform: scale(1.02); box-shadow: 0 28px 40px -12px #0f1e33; }
+        .dien-in-knoppie i { font-size: 1.6rem; }
+        .info-nota { font-size: 0.85rem; display: flex; align-items: center; gap: 8px; background: #eef5ffb0; border-radius: 30px; padding: 12px 18px; color: #1f3d66; font-weight: 500; border: 1px solid #ffffff; }
+        .info-nota i { color: #ff7b2d; }
+        footer { text-align: center; margin-top: 20px; color: #2a4c7a; font-weight: 400; opacity: 0.9; }
+        hr { border: 1px solid #c9d9f0; margin: 0.5rem 0 1rem; opacity: 0.4; }
+        .aanhegsel-kenteken {
+            background: #e8f0fe;
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #1a4b8c;
+            border: 1px solid #b8d1fc;
+        }
+        .aflaai-skakel {
+            color: #2d7aff;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .aflaai-skakel:hover {
+            text-decoration: underline;
+        }
 
-With over a decade of unwavering commitment to excellence, Giant Steps Tree Felling proudly stands as a leading tree care service provider in the <br>picturesque regions of Pretoria and Centurion, South Africa. Our journey began over ten years ago with a simple yet profound mission: to <br>enhance the beauty and safety of your outdoor spaces through professional tree felling and care services.<br>
+        @media (max-width: 480px) {
+            .verslag-kaart { padding: 1.5rem 1.2rem; border-radius: 32px; }
+            .logo-teks { font-size: 1.6rem; }
+            .dien-in-knoppie { font-size: 1.2rem; padding: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="verslag-kaart">
+        <!-- Logo header met eksterne logo.png -->
+        <div class="logo-header">
+            <div class="logo-area">
+                <div class="logo-prent">
+                    <img src="images/logo.png" alt="OnPoint logo" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-truck\' style=\'font-size:2.5rem; color:#1a3b5d;\'></i>';">
+                </div>
+                <div class="logo-teks">
+                    OnPoint <small>vloot & logistiek</small><br>
+					<a href="index.html">English</a>
+                </div>
+            </div>
+            <div class="adres-kenteken">
+                <i class="fas fa-map-marker-alt"></i> 71 Pretoriusweg, President Park, Midrand
+            </div>
+        </div>
 
-<h4>Experience Matters:</h4><br><br>
+        <div class="lewende-karakters">
+            <div class="karakter"><i class="fas fa-smile"></i></div>
+            <div class="karakter"><i class="fas fa-truck"></i></div>
+            <div class="karakter"><i class="fas fa-shield-hal"></i></div>
+        </div>
 
-<br>
-	<video width="700" height="500" controls>
-		<source src="video/giant.mp4" type="video/mp4">
-	</video><br>
-	<p>Once upon a time, all great things have humble beginnings.</p>
-	<br>
+        <div class="subopskrif">
+            <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i> voltooi ongelukverslag (met aanhegsel)
+            <div class="kaart-mini-houer">
+                <i class="fas fa-map-marked-alt"></i>
+                <a href="https://www.google.com/maps/search/?api=1&query=71+Pretorius+Rd+President+Park+AH+Midrand+1685+South+Africa" target="_blank" title="maak lewende kaart oop">
+                    71 Pretoriusweg · lewende kaart
+                </a>
+                <i class="fas fa-external-link-alt" style="font-size:0.7rem; opacity:0.6;"></i>
+            </div>
+        </div>
 
-At GIANT STEPS Tree Felling, experience is not just a number; it's a testament to our expertise. With a decade of hands-on knowledge and a team of <br>skilled arborists, we've cultivated a deep understanding of the unique flora in Pretoria and Centurion. This wealth of experience <br>empowers us to deliver tailored solutions that meet the diverse needs of our valued clients.<br>
+        <!-- VORM BEGIN -->
+        <form id="ongelukVorm" class="vorm-rooster">
+            <div class="datumtyd-ry">
+                <div class="inset-veld">
+                    <label><i class="fas fa-calendar-alt"></i> Datum</label>
+                    <input type="date" id="ongelukDatum" name="ongelukDatum" required>
+                </div>
+                <div class="inset-veld">
+                    <label><i class="fas fa-clock"></i> Tyd</label>
+                    <input type="time" id="ongelukTyd" name="ongelukTyd" value="14:30" required>
+                </div>
+            </div>
 
-<h4>Comprehensive Tree Care Services:</h4><br><br>
-<img id="b" src="images/b.jpeg"><br>
-<br>
+            <div class="twee-kolomme">
+                <div class="inset-veld">
+                    <label><i class="fas fa-car"></i> Voertuig registrasie</label>
+                    <input type="text" id="voertuigReg" placeholder="ABC-1234" value="VLOTE-408" required>
+                </div>
+                <div class="inset-veld">
+                    <label><i class="fas fa-map-pin"></i> Ligging / straat</label>
+                    <input type="text" id="ligging" placeholder="bv. I-95 myl 42" value="Sentrumlaan & 5de Straat" required>
+                </div>
+            </div>
 
+            <div class="twee-kolomme">
+                <div class="inset-veld">
+                    <label><i class="fas fa-tag"></i> Ongeluk tipe</label>
+                    <select id="ongelukTipe" required>
+                        <option value="" disabled>– kies –</option>
+                        <option value="Agterkant" selected>Agterkant botsing</option>
+                        <option value="Sy-impak">Sy-impak / T-been</option>
+                        <option value="Omslaan">Omslaan / skarnier</option>
+                        <option value="Enkel-voertuig">Enkele voertuig</option>
+                        <option value="Ander">Ander / voetganger</option>
+                    </select>
+                </div>
+                <div class="inset-veld">
+                    <label><i class="fas fa-id-card"></i> Eenheid #</label>
+                    <input type="text" id="eenheidNommer" placeholder="bv. 408" value="408" required>
+                </div>
+            </div>
 
-Our range of services encompasses the entire spectrum of tree care. From precise tree felling and expert trimming to meticulous tree <br>topping and artistic tree shaping, we handle each task with precision and care. Our commitment extends beyond the obvious – we specialize <br>in stump removal, ensuring your outdoor spaces are not only beautiful but also safe.<br>
+            <div class="twee-kolomme">
+                <div class="inset-veld">
+                    <label><i class="fas fa-user"></i> Bestuurder naam</label>
+                    <input type="text" id="bestuurderNaam" placeholder="Volle naam" value="James Keller" required>
+                </div>
+                <div class="inset-veld">
+                    <label><i class="fas fa-phone-alt"></i> Bestuurder selfoon</label>
+                    <input type="tel" id="bestuurderFoon" placeholder="(012) 345-6789" value="+27 12 345 6789" required>
+                </div>
+            </div>
 
-<h4>Beyond Trees:</h4><br>
-<br>
-<img id="c" src="images/c.jpeg"><br>
-<br>
+            <div class="inset-veld">
+                <label><i class="fas fa-file-signature"></i> Beskrywing</label>
+                <textarea id="beskrywing" placeholder="Beskryf skade, beserings, weer …" required>Voorbuffer stukkend, lugsakke ontplooi. Effense reën. Ander bestuurder het besonderhede uitgeruil.</textarea>
+            </div>
 
-At Giant Steps Tree Felling, we recognize that a pristine outdoor environment extends beyond just trees. That's why we offer refuse removal services<br> to leave your property spotless after our work is done. We understand that your satisfaction goes beyond the quality of our tree care – <br>it includes the cleanliness and tidiness of the space we work in.<br>
+            <div class="inset-veld">
+                <label><i class="fas fa-car-crash"></i> Ander partye betrokke</label>
+                <input type="text" id="anderPartye" placeholder="bv. Toyota Corolla, ABC123" value="Honda CR-V, nommerplaat 7GHJ432">
+            </div>
 
-<h4>Customer-Centric Approach:</h4><br>
-<br>
-<img id="p" src="images/p.jpeg"><br>
-<br>
+            <hr>
+            <div style="font-weight: 600; color: #0f2d55; margin-bottom: 8px;"><i class="fas fa-gavel" style="margin-right: 8px;"></i>AMPTELIKE / POLISIE INLIGTING</div>
 
-Your satisfaction is at the heart of everything we do. We take pride in our customer-centric approach, ensuring clear communication, <br>transparent processes, and a commitment to meeting deadlines. Our friendly and knowledgeable team is always ready to address your queries,<br> providing guidance and recommendations based on our extensive experience.<br><br>
+            <div class="inset-veld">
+                <label><i class="fas fa-building"></i> Aan metro rapporteer</label>
+                <div class="ja-nee-groep">
+                    <label><input type="radio" name="metroGerapporteer" value="Ja" checked> Ja</label>
+                    <label><input type="radio" name="metroGerapporteer" value="Nee"> Nee</label>
+                </div>
+            </div>
 
-<h4>Environmental Responsibility:</h4><br>
-<br>
-<img id="v" src="images/v.jpeg"><br>
-<br>
+            <div class="twee-kolomme">
+                <div class="inset-veld">
+                    <label><i class="fas fa-user-shield"></i> Beampte naam</label>
+                    <input type="text" id="beampteNaam" placeholder="bv. M. Davis" value="Beampte M. Davis">
+                </div>
+                <div class="inset-veld">
+                    <label><i class="fas fa-mobile-alt"></i> Beampte selfoon</label>
+                    <input type="tel" id="beampteFoon" placeholder="(012) 987-6543" value="012-987-6543">
+                </div>
+            </div>
 
-As stewards of the environment, Giant Steps Tree Felling is dedicated to responsible and sustainable tree care practices. We prioritize the health <br>of your trees and the ecosystem they contribute to, promoting a harmonious coexistence between nature and human spaces.<br>
-<br>
-<img id="l" src="images/l.jpeg">
+            <div class="inset-veld">
+                <label><i class="fas fa-wine-bottle"></i> Dronkbestuur betrokke</label>
+                <div class="ja-nee-groep">
+                    <label><input type="radio" name="dronkBestuur" value="Ja"> Ja</label>
+                    <label><input type="radio" name="dronkBestuur" value="Nee" checked> Nee</label>
+                </div>
+            </div>
 
+            <div class="inset-veld">
+                <label><i class="fas fa-hashtag"></i> Voorval polisieverslag #</label>
+                <input type="text" id="polisieVerslagNo" placeholder="bv. 23-78901" value="PD-2309-452">
+            </div>
 
-<img id="m" src="images/m.jpeg"><br>
-<br>
+            <div class="inset-veld">
+                <label><i class="fas fa-balance-scale"></i> Beampte se oordeel (is jy skuldig?)</label>
+                <div class="ja-nee-groep">
+                    <label><input type="radio" name="skuldig" value="Ja"> Ja, skuldig</label>
+                    <label><input type="radio" name="skuldig" value="Nee" checked> Nee, nie skuldig nie</label>
+                </div>
+            </div>
 
-<img id="n" src="images/n.jpeg">
+            <hr>
+            <!-- FOTO LAAI AREA -->
+            <div class="foto-laai-area" id="losGebied">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <div class="laai-teks">heg ongelukfoto aan</div>
+                <div class="laai-wenk">tik om te blaai of sleep — sal aan e-pos geheg word</div>
+                <input type="file" id="lêerInset" accept="image/*" capture="environment">
+            </div>
 
+            <!-- lewendige voorskou van gekose beeld en naam -->
+            <div id="voorskouHouer" class="prent-voorskou-ry" style="display: none;">
+                <img id="beeldVoorskou" class="voorskou-duim" src="#" alt="voorskou">
+                <span id="lêerNaamVertoon" class="lêer-naam-kenteken"><i class="far fa-image"></i> ongeluk.jpg</span>
+                <div class="aanhegsel-kenteken">
+                    <i class="fas fa-paperclip"></i> Gereed om aan te heg
+                </div>
+                <button type="button" id="skoonBeeldKnoppie" style="background: none; border:none; color:#b00; margin-left:auto; font-size:1.5rem; cursor:pointer;"><i class="fas fa-times-circle"></i></button>
+            </div>
 
-<img id="i" src="images/i.jpeg"><br>
-<br>
+            <!-- stoor lêerdata vir aanhegsel simulasie -->
+            <input type="hidden" id="beeldBase64" value="">
+            <input type="hidden" id="beeldLêerNaam" value="">
+            <input type="hidden" id="beeldLêerTipe" value="">
 
+            <!-- Oplossing 1: Verbeterde mailto met aanhegsel instruksies -->
+            <button type="button" id="posKnoppie" class="dien-in-knoppie" style="background: #1a3b5d;">
+                <i class="fas fa-envelope"></i> Opsie 1: Maak in E-pos Kliënt oop
+            </button>
+            
+            <!-- Oplossing 2: Laai EML lêer af (werk soos regte aanhegsel) -->
+            <button type="button" id="emlKnoppie" class="dien-in-knoppie" style="background: #2d4e8c; margin-top: 0;">
+                <i class="fas fa-download"></i> Opsie 2: Laai E-pos af (met aanhegsel)
+            </button>
+            
+            <div class="info-nota" style="margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> 
+                <span id="aanhegselStatus">Geen beeld gekies nie</span>
+            </div>
+            
+            <div class="info-nota" style="background: #fff3cd; border-color: #ffeeba;">
+                <i class="fas fa-lightbulb" style="color: #856404;"></i>
+                <strong>Wenk:</strong> Opsie 2 laai 'n volledige .eml lêer af met die beeld aangeheg. Maak dit oop in Outlook, Thunderbird, of Windows Mail om die aanhegsel te sien.
+            </div>
+        </form>
+        <footer>
+            <i class="fas fa-check-circle" style="color: #249c6b;"></i> OnPoint vloot – veiligheid eerste · 71 Pretoriusweg, President Park, Midrand
+        </footer>
+    </div>
 
-Choose Giant Steps Tree Felling for a decade-strong legacy of excellence, professionalism, and unmatched expertise in tree care services. Join our <br>growing list of satisfied clients who have entrusted us with the care of their outdoor havens. Your trees deserve the best – and that's <br>exactly what we deliver. <br>
-<img id="z" src="images/z.jpeg"><br>
-<br>
+    <script>
+        (function() {
+            const lêerInset = document.getElementById('lêerInset');
+            const losGebied = document.getElementById('losGebied');
+            const voorskouHouer = document.getElementById('voorskouHouer');
+            const beeldVoorskou = document.getElementById('beeldVoorskou');
+            const lêerNaamVertoon = document.getElementById('lêerNaamVertoon');
+            const skoonBeeldKnoppie = document.getElementById('skoonBeeldKnoppie');
+            const beeldBase64Hidden = document.getElementById('beeldBase64');
+            const beeldLêerNaamHidden = document.getElementById('beeldLêerNaam');
+            const beeldLêerTipeHidden = document.getElementById('beeldLêerTipe');
+            const aanhegselStatus = document.getElementById('aanhegselStatus');
+            
+            const posKnoppie = document.getElementById('posKnoppie');
+            const emlKnoppie = document.getElementById('emlKnoppie');
 
-<img id="w" src="images/w.jpeg"><br>
-<br>
-<br>
-<img id="ba" src="images/ba.jpeg"><br>
-<br>
-<img id="be" src="images/be.jpeg"><br>
+            let gekoseLêer = null;
+            let huidigeBase64 = '';
+            let huidigeLêerData = null;
 
-<br>
-<img id="bo" src="images/bo.jpeg"><br>
-<br>
+            function hanteerLêerKies(lêer) {
+                if (!lêer) return;
+                if (!lêer.type.startsWith('image/')) {
+                    alert('Kies asseblief \'n beeldlêer (JPEG, PNG, ens.)');
+                    return;
+                }
+                gekoseLêer = lêer;
+                huidigeLêerData = lêer;
+                lêerNaamVertoon.innerHTML = `<i class="far fa-file-image"></i> ${lêer.name}`;
+                beeldLêerNaamHidden.value = lêer.name;
+                beeldLêerTipeHidden.value = lêer.type;
 
+                const leser = new FileReader();
+                leser.onload = (e) => {
+                    huidigeBase64 = e.target.result.split(',')[1]; // Verwyder data:image/xyz;base64, deel
+                    beeldVoorskou.src = e.target.result;
+                    beeldBase64Hidden.value = huidigeBase64;
+                    voorskouHouer.style.display = 'flex';
+                    aanhegselStatus.innerHTML = `<i class="fas fa-paperclip"></i> Aanhegsel gereed: ${lêer.name} (${(lêer.size/1024).toFixed(1)} KB)`;
+                };
+                leser.readAsDataURL(lêer);
+            }
 
-Giant Steps Tree Felling – Nurturing Nature, Crafting Beauty.<br>
-</p>
-		<h4>Services Provided</h4><br>
-		<br>
-		<ol>
-			<li>Tree Felling</li>
-			<li>Tree Topping</li>
-			<li>Tree Shaping</li>
-			<li>Stump Removal</li>
-			<li>Refuse Removal</li>
-		</ol>
-		<br>
-		We are fully insured against any accident or misharp and our employees are full covered by compensation fund.<br>
-		<br>
-<footer>
-	<a id="home" href="index.html">Home Page</a>
-	<a id="contacts" href="contacts.html">Contacts</a>
-	<a id="about" href="#about">Back to top</a><br>
-	<br>
-	&copy Giant Steps Tree Felling 2023.<br>
-	<br>
-</footer>
+            lêerInset.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    hanteerLêerKies(e.target.files[0]);
+                }
+            });
+
+            losGebied.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                losGebied.style.background = '#e3edff';
+                losGebied.style.borderColor = '#0a52c2';
+            });
+            
+            losGebied.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                losGebied.style.background = '#f1f7ff';
+                losGebied.style.borderColor = '#9bb8f0';
+            });
+            
+            losGebied.addEventListener('drop', (e) => {
+                e.preventDefault();
+                losGebied.style.background = '#f1f7ff';
+                losGebied.style.borderColor = '#9bb8f0';
+                if (e.dataTransfer.files.length > 0) {
+                    lêerInset.files = e.dataTransfer.files;
+                    hanteerLêerKies(e.dataTransfer.files[0]);
+                }
+            });
+
+            skoonBeeldKnoppie.addEventListener('click', (e) => {
+                e.stopPropagation();
+                gekoseLêer = null;
+                huidigeLêerData = null;
+                lêerInset.value = '';
+                beeldBase64Hidden.value = '';
+                beeldLêerNaamHidden.value = '';
+                beeldLêerTipeHidden.value = '';
+                huidigeBase64 = '';
+                voorskouHouer.style.display = 'none';
+                beeldVoorskou.src = '#';
+                aanhegselStatus.innerHTML = 'Geen beeld gekies nie';
+            });
+
+            // Stel vandag se datum
+            const vandag = new Date().toISOString().split('T')[0];
+            document.getElementById('ongelukDatum').value = vandag;
+
+            // Hulpfunksie om alle vormdata te kry
+            function kryVormData() {
+                return {
+                    datum: document.getElementById('ongelukDatum').value,
+                    tyd: document.getElementById('ongelukTyd').value,
+                    voertuigReg: document.getElementById('voertuigReg').value,
+                    ligging: document.getElementById('ligging').value,
+                    ongelukTipe: document.getElementById('ongelukTipe').value,
+                    eenheidNommer: document.getElementById('eenheidNommer').value,
+                    bestuurderNaam: document.getElementById('bestuurderNaam').value,
+                    bestuurderFoon: document.getElementById('bestuurderFoon').value,
+                    beskrywing: document.getElementById('beskrywing').value,
+                    anderPartye: document.getElementById('anderPartye').value,
+                    metroGerapporteer: document.querySelector('input[name="metroGerapporteer"]:checked')?.value || 'Nie gespesifiseer',
+                    beampteNaam: document.getElementById('beampteNaam').value || 'N/B',
+                    beampteFoon: document.getElementById('beampteFoon').value || 'N/B',
+                    dronkBestuur: document.querySelector('input[name="dronkBestuur"]:checked')?.value || 'Nie gespesifiseer',
+                    polisieVerslagNo: document.getElementById('polisieVerslagNo').value || 'N/B',
+                    skuldig: document.querySelector('input[name="skuldig"]:checked')?.value || 'Nie gespesifiseer'
+                };
+            }
+
+            // Valideer vorm
+            function valideerVorm(data) {
+                if (!data.datum || !data.tyd || !data.voertuigReg || !data.ligging || !data.ongelukTipe || 
+                    !data.eenheidNommer || !data.bestuurderNaam || !data.bestuurderFoon || !data.beskrywing) {
+                    alert('Vul asseblief alle verpligte velde in (Datum, Tyd, Voertuig, Ligging, Tipe, Eenheid, Bestuurder Naam, Foon, Beskrywing).');
+                    return false;
+                }
+                return true;
+            }
+
+            // Skep e-pos boodskap teks
+            function skepEposBody(data) {
+                let bodyTeks = '';
+                bodyTeks += `ONPOINT VLOOT – VOLLEDIGE ONGELUKVERSLAG\n`;
+                bodyTeks += `=========================================\n\n`;
+                bodyTeks += `📅 DATUM: ${data.datum} om ${data.tyd}\n`;
+                bodyTeks += `🚗 VOERTUIG REG: ${data.voertuigReg}\n`;
+                bodyTeks += `📍 LIGGING: ${data.ligging}\n`;
+                bodyTeks += `🚧 TIPE: ${data.ongelukTipe}\n`;
+                bodyTeks += `🚛 EENHEID: ${data.eenheidNommer}\n`;
+                bodyTeks += `🧑‍✈️ BESTUURDER: ${data.bestuurderNaam}\n`;
+                bodyTeks += `📞 BESTUURDER FOON: ${data.bestuurderFoon}\n`;
+                bodyTeks += `📄 BESKRYWING: ${data.beskrywing}\n`;
+                bodyTeks += `🚙 ANDER PARTYE: ${data.anderPartye || 'geen rapporteer'}\n\n`;
+                bodyTeks += `👮 AMPTELIKE / POLISIE INLIGTING\n`;
+                bodyTeks += `--------------------------------\n`;
+                bodyTeks += `🏛️ AAN METRO GERAPPORTEER: ${data.metroGerapporteer}\n`;
+                bodyTeks += `🛡️ BEAMPTE NAAM: ${data.beampteNaam}\n`;
+                bodyTeks += `📞 BEAMPTE FOON: ${data.beampteFoon}\n`;
+                bodyTeks += `🍷 DRONKBESTUUR: ${data.dronkBestuur}\n`;
+                bodyTeks += `📋 POLISIEVERSLAG #: ${data.polisieVerslagNo}\n`;
+                bodyTeks += `⚖️ SKULDIG?: ${data.skuldig}\n\n`;
+                
+                if (gekoseLêer) {
+                    bodyTeks += `📸 AANHEGSEL: ${gekoseLêer.name} (${(gekoseLêer.size/1024).toFixed(1)} KB)\n`;
+                    bodyTeks += `Nota: Hierdie e-pos kliënt mag dalk nie outomatiese aanhegsels ondersteun nie.\n`;
+                    bodyTeks += `Gebruik asseblief Opsie 2 hieronder om die volledige e-pos met aanhegsel af te laai.\n`;
+                }
+                
+                bodyTeks += `\n-- \n`;
+                bodyTeks += `OnPoint Vloot veiligheidsverslag – gegenereer vanaf mobiele app\n`;
+                bodyTeks += `71 Pretoriusweg, President Park, Midrand`;
+                
+                return bodyTeks;
+            }
+
+            // Opsie 1: Verbeterde mailto (met aanhegsel nota)
+            posKnoppie.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                const data = kryVormData();
+                if (!valideerVorm(data)) return;
+
+                const ontvanger = 'vloot@onpointontime.co.za';
+                const onderwerp = `🚨 Ongelukverslag - Eenheid ${data.eenheidNommer} / ${data.voertuigReg} - ${data.datum}`;
+                const bodyTeks = skepEposBody(data);
+                
+                // Skep mailto skakel
+                const posSkakel = `mailto:${ontvanger}?subject=${encodeURIComponent(onderwerp)}&body=${encodeURIComponent(bodyTeks)}`;
+                
+                if (gekoseLêer) {
+                    // Wys instruksies vir handmatige aanhegsel
+                    const aanhegMsg = `\n\n📎 OM DIE BEELD AAN TE HEG:\n` +
+                                    `1. Stoor hierdie beeld van die voorskou\n` +
+                                    `2. Sleep en los ${gekoseLêer.name} in jou e-pos\n` +
+                                    `3. Of gebruik die skuifspeld-ikoon om dit handmatig aan te heg`;
+                    
+                    // Dateer body op met aanhegsel instruksies
+                    const verbeterdeBody = bodyTeks + aanhegMsg;
+                    const verbeterdeSkakel = `mailto:${ontvanger}?subject=${encodeURIComponent(onderwerp)}&body=${encodeURIComponent(verbeterdeBody)}`;
+                    window.location.href = verbeterdeSkakel;
+                } else {
+                    window.location.href = posSkakel;
+                }
+            });
+
+            // Opsie 2: Laai EML lêer af (met regte aanhegsel)
+            emlKnoppie.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                const data = kryVormData();
+                if (!valideerVorm(data)) return;
+
+                // Skep e-pos inhoud
+                const ontvanger = 'vloot@onpointontime.co.za';
+                const onderwerp = `Ongelukverslag - Eenheid ${data.eenheidNommer} / ${data.voertuigReg} - ${data.datum}`;
+                const bodyTeks = skepEposBody(data);
+                
+                // Genereer grens vir multi-deel e-pos
+                const grens = '----=_VolgendeDeel_' + Math.random().toString(36).substring(2, 15);
+                
+                let emlInhoud = '';
+                
+                // Hoofde
+                emlInhoud += `From: "OnPoint Vloot Bestuurder" <bestuurder@onpointvloot.co.za>\r\n`;
+                emlInhoud += `To: ${ontvanger}\r\n`;
+                emlInhoud += `Subject: ${onderwerp}\r\n`;
+                emlInhoud += `MIME-Version: 1.0\r\n`;
+                emlInhoud += `Content-Type: multipart/mixed; boundary="${grens}"\r\n`;
+                emlInhoud += `\r\n`;
+                emlInhoud += `Hierdie is 'n multi-deel boodskap in MIME-formaat.\r\n`;
+                emlInhoud += `\r\n`;
+                emlInhoud += `--${grens}\r\n`;
+                
+                // Teks deel
+                emlInhoud += `Content-Type: text/plain; charset="utf-8"\r\n`;
+                emlInhoud += `Content-Transfer-Encoding: 7bit\r\n`;
+                emlInhoud += `\r\n`;
+                emlInhoud += bodyTeks.replace(/\n/g, '\r\n');
+                emlInhoud += `\r\n`;
+                emlInhoud += `\r\n`;
+                
+                // Aanhegsel deel (as beeld bestaan)
+                if (gekoseLêer && huidigeBase64) {
+                    emlInhoud += `--${grens}\r\n`;
+                    emlInhoud += `Content-Type: ${gekoseLêer.type}; name="${gekoseLêer.name}"\r\n`;
+                    emlInhoud += `Content-Transfer-Encoding: base64\r\n`;
+                    emlInhoud += `Content-Disposition: attachment; filename="${gekoseLêer.name}"\r\n`;
+                    emlInhoud += `\r\n`;
+                    
+                    // Voeg base64 inhoud by in stukkies van 76 karakters per lyn (standaard vir e-pos)
+                    const base64Data = huidigeBase64;
+                    for (let i = 0; i < base64Data.length; i += 76) {
+                        emlInhoud += base64Data.substr(i, 76) + '\r\n';
+                    }
+                    emlInhoud += `\r\n`;
+                }
+                
+                // Maak grens toe
+                emlInhoud += `--${grens}--\r\n`;
+                
+                // Skep aflaai
+                const blob = new Blob([emlInhoud], { type: 'message/rfc822' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `ongelukverslag_${data.eenheidNommer}_${data.datum.replace(/-/g, '')}.eml`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                if (gekoseLêer) {
+                    alert('✅ EML lêer afgelaai met beeld aangeheg! Maak dit oop in Outlook, Thunderbird, of Windows Mail.');
+                }
+            });
+
+            // Dateer aanhegsel status by op laai
+            aanhegselStatus.innerHTML = 'Geen beeld gekies nie';
+        })();
+    </script>
 </body>
-
-
+</html>
