@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>OnPoint Fleet · accident report (with attachment support)</title>
-    <!-- Font & icons (Font Awesome & Google Font) -->
+    <title>OnPoint Fleet · accident report (live location + stamped photo)</title>
+    <!-- Font & icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
@@ -228,6 +228,13 @@
             color: #1a4b8c;
             border: 1px solid #b8d1fc;
         }
+        .geo-badge {
+            background: #deedff;
+            border-radius: 30px;
+            padding: 8px 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
         .download-link {
             color: #2d7aff;
             text-decoration: none;
@@ -269,14 +276,13 @@
         </div>
 
         <div class="subhead">
-            <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i> complete accident report (with attachment)
-            <div class="map-mini-container">
+            <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i> complete accident report (live GPS + stamped photo)
+            <div class="map-mini-container" id="liveMapLink">
                 <i class="fas fa-map-marked-alt"></i>
-                <a href="https://www.google.com/maps/search/?api=1&query=71+Pretorius+Rd+President+Park+AH+Midrand+1685+South+Africa" target="_blank" title="open live map">
-                    71 Pretorius Rd · live map
+                <a href="#" id="dynamicMapLink" target="_blank" title="open live map – auto updates">
+                    obtaining location...
                 </a>
                 <i class="fas fa-external-link-alt" style="font-size:0.7rem; opacity:0.6;"></i>
-                <i><a href="details.html">Afrikaans</a></i>
             </div>
         </div>
 
@@ -295,8 +301,8 @@
 
             <div class="two-cols">
                 <div class="input-field">
-                    <label><i class="fas fa-car"></i> Vehicle reg. number</label>
-                    <input type="text" id="vehicleReg" placeholder="ABC-1234" value="FLEET-408" required>
+                    <label><i class="fas fa-car"></i> Vehicle reg.</label>
+                    <input type="text" id="vehicleReg" value="FLEET-408" required>
                 </div>
                 <div class="input-field">
                     <label><i class="fas fa-map-pin"></i> Location / street</label>
@@ -318,29 +324,29 @@
                 </div>
                 <div class="input-field">
                     <label><i class="fas fa-id-card"></i> Unit #</label>
-                    <input type="text" id="unitNumber" placeholder="e.g. 408" value="408" required>
+                    <input type="text" id="unitNumber" value="408" required>
                 </div>
             </div>
 
             <div class="two-cols">
                 <div class="input-field">
                     <label><i class="fas fa-user"></i> Driver name</label>
-                    <input type="text" id="driverName" placeholder="Full name" value="James Keller" required>
+                    <input type="text" id="driverName" value="James Keller" required>
                 </div>
                 <div class="input-field">
                     <label><i class="fas fa-phone-alt"></i> Driver phone</label>
-                    <input type="tel" id="driverPhone" placeholder="(555) 123-4567" value="+1 555 321 7890" required>
+                    <input type="tel" id="driverPhone" value="+1 555 321 7890" required>
                 </div>
             </div>
 
             <div class="input-field">
                 <label><i class="fas fa-file-signature"></i> Description</label>
-                <textarea id="description" placeholder="Describe damages, injuries, weather …" required>Front bumper crushed, airbags deployed. Slight rain. Other driver exchanged info.</textarea>
+                <textarea id="description" required>Front bumper crushed, airbags deployed. Slight rain. Other driver exchanged info.</textarea>
             </div>
 
             <div class="input-field">
                 <label><i class="fas fa-car-crash"></i> Other parties involved</label>
-                <input type="text" id="otherParties" placeholder="e.g. Toyota Camry, ABC123" value="Honda CR-V, plate 7GHJ432">
+                <input type="text" id="otherParties" value="Honda CR-V, plate 7GHJ432">
             </div>
 
             <hr>
@@ -357,11 +363,11 @@
             <div class="two-cols">
                 <div class="input-field">
                     <label><i class="fas fa-user-shield"></i> Officer name</label>
-                    <input type="text" id="officerName" placeholder="e.g. M. Davis" value="Officer M. Davis">
+                    <input type="text" id="officerName" value="Officer M. Davis">
                 </div>
                 <div class="input-field">
                     <label><i class="fas fa-mobile-alt"></i> Officer cell</label>
-                    <input type="tel" id="officerPhone" placeholder="(555) 987-6543" value="555-987-6543">
+                    <input type="tel" id="officerPhone" value="555-987-6543">
                 </div>
             </div>
 
@@ -375,7 +381,7 @@
 
             <div class="input-field">
                 <label><i class="fas fa-hashtag"></i> Incident police report #</label>
-                <input type="text" id="policeReportNo" placeholder="e.g. 23-78901" value="PD-2309-452">
+                <input type="text" id="policeReportNo" value="PD-2309-452">
             </div>
 
             <div class="input-field">
@@ -387,47 +393,48 @@
             </div>
 
             <hr>
-            <!-- PHOTO UPLOAD AREA -->
+            <!-- PHOTO UPLOAD AREA with live geo + timestamp overlay -->
             <div class="photo-upload-area" id="dropZone">
                 <i class="fas fa-cloud-upload-alt"></i>
-                <div class="upload-text">attach accident image</div>
-                <div class="upload-hint">tap to browse or drag — will be attached to email</div>
-                <input type="file" id="fileInput" accept="image/*" capture="environment">
+                <div class="upload-text">attach accident image with GPS & date stamp</div>
+                <div class="upload-hint">tap to browse — EXIF / overlay will be added automatically</div>
+                <input type="file" id="fileInput" accept="image/*">
             </div>
 
-            <!-- live preview of selected image & name -->
+            <!-- live preview of selected stamped image -->
             <div id="previewContainer" class="image-preview-row" style="display: none;">
-                <img id="imagePreview" class="preview-thumb" src="#" alt="preview">
+                <img id="imagePreview" class="preview-thumb" src="#" alt="stamped preview">
                 <span id="fileNameDisplay" class="file-name-badge"><i class="far fa-image"></i> accident.jpg</span>
                 <div class="attachment-badge">
-                    <i class="fas fa-paperclip"></i> Ready to attach
+                    <i class="fas fa-map-marker-alt"></i> <span id="stampLocation">locating…</span>
                 </div>
                 <button type="button" id="clearImageBtn" style="background: none; border:none; color:#b00; margin-left:auto; font-size:1.5rem; cursor:pointer;"><i class="fas fa-times-circle"></i></button>
             </div>
 
-            <!-- store file data for attachment simulation -->
+            <!-- hidden fields to store stamped image data & GPS -->
             <input type="hidden" id="imageBase64" value="">
             <input type="hidden" id="imageFileName" value="">
             <input type="hidden" id="imageFileType" value="">
+            <input type="hidden" id="capturedLat" value="">
+            <input type="hidden" id="capturedLon" value="">
+            <input type="hidden" id="capturedGeoUrl" value="">
 
-            <!-- Solution 1: Enhanced mailto with attachment instructions -->
+            <!-- Buttons -->
             <button type="button" id="mailtoBtn" class="submit-btn" style="background: #1a3b5d;">
                 <i class="fas fa-envelope"></i> Option 1: Open in Email Client
             </button>
             
-            <!-- Solution 2: Download EML file (works like real attachment) -->
             <button type="button" id="emlBtn" class="submit-btn" style="background: #2d4e8c; margin-top: 0;">
-                <i class="fas fa-download"></i> Option 2: Download Email (with attachment)
+                <i class="fas fa-download"></i> Option 2: Download Email (stamped image + location)
             </button>
             
-            <div class="info-note" style="margin-top: 10px;">
-                <i class="fas fa-info-circle"></i> 
-                <span id="attachmentStatus">No image selected</span>
+            <div class="info-note" style="margin-top: 10px;" id="attachmentStatus">
+                <i class="fas fa-info-circle"></i> No image — GPS will be fetched live
             </div>
             
             <div class="info-note" style="background: #fff3cd; border-color: #ffeeba;">
                 <i class="fas fa-lightbulb" style="color: #856404;"></i>
-                <strong>Tip:</strong> Option 2 downloads a complete .eml file with the image attached. Open it in Outlook, Thunderbird, or Windows Mail to see the attachment.
+                <strong>Live map:</strong> link above updates with your position. Photo gets location + timestamp overlay (audit trail).
             </div>
         </form>
         <footer>
@@ -437,95 +444,192 @@
 
     <script>
         (function() {
+            // DOM elements
             const fileInput = document.getElementById('fileInput');
             const dropZone = document.getElementById('dropZone');
             const previewContainer = document.getElementById('previewContainer');
             const imagePreview = document.getElementById('imagePreview');
             const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const stampLocationSpan = document.getElementById('stampLocation');
             const clearImageBtn = document.getElementById('clearImageBtn');
             const imageBase64Hidden = document.getElementById('imageBase64');
             const imageFileNameHidden = document.getElementById('imageFileName');
             const imageFileTypeHidden = document.getElementById('imageFileType');
+            const capturedLat = document.getElementById('capturedLat');
+            const capturedLon = document.getElementById('capturedLon');
+            const capturedGeoUrl = document.getElementById('capturedGeoUrl');
             const attachmentStatus = document.getElementById('attachmentStatus');
+            const dynamicMapLink = document.getElementById('dynamicMapLink');
             
             const mailtoBtn = document.getElementById('mailtoBtn');
             const emlBtn = document.getElementById('emlBtn');
 
+            // state
             let selectedFile = null;
-            let currentBase64 = '';
-            let currentFileData = null;
+            let currentBase64 = '';          // raw base64 of the stamped image
+            let originalBase64Data = null;    // original image data for stamping
+            let gpsCoords = { lat: null, lon: null, accuracy: null };
+            let geoName = 'location unavailable';
+            
+            // set today's date
+            document.getElementById('accidentDate').value = new Date().toISOString().split('T')[0];
 
-            function handleFileSelect(file) {
+            // ---------- GEOLOCATION ----------
+            function updateMapLink() {
+                if (gpsCoords.lat && gpsCoords.lon) {
+                    const lat = gpsCoords.lat.toFixed(6);
+                    const lon = gpsCoords.lon.toFixed(6);
+                    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+                    capturedLat.value = lat;
+                    capturedLon.value = lon;
+                    capturedGeoUrl.value = mapsUrl;
+                    dynamicMapLink.href = mapsUrl;
+                    dynamicMapLink.innerHTML = `${lat}, ${lon} · live map`;
+                    geoName = `${lat}, ${lon}`;
+                } else {
+                    dynamicMapLink.href = '#';
+                    dynamicMapLink.innerHTML = 'waiting for GPS …';
+                }
+            }
+
+            // get location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        gpsCoords.lat = pos.coords.latitude;
+                        gpsCoords.lon = pos.coords.longitude;
+                        gpsCoords.accuracy = pos.coords.accuracy;
+                        updateMapLink();
+                        attachmentStatus.innerHTML = `<i class="fas fa-map-pin"></i> GPS locked: ${gpsCoords.lat.toFixed(4)}, ${gpsCoords.lon.toFixed(4)}`;
+                    },
+                    (err) => {
+                        console.warn('GPS failed, fallback to manual');
+                        gpsCoords.lat = -25.9989; gpsCoords.lon = 28.1213; // Midrand approx
+                        updateMapLink();
+                        attachmentStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> GPS denied – using default Midrand coord';
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                gpsCoords.lat = -25.9989; gpsCoords.lon = 28.1213;
+                updateMapLink();
+            }
+
+            // ---------- STAMP IMAGE WITH LOCATION + DATE ----------
+            function stampImageWithOverlay(file) {
+                return new Promise((resolve, reject) => {
+                    if (!file) return reject('no file');
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            const ctx = canvas.getContext('2d');
+                            
+                            // draw original image
+                            ctx.drawImage(img, 0, 0);
+                            
+                            // overlay black semi-transparent bar at bottom
+                            const barHeight = 60;
+                            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                            ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
+                            
+                            // text styling
+                            ctx.font = 'bold 22px "Inter", Arial, sans-serif';
+                            ctx.fillStyle = '#ffc107';
+                            ctx.shadowColor = '#000';
+                            ctx.shadowBlur = 8;
+                            
+                            // get current datetime for overlay
+                            const now = new Date();
+                            const dateStr = now.toLocaleDateString('en-ZA') + ' ' + now.toLocaleTimeString('en-ZA', {hour12: false});
+                            const locationStr = (gpsCoords.lat && gpsCoords.lon) ? 
+                                `${gpsCoords.lat.toFixed(5)}, ${gpsCoords.lon.toFixed(5)}` : 'location pending';
+                            
+                            // draw two lines
+                            ctx.fillText(`📅 ${dateStr}`, 20, canvas.height - 32);
+                            ctx.fillText(`📍 ${locationStr}`, 20, canvas.height - 8);
+                            
+                            // get base64 without header
+                            const stampedBase64 = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
+                            // also build preview
+                            const previewUrl = canvas.toDataURL('image/jpeg', 0.8);
+                            
+                            resolve({
+                                stampedBase64,
+                                previewUrl,
+                                fileName: `stamped_${file.name.replace(/\.[^/.]+$/, '')}.jpg`,
+                                locationText: locationStr
+                            });
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // handle file selection and stamp
+            async function handleFileSelect(file) {
                 if (!file) return;
                 if (!file.type.startsWith('image/')) {
-                    alert('Please select an image file (JPEG, PNG, etc.)');
+                    alert('Please select an image');
                     return;
                 }
-                selectedFile = file;
-                currentFileData = file;
-                fileNameDisplay.innerHTML = `<i class="far fa-file-image"></i> ${file.name}`;
-                imageFileNameHidden.value = file.name;
-                imageFileTypeHidden.value = file.type;
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    currentBase64 = e.target.result.split(',')[1]; // Remove data:image/xyz;base64, part
-                    imagePreview.src = e.target.result;
+                
+                try {
+                    attachmentStatus.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> stamping image with location & time...';
+                    const stamped = await stampImageWithOverlay(file);
+                    
+                    // store stamped data
+                    currentBase64 = stamped.stampedBase64;
                     imageBase64Hidden.value = currentBase64;
+                    imageFileNameHidden.value = stamped.fileName;
+                    imageFileTypeHidden.value = 'image/jpeg';
+                    
+                    // update preview
+                    imagePreview.src = stamped.previewUrl;
+                    fileNameDisplay.innerHTML = `<i class="far fa-file-image"></i> ${stamped.fileName}`;
+                    stampLocationSpan.innerText = stamped.locationText;
                     previewContainer.style.display = 'flex';
-                    attachmentStatus.innerHTML = `<i class="fas fa-paperclip"></i> Attachment ready: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
-                };
-                reader.readAsDataURL(file);
+                    
+                    attachmentStatus.innerHTML = `<i class="fas fa-check-circle" style="color:#2a7f2a;"></i> stamped ready – ${stamped.fileName} (GPS embedded)`;
+                } catch (err) {
+                    alert('Error processing image');
+                    console.error(err);
+                }
             }
 
             fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleFileSelect(e.target.files[0]);
-                }
+                if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
             });
 
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.style.background = '#e3edff';
-                dropZone.style.borderColor = '#0a52c2';
-            });
-            
-            dropZone.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                dropZone.style.background = '#f1f7ff';
-                dropZone.style.borderColor = '#9bb8f0';
-            });
-            
+            dropZone.addEventListener('dragover', (e) => e.preventDefault());
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
-                dropZone.style.background = '#f1f7ff';
-                dropZone.style.borderColor = '#9bb8f0';
-                if (e.dataTransfer.files.length > 0) {
-                    fileInput.files = e.dataTransfer.files;
-                    handleFileSelect(e.dataTransfer.files[0]);
-                }
+                if (e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files[0]);
             });
 
-            clearImageBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
+            clearImageBtn.addEventListener('click', () => {
                 selectedFile = null;
-                currentFileData = null;
                 fileInput.value = '';
                 imageBase64Hidden.value = '';
                 imageFileNameHidden.value = '';
                 imageFileTypeHidden.value = '';
                 currentBase64 = '';
                 previewContainer.style.display = 'none';
-                imagePreview.src = '#';
-                attachmentStatus.innerHTML = 'No image selected';
+                attachmentStatus.innerHTML = 'No image — GPS will be fetched live';
+                stampLocationSpan.innerText = 'locating…';
             });
 
-            // Set today's date
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('accidentDate').value = today;
-
-            // Helper function to get all form data
+            // ---------- FORM DATA & EMAIL ----------
             function getFormData() {
+                const reported = document.querySelector('input[name="reportedMetro"]:checked');
+                const drunken = document.querySelector('input[name="drunkenDriving"]:checked');
+                const atFault = document.querySelector('input[name="atFault"]:checked');
+                
                 return {
                     date: document.getElementById('accidentDate').value,
                     time: document.getElementById('accidentTime').value,
@@ -537,167 +641,110 @@
                     driverPhone: document.getElementById('driverPhone').value,
                     description: document.getElementById('description').value,
                     otherParties: document.getElementById('otherParties').value,
-                    reportedMetro: document.querySelector('input[name="reportedMetro"]:checked')?.value || 'Not specified',
+                    reportedMetro: reported ? reported.value : 'Not specified',
                     officerName: document.getElementById('officerName').value || 'N/A',
                     officerPhone: document.getElementById('officerPhone').value || 'N/A',
-                    drunkenDriving: document.querySelector('input[name="drunkenDriving"]:checked')?.value || 'Not specified',
+                    drunkenDriving: drunken ? drunken.value : 'Not specified',
                     policeReportNo: document.getElementById('policeReportNo').value || 'N/A',
-                    atFault: document.querySelector('input[name="atFault"]:checked')?.value || 'Not specified'
+                    atFault: atFault ? atFault.value : 'Not specified',
+                    lat: capturedLat.value || 'unknown',
+                    lon: capturedLon.value || 'unknown'
                 };
             }
 
-            // Validate form
             function validateForm(data) {
-                if (!data.date || !data.time || !data.vehicleReg || !data.location || !data.accidentType || 
-                    !data.unitNumber || !data.driverName || !data.driverPhone || !data.description) {
-                    alert('Please fill all required fields (Date, Time, Vehicle, Location, Type, Unit, Driver Name, Phone, Description).');
+                const required = [data.date, data.time, data.vehicleReg, data.location, data.accidentType, data.unitNumber, data.driverName, data.driverPhone, data.description];
+                if (required.some(f => !f)) {
+                    alert('Please fill all required fields');
                     return false;
                 }
                 return true;
             }
 
-            // Create email body text
             function createEmailBody(data) {
-                let bodyText = '';
-                bodyText += `ONPOINT FLEET – COMPLETE ACCIDENT REPORT\n`;
-                bodyText += `=======================================\n\n`;
-                bodyText += `📅 DATE: ${data.date} at ${data.time}\n`;
-                bodyText += `🚗 VEHICLE REG: ${data.vehicleReg}\n`;
-                bodyText += `📍 LOCATION: ${data.location}\n`;
-                bodyText += `🚧 TYPE: ${data.accidentType}\n`;
-                bodyText += `🚛 UNIT: ${data.unitNumber}\n`;
-                bodyText += `🧑‍✈️ DRIVER: ${data.driverName}\n`;
-                bodyText += `📞 DRIVER PHONE: ${data.driverPhone}\n`;
-                bodyText += `📄 DESCRIPTION: ${data.description}\n`;
-                bodyText += `🚙 OTHER PARTIES: ${data.otherParties || 'none reported'}\n\n`;
-                bodyText += `👮 OFFICIAL / POLICE INFORMATION\n`;
-                bodyText += `--------------------------------\n`;
-                bodyText += `🏛️ REPORTED TO METRO: ${data.reportedMetro}\n`;
-                bodyText += `🛡️ OFFICER NAME: ${data.officerName}\n`;
-                bodyText += `📞 OFFICER CELL: ${data.officerPhone}\n`;
-                bodyText += `🍷 DRUNKEN DRIVING: ${data.drunkenDriving}\n`;
-                bodyText += `📋 POLICE REPORT #: ${data.policeReportNo}\n`;
-                bodyText += `⚖️ AT FAULT?: ${data.atFault}\n\n`;
-                
-                if (selectedFile) {
-                    bodyText += `📸 ATTACHMENT: ${selectedFile.name} (${(selectedFile.size/1024).toFixed(1)} KB)\n`;
-                    bodyText += `Note: This email client may not support automatic attachments.\n`;
-                    bodyText += `Please use Option 2 below to download the complete email with attachment.\n`;
+                let body = `ONPOINT FLEET – ACCIDENT REPORT (GPS-AUDIT)\r\n`;
+                body += `==========================================\r\n`;
+                body += `📅 DATE/TIME: ${data.date} ${data.time}\r\n`;
+                body += `🚗 VEHICLE: ${data.vehicleReg}  |  UNIT: ${data.unitNumber}\r\n`;
+                body += `📍 STREET/INPUT: ${data.location}\r\n`;
+                body += `🌐 LIVE GPS: https://www.google.com/maps?q=${data.lat},${data.lon}  (lat:${data.lat}, lon:${data.lon})\r\n`;
+                body += `🚧 TYPE: ${data.accidentType}\r\n`;
+                body += `🧑 DRIVER: ${data.driverName} ☎ ${data.driverPhone}\r\n`;
+                body += `📄 DESCRIPTION: ${data.description}\r\n`;
+                body += `🚙 OTHER PARTIES: ${data.otherParties || 'none'}\r\n`;
+                body += `\r\n👮‍♂️ OFFICIAL / POLICE INFO\r\n`;
+                body += `REPORTED: ${data.reportedMetro}  |  OFFICER: ${data.officerName} / ${data.officerPhone}\r\n`;
+                body += `DRUNKEN DRIVING: ${data.drunkenDriving}  |  REPORT#: ${data.policeReportNo}\r\n`;
+                body += `AT FAULT?: ${data.atFault}\r\n`;
+                if (imageFileNameHidden.value) {
+                    body += `\r\n📸 STAMPED PHOTO: ${imageFileNameHidden.value} (with location & timestamp overlay)\r\n`;
                 }
-                
-                bodyText += `\n-- \n`;
-                bodyText += `OnPoint Fleet safety report – generated from mobile app\n`;
-                bodyText += `71 Pretorius Rd, President Park, Midrand`;
-                
-                return bodyText;
+                body += `\r\n-- \r\nOnPoint Fleet – report generated from live GPS. 71 Pretorius Rd, Midrand.\r\n`;
+                return body;
             }
 
-            // Option 1: Enhanced mailto (with attachment note)
-            mailtoBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                
+            // mailto (option 1)
+            mailtoBtn.addEventListener('click', () => {
                 const data = getFormData();
                 if (!validateForm(data)) return;
-
                 const recipient = 'fleet@onpointontime.co.za';
-                const subject = `🚨 Accident report - Unit ${data.unitNumber} / ${data.vehicleReg} - ${data.date}`;
-                const bodyText = createEmailBody(data);
-                
-                // Create mailto link
-                const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
-                
-                if (selectedFile) {
-                    // Show instructions for manual attachment
-                    const attachMsg = `\n\n📎 TO ATTACH THE IMAGE:\n` +
-                                    `1. Save this image from preview\n` +
-                                    `2. Drag and drop ${selectedFile.name} into your email\n` +
-                                    `3. Or use the paperclip icon to attach it manually`;
-                    
-                    // Update body with attachment instructions
-                    const enhancedBody = bodyText + attachMsg;
-                    const enhancedLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(enhancedBody)}`;
-                    window.location.href = enhancedLink;
-                } else {
-                    window.location.href = mailtoLink;
-                }
+                const subject = `🚨 Accident - Unit ${data.unitNumber} - ${data.date} GPS`;
+                const body = createEmailBody(data);
+                const mailto = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                window.location.href = mailto;
             });
 
-            // Option 2: Download EML file (with real attachment)
-            emlBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                
+            // eml (option 2) with stamped image attached
+            emlBtn.addEventListener('click', () => {
                 const data = getFormData();
                 if (!validateForm(data)) return;
 
-                // Create email content
                 const recipient = 'fleet@onpointontime.co.za';
-                const subject = `Accident report - Unit ${data.unitNumber} / ${data.vehicleReg} - ${data.date}`;
+                const subject = `Accident - Unit ${data.unitNumber} - ${data.date} (GPS stamped)`;
                 const bodyText = createEmailBody(data);
-                
-                // Generate boundary for multipart email
-                const boundary = '----=_NextPart_' + Math.random().toString(36).substring(2, 15);
-                
-                let emlContent = '';
-                
-                // Headers
-                emlContent += `From: "OnPoint Fleet Driver" <driver@onpointfleet.com>\r\n`;
-                emlContent += `To: ${recipient}\r\n`;
-                emlContent += `Subject: ${subject}\r\n`;
-                emlContent += `MIME-Version: 1.0\r\n`;
-                emlContent += `Content-Type: multipart/mixed; boundary="${boundary}"\r\n`;
-                emlContent += `\r\n`;
-                emlContent += `This is a multipart message in MIME format.\r\n`;
-                emlContent += `\r\n`;
-                emlContent += `--${boundary}\r\n`;
-                
-                // Text part
-                emlContent += `Content-Type: text/plain; charset="utf-8"\r\n`;
-                emlContent += `Content-Transfer-Encoding: 7bit\r\n`;
-                emlContent += `\r\n`;
-                emlContent += bodyText.replace(/\n/g, '\r\n');
-                emlContent += `\r\n`;
-                emlContent += `\r\n`;
-                
-                // Attachment part (if image exists)
-                if (selectedFile && currentBase64) {
-                    emlContent += `--${boundary}\r\n`;
-                    emlContent += `Content-Type: ${selectedFile.type}; name="${selectedFile.name}"\r\n`;
-                    emlContent += `Content-Transfer-Encoding: base64\r\n`;
-                    emlContent += `Content-Disposition: attachment; filename="${selectedFile.name}"\r\n`;
-                    emlContent += `\r\n`;
-                    
-                    // Add base64 content in chunks of 76 characters per line (standard for email)
+                const boundary = '----=_NextPart_' + Math.random().toString(36).substring(2, 18);
+
+                let eml = `From: "OnPoint Driver" <driver@onpointfleet.com>\r\n`;
+                eml += `To: ${recipient}\r\n`;
+                eml += `Subject: ${subject}\r\n`;
+                eml += `MIME-Version: 1.0\r\n`;
+                eml += `Content-Type: multipart/mixed; boundary="${boundary}"\r\n\r\n`;
+                eml += `This is a multipart message.\r\n\r\n`;
+                eml += `--${boundary}\r\n`;
+                eml += `Content-Type: text/plain; charset="utf-8"\r\n`;
+                eml += `Content-Transfer-Encoding: 7bit\r\n\r\n`;
+                eml += bodyText.replace(/\n/g, '\r\n') + '\r\n\r\n';
+
+                if (currentBase64) {
+                    eml += `--${boundary}\r\n`;
+                    eml += `Content-Type: image/jpeg; name="${imageFileNameHidden.value}"\r\n`;
+                    eml += `Content-Transfer-Encoding: base64\r\n`;
+                    eml += `Content-Disposition: attachment; filename="${imageFileNameHidden.value}"\r\n\r\n`;
+
                     const base64Data = currentBase64;
                     for (let i = 0; i < base64Data.length; i += 76) {
-                        emlContent += base64Data.substr(i, 76) + '\r\n';
+                        eml += base64Data.substr(i, 76) + '\r\n';
                     }
-                    emlContent += `\r\n`;
+                    eml += `\r\n`;
                 }
-                
-                // Close boundary
-                emlContent += `--${boundary}--\r\n`;
-                
-                // Create download
-                const blob = new Blob([emlContent], { type: 'message/rfc822' });
+
+                eml += `--${boundary}--\r\n`;
+
+                const blob = new Blob([eml], { type: 'message/rfc822' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `accident_report_${data.unitNumber}_${data.date.replace(/-/g, '')}.eml`;
+                a.download = `accident_${data.unitNumber}_${data.date.replace(/-/g,'')}.eml`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
-                if (selectedFile) {
-                    alert('✅ EML file downloaded with image attached! Open it in Outlook, Thunderbird, or Windows Mail.');
-                }
+                alert('✅ EML downloaded – open in Outlook/Thunderbird to see stamped photo attached.');
             });
 
-            // Update attachment status on page load
-            attachmentStatus.innerHTML = 'No image selected';
+            // initial map update
+            updateMapLink();
         })();
     </script>
 </body>
 </html>
-
-
