@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>OnPoint Fleet · accident report (image as link)</title>
+    <title>OnPoint Fleet · accident report (with attachment support)</title>
     <!-- Font & icons (Font Awesome & Google Font) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
@@ -217,6 +217,26 @@
         .info-note i { color: #ff7b2d; }
         footer { text-align: center; margin-top: 20px; color: #2a4c7a; font-weight: 400; opacity: 0.9; }
         hr { border: 1px solid #c9d9f0; margin: 0.5rem 0 1rem; opacity: 0.4; }
+        .attachment-badge {
+            background: #e8f0fe;
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #1a4b8c;
+            border: 1px solid #b8d1fc;
+        }
+        .download-link {
+            color: #2d7aff;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .download-link:hover {
+            text-decoration: underline;
+        }
 
         @media (max-width: 480px) {
             .report-card { padding: 1.5rem 1.2rem; border-radius: 32px; }
@@ -249,7 +269,7 @@
         </div>
 
         <div class="subhead">
-            <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i> complete accident report (with police & judgement)
+            <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i> complete accident report (with attachment)
             <div class="map-mini-container">
                 <i class="fas fa-map-marked-alt"></i>
                 <a href="https://www.google.com/maps/search/?api=1&query=71+Pretorius+Rd+President+Park+AH+Midrand+1685+South+Africa" target="_blank" title="open live map">
@@ -366,11 +386,11 @@
             </div>
 
             <hr>
-            <!-- PHOTO UPLOAD AREA (image will be converted to a shareable link) -->
+            <!-- PHOTO UPLOAD AREA -->
             <div class="photo-upload-area" id="dropZone">
                 <i class="fas fa-cloud-upload-alt"></i>
                 <div class="upload-text">attach accident image</div>
-                <div class="upload-hint">tap to browse or drag — will become a link</div>
+                <div class="upload-hint">tap to browse or drag — will be attached to email</div>
                 <input type="file" id="fileInput" accept="image/*" capture="environment">
             </div>
 
@@ -378,17 +398,35 @@
             <div id="previewContainer" class="image-preview-row" style="display: none;">
                 <img id="imagePreview" class="preview-thumb" src="#" alt="preview">
                 <span id="fileNameDisplay" class="file-name-badge"><i class="far fa-image"></i> accident.jpg</span>
+                <div class="attachment-badge">
+                    <i class="fas fa-paperclip"></i> Ready to attach
+                </div>
                 <button type="button" id="clearImageBtn" style="background: none; border:none; color:#b00; margin-left:auto; font-size:1.5rem; cursor:pointer;"><i class="fas fa-times-circle"></i></button>
             </div>
 
-            <!-- store base64 data to generate a link later -->
+            <!-- store file data for attachment simulation -->
             <input type="hidden" id="imageBase64" value="">
+            <input type="hidden" id="imageFileName" value="">
+            <input type="hidden" id="imageFileType" value="">
 
-            <button type="submit" class="submit-btn">
-                <i class="fas fa-paper-plane"></i> email full report + image link
+            <!-- Solution 1: Enhanced mailto with attachment instructions -->
+            <button type="button" id="mailtoBtn" class="submit-btn" style="background: #1a3b5d;">
+                <i class="fas fa-envelope"></i> Option 1: Open in Email Client
             </button>
-            <div class="info-note">
-                <i class="fas fa-link"></i> Image will be included as a direct link (data: URI) · copy & paste into browser to view.
+            
+            <!-- Solution 2: Download EML file (works like real attachment) -->
+            <button type="button" id="emlBtn" class="submit-btn" style="background: #2d4e8c; margin-top: 0;">
+                <i class="fas fa-download"></i> Option 2: Download Email (with attachment)
+            </button>
+            
+            <div class="info-note" style="margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> 
+                <span id="attachmentStatus">No image selected</span>
+            </div>
+            
+            <div class="info-note" style="background: #fff3cd; border-color: #ffeeba;">
+                <i class="fas fa-lightbulb" style="color: #856404;"></i>
+                <strong>Tip:</strong> Option 2 downloads a complete .eml file with the image attached. Open it in Outlook, Thunderbird, or Windows Mail to see the attachment.
             </div>
         </form>
         <footer>
@@ -405,10 +443,16 @@
             const fileNameDisplay = document.getElementById('fileNameDisplay');
             const clearImageBtn = document.getElementById('clearImageBtn');
             const imageBase64Hidden = document.getElementById('imageBase64');
-            const form = document.getElementById('accidentForm');
+            const imageFileNameHidden = document.getElementById('imageFileName');
+            const imageFileTypeHidden = document.getElementById('imageFileType');
+            const attachmentStatus = document.getElementById('attachmentStatus');
+            
+            const mailtoBtn = document.getElementById('mailtoBtn');
+            const emlBtn = document.getElementById('emlBtn');
 
             let selectedFile = null;
-            let currentBase64 = '';   // stores data URL
+            let currentBase64 = '';
+            let currentFileData = null;
 
             function handleFileSelect(file) {
                 if (!file) return;
@@ -417,14 +461,18 @@
                     return;
                 }
                 selectedFile = file;
+                currentFileData = file;
                 fileNameDisplay.innerHTML = `<i class="far fa-file-image"></i> ${file.name}`;
+                imageFileNameHidden.value = file.name;
+                imageFileTypeHidden.value = file.type;
 
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    currentBase64 = e.target.result;      // data url
-                    imagePreview.src = currentBase64;
+                    currentBase64 = e.target.result.split(',')[1]; // Remove data:image/xyz;base64, part
+                    imagePreview.src = e.target.result;
                     imageBase64Hidden.value = currentBase64;
                     previewContainer.style.display = 'flex';
+                    attachmentStatus.innerHTML = `<i class="fas fa-paperclip"></i> Attachment ready: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
                 };
                 reader.readAsDataURL(file);
             }
@@ -440,11 +488,13 @@
                 dropZone.style.background = '#e3edff';
                 dropZone.style.borderColor = '#0a52c2';
             });
+            
             dropZone.addEventListener('dragleave', (e) => {
                 e.preventDefault();
                 dropZone.style.background = '#f1f7ff';
                 dropZone.style.borderColor = '#9bb8f0';
             });
+            
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 dropZone.style.background = '#f1f7ff';
@@ -458,103 +508,192 @@
             clearImageBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 selectedFile = null;
+                currentFileData = null;
                 fileInput.value = '';
                 imageBase64Hidden.value = '';
+                imageFileNameHidden.value = '';
+                imageFileTypeHidden.value = '';
                 currentBase64 = '';
                 previewContainer.style.display = 'none';
                 imagePreview.src = '#';
+                attachmentStatus.innerHTML = 'No image selected';
             });
 
             // Set today's date
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('accidentDate').value = today;
 
-            // Form submit – build email body with EVERYTHING from Date to the End (including image as clickable link)
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
+            // Helper function to get all form data
+            function getFormData() {
+                return {
+                    date: document.getElementById('accidentDate').value,
+                    time: document.getElementById('accidentTime').value,
+                    vehicleReg: document.getElementById('vehicleReg').value,
+                    location: document.getElementById('location').value,
+                    accidentType: document.getElementById('accidentType').value,
+                    unitNumber: document.getElementById('unitNumber').value,
+                    driverName: document.getElementById('driverName').value,
+                    driverPhone: document.getElementById('driverPhone').value,
+                    description: document.getElementById('description').value,
+                    otherParties: document.getElementById('otherParties').value,
+                    reportedMetro: document.querySelector('input[name="reportedMetro"]:checked')?.value || 'Not specified',
+                    officerName: document.getElementById('officerName').value || 'N/A',
+                    officerPhone: document.getElementById('officerPhone').value || 'N/A',
+                    drunkenDriving: document.querySelector('input[name="drunkenDriving"]:checked')?.value || 'Not specified',
+                    policeReportNo: document.getElementById('policeReportNo').value || 'N/A',
+                    atFault: document.querySelector('input[name="atFault"]:checked')?.value || 'Not specified'
+                };
+            }
 
-                // ---- GATHER ALL FIELDS (from Date to the end) ----
-                const date = document.getElementById('accidentDate').value;
-                const time = document.getElementById('accidentTime').value;
-                const vehicleReg = document.getElementById('vehicleReg').value;
-                const location = document.getElementById('location').value;
-                const accidentType = document.getElementById('accidentType').value;
-                const unitNumber = document.getElementById('unitNumber').value;
-                const driverName = document.getElementById('driverName').value;
-                const driverPhone = document.getElementById('driverPhone').value;
-                const description = document.getElementById('description').value;
-                const otherParties = document.getElementById('otherParties').value;
-
-                const reportedMetro = document.querySelector('input[name="reportedMetro"]:checked')?.value || 'Not specified';
-                const officerName = document.getElementById('officerName').value || 'N/A';
-                const officerPhone = document.getElementById('officerPhone').value || 'N/A';
-                const drunkenDriving = document.querySelector('input[name="drunkenDriving"]:checked')?.value || 'Not specified';
-                const policeReportNo = document.getElementById('policeReportNo').value || 'N/A';
-                const atFault = document.querySelector('input[name="atFault"]:checked')?.value || 'Not specified';
-
-                // Basic required check
-                if (!date || !time || !vehicleReg || !location || !accidentType || !unitNumber || !driverName || !driverPhone || !description) {
+            // Validate form
+            function validateForm(data) {
+                if (!data.date || !data.time || !data.vehicleReg || !data.location || !data.accidentType || 
+                    !data.unitNumber || !data.driverName || !data.driverPhone || !data.description) {
                     alert('Please fill all required fields (Date, Time, Vehicle, Location, Type, Unit, Driver Name, Phone, Description).');
-                    return;
+                    return false;
                 }
+                return true;
+            }
 
-                // recipient & subject
-                const recipient = 'fleet@onpointontime.co.za';
-                const subject = `🚨 Accident report - Unit ${unitNumber} / ${vehicleReg} - ${date}`;
-
-                // ----- COMPOSE BODY – from DATE to OFFICER JUDGEMENT + image link at the end -----
+            // Create email body text
+            function createEmailBody(data) {
                 let bodyText = '';
-
-                // 1) Date / time block
-                bodyText += `ONPOINT FLEET – COMPLETE ACCIDENT REPORT\n\n`;
-                bodyText += `📅 DATE: ${date} at ${time}\n`;
-                bodyText += `🚗 VEHICLE REG: ${vehicleReg}\n`;
-                bodyText += `📍 LOCATION: ${location}\n`;
-                bodyText += `🚧 TYPE: ${accidentType}\n`;
-                bodyText += `🚛 UNIT: ${unitNumber}\n`;
-                bodyText += `🧑‍✈️ DRIVER: ${driverName}  |  PHONE: ${driverPhone}\n`;
-                bodyText += `📄 DESCRIPTION: ${description}\n`;
-                bodyText += `🚙 OTHER PARTIES: ${otherParties || 'none reported'}\n\n`;
-
-                // 2) Police / official section
+                bodyText += `ONPOINT FLEET – COMPLETE ACCIDENT REPORT\n`;
+                bodyText += `=======================================\n\n`;
+                bodyText += `📅 DATE: ${data.date} at ${data.time}\n`;
+                bodyText += `🚗 VEHICLE REG: ${data.vehicleReg}\n`;
+                bodyText += `📍 LOCATION: ${data.location}\n`;
+                bodyText += `🚧 TYPE: ${data.accidentType}\n`;
+                bodyText += `🚛 UNIT: ${data.unitNumber}\n`;
+                bodyText += `🧑‍✈️ DRIVER: ${data.driverName}\n`;
+                bodyText += `📞 DRIVER PHONE: ${data.driverPhone}\n`;
+                bodyText += `📄 DESCRIPTION: ${data.description}\n`;
+                bodyText += `🚙 OTHER PARTIES: ${data.otherParties || 'none reported'}\n\n`;
                 bodyText += `👮 OFFICIAL / POLICE INFORMATION\n`;
-                bodyText += `🏛️ REPORTED TO METRO: ${reportedMetro}\n`;
-                bodyText += `🛡️ OFFICER NAME: ${officerName}  |  CELL: ${officerPhone}\n`;
-                bodyText += `🍷 DRUNKEN DRIVING INVOLVED: ${drunkenDriving}\n`;
-                bodyText += `📋 INCIDENT POLICE REPORT #: ${policeReportNo}\n`;
-                bodyText += `⚖️ OFFICER’S JUDGEMENT (AT FAULT?): ${atFault}\n\n`;
-
-                // 3) IMAGE as a clickable link (data URI) – placed at the end as requested
-                if (currentBase64) {
-                    // Provide the image as a direct data URI link (works in any email client that supports links)
-                    // Shorten display: show first 50 chars for readability but keep full link clickable.
-                    const shortBase = currentBase64.substring(0, 70) + '…' + currentBase64.slice(-20);
-                    bodyText += `📸 ACCIDENT IMAGE (click the link below — if it doesn't open, paste into browser)\n`;
-                    bodyText += `🔗 Image link: ${currentBase64}\n\n`;
-                    // also include a hint to open in browser
-                    bodyText += `(Most email clients allow clicking. If the link is very long, copy the entire line into a browser address bar.)\n\n`;
-                } else {
-                    bodyText += `📷 No image attached.\n\n`;
+                bodyText += `--------------------------------\n`;
+                bodyText += `🏛️ REPORTED TO METRO: ${data.reportedMetro}\n`;
+                bodyText += `🛡️ OFFICER NAME: ${data.officerName}\n`;
+                bodyText += `📞 OFFICER CELL: ${data.officerPhone}\n`;
+                bodyText += `🍷 DRUNKEN DRIVING: ${data.drunkenDriving}\n`;
+                bodyText += `📋 POLICE REPORT #: ${data.policeReportNo}\n`;
+                bodyText += `⚖️ AT FAULT?: ${data.atFault}\n\n`;
+                
+                if (selectedFile) {
+                    bodyText += `📸 ATTACHMENT: ${selectedFile.name} (${(selectedFile.size/1024).toFixed(1)} KB)\n`;
+                    bodyText += `Note: This email client may not support automatic attachments.\n`;
+                    bodyText += `Please use Option 2 below to download the complete email with attachment.\n`;
                 }
+                
+                bodyText += `\n-- \n`;
+                bodyText += `OnPoint Fleet safety report – generated from mobile app\n`;
+                bodyText += `71 Pretorius Rd, President Park, Midrand`;
+                
+                return bodyText;
+            }
 
-                bodyText += `-- \nOnPoint Fleet safety report – generated from mobile app · 71 Pretorius Rd, Midrand`;
+            // Option 1: Enhanced mailto (with attachment note)
+            mailtoBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                const data = getFormData();
+                if (!validateForm(data)) return;
 
-                // URL encode the entire body
+                const recipient = 'fleet@onpointontime.co.za';
+                const subject = `🚨 Accident report - Unit ${data.unitNumber} / ${data.vehicleReg} - ${data.date}`;
+                const bodyText = createEmailBody(data);
+                
+                // Create mailto link
                 const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
-
-                // Mailto length warning (though data URIs can be huge)
-                if (mailtoLink.length > 9000) {
-                    alert('The mailto link is very long because of the image data. If your email client does not open, please use the browser console to copy the image link manually. The image is also shown in the preview.');
+                
+                if (selectedFile) {
+                    // Show instructions for manual attachment
+                    const attachMsg = `\n\n📎 TO ATTACH THE IMAGE:\n` +
+                                    `1. Save this image from preview\n` +
+                                    `2. Drag and drop ${selectedFile.name} into your email\n` +
+                                    `3. Or use the paperclip icon to attach it manually`;
+                    
+                    // Update body with attachment instructions
+                    const enhancedBody = bodyText + attachMsg;
+                    const enhancedLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(enhancedBody)}`;
+                    window.location.href = enhancedLink;
+                } else {
+                    window.location.href = mailtoLink;
                 }
-
-                // Open default email client
-                window.location.href = mailtoLink;
-
-                // For debugging / long image fallback
-                setTimeout(() => {
-                    console.log('Full email body prepared. If image link troubles, here is the base64:', currentBase64);
-                }, 300);
             });
+
+            // Option 2: Download EML file (with real attachment)
+            emlBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                const data = getFormData();
+                if (!validateForm(data)) return;
+
+                // Create email content
+                const recipient = 'fleet@onpointontime.co.za';
+                const subject = `Accident report - Unit ${data.unitNumber} / ${data.vehicleReg} - ${data.date}`;
+                const bodyText = createEmailBody(data);
+                
+                // Generate boundary for multipart email
+                const boundary = '----=_NextPart_' + Math.random().toString(36).substring(2, 15);
+                
+                let emlContent = '';
+                
+                // Headers
+                emlContent += `From: "OnPoint Fleet Driver" <driver@onpointfleet.com>\r\n`;
+                emlContent += `To: ${recipient}\r\n`;
+                emlContent += `Subject: ${subject}\r\n`;
+                emlContent += `MIME-Version: 1.0\r\n`;
+                emlContent += `Content-Type: multipart/mixed; boundary="${boundary}"\r\n`;
+                emlContent += `\r\n`;
+                emlContent += `This is a multipart message in MIME format.\r\n`;
+                emlContent += `\r\n`;
+                emlContent += `--${boundary}\r\n`;
+                
+                // Text part
+                emlContent += `Content-Type: text/plain; charset="utf-8"\r\n`;
+                emlContent += `Content-Transfer-Encoding: 7bit\r\n`;
+                emlContent += `\r\n`;
+                emlContent += bodyText.replace(/\n/g, '\r\n');
+                emlContent += `\r\n`;
+                emlContent += `\r\n`;
+                
+                // Attachment part (if image exists)
+                if (selectedFile && currentBase64) {
+                    emlContent += `--${boundary}\r\n`;
+                    emlContent += `Content-Type: ${selectedFile.type}; name="${selectedFile.name}"\r\n`;
+                    emlContent += `Content-Transfer-Encoding: base64\r\n`;
+                    emlContent += `Content-Disposition: attachment; filename="${selectedFile.name}"\r\n`;
+                    emlContent += `\r\n`;
+                    
+                    // Add base64 content in chunks of 76 characters per line (standard for email)
+                    const base64Data = currentBase64;
+                    for (let i = 0; i < base64Data.length; i += 76) {
+                        emlContent += base64Data.substr(i, 76) + '\r\n';
+                    }
+                    emlContent += `\r\n`;
+                }
+                
+                // Close boundary
+                emlContent += `--${boundary}--\r\n`;
+                
+                // Create download
+                const blob = new Blob([emlContent], { type: 'message/rfc822' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `accident_report_${data.unitNumber}_${data.date.replace(/-/g, '')}.eml`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                if (selectedFile) {
+                    alert('✅ EML file downloaded with image attached! Open it in Outlook, Thunderbird, or Windows Mail.');
+                }
+            });
+
+            // Update attachment status on page load
+            attachmentStatus.innerHTML = 'No image selected';
         })();
     </script>
 </body>
