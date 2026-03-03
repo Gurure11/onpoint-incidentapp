@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>OnPoint Fleet · accident report</title>
-    <!-- Font & icons (Font Awesome & Google Font) for stunning, clean look -->
+    <title>OnPoint Fleet · advanced accident report</title>
+    <!-- Font & icons (Font Awesome & Google Font) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
@@ -23,7 +23,7 @@
             padding: 1rem;
         }
         .report-card {
-            max-width: 680px;
+            max-width: 750px;
             width: 100%;
             background: rgba(255,255,255,0.75);
             backdrop-filter: blur(8px);
@@ -68,6 +68,14 @@
             flex-direction: column;
             gap: 1.5rem;
         }
+        .two-cols {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .two-cols > div {
+            flex: 1 1 180px;
+        }
         .input-field {
             display: flex;
             flex-direction: column;
@@ -105,8 +113,30 @@
             box-shadow: 0 8px 18px -10px #2d7aff, 0 0 0 4px rgba(45,122,255,0.15);
         }
         .input-field textarea {
-            min-height: 100px;
+            min-height: 90px;
             resize: vertical;
+        }
+        .yes-no-group {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            background: #f4f9ff;
+            border-radius: 30px;
+            padding: 10px 20px;
+            border: 1px solid #d2e0f5;
+        }
+        .yes-no-group label {
+            font-weight: 500;
+            text-transform: none;
+            font-size: 1rem;
+            color: #10345e;
+            gap: 6px;
+        }
+        .yes-no-group input[type="radio"] {
+            accent-color: #1e4f8a;
+            width: 18px;
+            height: 18px;
+            margin-right: 4px;
         }
         .photo-upload-area {
             background: #f1f7ff;
@@ -231,7 +261,11 @@
             font-weight: 400;
             opacity: 0.9;
         }
-        /* mobile touch friendly */
+        hr {
+            border: 1px solid #c9d9f0;
+            margin: 0.5rem 0 1rem;
+            opacity: 0.4;
+        }
         @media (max-width: 480px) {
             .report-card { padding: 1.5rem 1.2rem; border-radius: 32px; }
             h1 { font-size: 1.6rem; }
@@ -246,15 +280,15 @@
             OnPoint Fleet · ACE
         </h1>
         <div class="subhead">
-            <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i> accident report & immediate capture
+            <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i> complete accident report (with police & judgement)
         </div>
 
         <form id="accidentForm" class="form-grid">
-            <!-- Date & time row (beautiful) -->
+            <!-- date & time -->
             <div class="datetime-row">
                 <div class="input-field">
                     <label><i class="fas fa-calendar-alt"></i> Date</label>
-                    <input type="date" id="accidentDate" name="accidentDate" value="2025-03-20" required>
+                    <input type="date" id="accidentDate" name="accidentDate" required>
                 </div>
                 <div class="input-field">
                     <label><i class="fas fa-clock"></i> Time</label>
@@ -262,52 +296,112 @@
                 </div>
             </div>
 
-            <div class="input-field">
-                <label><i class="fas fa-map-pin"></i> Location / street</label>
-                <input type="text" id="location" placeholder="e.g., I-95 northbound, mile marker 42" value="Downtown Ave & 5th St" required>
+            <!-- Vehicle reg + location row -->
+            <div class="two-cols">
+                <div class="input-field">
+                    <label><i class="fas fa-car"></i> Vehicle reg. number</label>
+                    <input type="text" id="vehicleReg" placeholder="ABC-1234" value="FLEET-408" required>
+                </div>
+                <div class="input-field">
+                    <label><i class="fas fa-map-pin"></i> Location / street</label>
+                    <input type="text" id="location" placeholder="e.g., I-95 mile 42" value="Downtown Ave & 5th St" required>
+                </div>
             </div>
 
-            <div class="input-field">
-                <label><i class="fas fa-tag"></i> Accident type</label>
-                <select id="accidentType" required>
-                    <option value="" disabled selected>– select category –</option>
-                    <option value="Rear-end" selected>Rear-end collision</option>
-                    <option value="Side-impact">Side-impact / T-bone</option>
-                    <option value="Rollover">Rollover / jackknife</option>
-                    <option value="Single-vehicle">Single vehicle (object / off-road)</option>
-                    <option value="Other">Other / pedestrian</option>
-                </select>
-            </div>
-
-            <!-- Vehicle / driver info -->
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <div class="input-field" style="flex: 1;">
+            <!-- Accident type + unit / driver row (two-cols) -->
+            <div class="two-cols">
+                <div class="input-field">
+                    <label><i class="fas fa-tag"></i> Accident type</label>
+                    <select id="accidentType" required>
+                        <option value="" disabled selected>– select –</option>
+                        <option value="Rear-end" selected>Rear-end collision</option>
+                        <option value="Side-impact">Side-impact / T-bone</option>
+                        <option value="Rollover">Rollover / jackknife</option>
+                        <option value="Single-vehicle">Single vehicle</option>
+                        <option value="Other">Other / pedestrian</option>
+                    </select>
+                </div>
+                <div class="input-field">
                     <label><i class="fas fa-id-card"></i> Unit #</label>
                     <input type="text" id="unitNumber" placeholder="e.g. 408" value="408" required>
                 </div>
-                <div class="input-field" style="flex: 2;">
+            </div>
+
+            <!-- Driver name + phone -->
+            <div class="two-cols">
+                <div class="input-field">
                     <label><i class="fas fa-user"></i> Driver name</label>
                     <input type="text" id="driverName" placeholder="Full name" value="James Keller" required>
                 </div>
+                <div class="input-field">
+                    <label><i class="fas fa-phone-alt"></i> Driver phone</label>
+                    <input type="tel" id="driverPhone" placeholder="(555) 123-4567" value="+1 555 321 7890" required>
+                </div>
             </div>
 
-            <div class="input-field">
-                <label><i class="fas fa-phone-alt"></i> Driver phone</label>
-                <input type="tel" id="driverPhone" placeholder="(555) 123-4567" value="+1 555 321 7890" required>
-            </div>
-
+            <!-- Description field (full width) -->
             <div class="input-field">
                 <label><i class="fas fa-file-signature"></i> Description</label>
-                <textarea id="description" placeholder="Describe damages, injuries, weather, road conditions …" required>Front bumper crushed, airbags deployed. Slight rain. Other driver exchanged info.</textarea>
+                <textarea id="description" placeholder="Describe damages, injuries, weather …" required>Front bumper crushed, airbags deployed. Slight rain. Other driver exchanged info.</textarea>
             </div>
 
-            <!-- third parties (simple) -->
+            <!-- other parties -->
             <div class="input-field">
                 <label><i class="fas fa-car-crash"></i> Other parties involved</label>
-                <input type="text" id="otherParties" placeholder="e.g. Toyota Camry, license ABC123" value="Honda CR-V, plate 7GHJ432">
+                <input type="text" id="otherParties" placeholder="e.g. Toyota Camry, ABC123" value="Honda CR-V, plate 7GHJ432">
             </div>
 
-            <!-- PHOTO UPLOAD - beautiful drag & drop / click -->
+            <!-- ========== NEW FIELDS (police / metro / judgement) ========== -->
+            <hr>
+            <div style="font-weight: 600; color: #0f2d55; margin-bottom: 8px;"><i class="fas fa-gavel" style="margin-right: 8px;"></i>OFFICIAL / POLICE INFORMATION</div>
+
+            <!-- Reported to Metro (yes/no) -->
+            <div class="input-field">
+                <label><i class="fas fa-building"></i> Reported to Metro</label>
+                <div class="yes-no-group">
+                    <label><input type="radio" name="reportedMetro" value="Yes" checked> Yes</label>
+                    <label><input type="radio" name="reportedMetro" value="No"> No</label>
+                </div>
+            </div>
+
+            <!-- Officer's name + cell -->
+            <div class="two-cols">
+                <div class="input-field">
+                    <label><i class="fas fa-user-shield"></i> Officer name</label>
+                    <input type="text" id="officerName" placeholder="e.g. M. Davis" value="Officer M. Davis">
+                </div>
+                <div class="input-field">
+                    <label><i class="fas fa-mobile-alt"></i> Officer cell</label>
+                    <input type="tel" id="officerPhone" placeholder="(555) 987-6543" value="555-987-6543">
+                </div>
+            </div>
+
+            <!-- Drunken driving involved (yes/no) -->
+            <div class="input-field">
+                <label><i class="fas fa-wine-bottle"></i> Drunken driving involved</label>
+                <div class="yes-no-group">
+                    <label><input type="radio" name="drunkenDriving" value="Yes"> Yes</label>
+                    <label><input type="radio" name="drunkenDriving" value="No" checked> No</label>
+                </div>
+            </div>
+
+            <!-- Incident police report number -->
+            <div class="input-field">
+                <label><i class="fas fa-hashtag"></i> Incident police report #</label>
+                <input type="text" id="policeReportNo" placeholder="e.g. 23-78901" value="PD-2309-452">
+            </div>
+
+            <!-- Officer's immediate judgement (at fault? yes/no) -->
+            <div class="input-field">
+                <label><i class="fas fa-balance-scale"></i> Officer's judgement (are you at fault?)</label>
+                <div class="yes-no-group">
+                    <label><input type="radio" name="atFault" value="Yes"> Yes, at fault</label>
+                    <label><input type="radio" name="atFault" value="No" checked> No, not at fault</label>
+                </div>
+            </div>
+
+            <hr>
+            <!-- PHOTO UPLOAD -->
             <div class="photo-upload-area" id="dropZone">
                 <i class="fas fa-cloud-upload-alt"></i>
                 <div class="upload-text">attach accident image</div>
@@ -321,20 +415,18 @@
                 <span id="fileNameDisplay" class="file-name-badge"><i class="far fa-image"></i> accident.jpg</span>
                 <button type="button" id="clearImageBtn" style="background: none; border:none; color:#b00; margin-left:auto; font-size:1.5rem; cursor:pointer;"><i class="fas fa-times-circle"></i></button>
             </div>
-
-            <!-- additional hidden field for image base64 later -->
             <input type="hidden" id="imageBase64" value="">
 
             <!-- submit button -->
             <button type="submit" class="submit-btn">
-                <i class="fas fa-paper-plane"></i> email report with image
+                <i class="fas fa-paper-plane"></i> email full report + image
             </button>
             <div class="info-note">
-                <i class="fas fa-shield-alt"></i> All data will be sent as an email · photo attached (JPEG/PNG)
+                <i class="fas fa-shield-alt"></i> All data + picture included (base64 in body) · send via mail app
             </div>
         </form>
         <footer>
-            <i class="fas fa-check-circle" style="color: #249c6b;"></i> OnPoint fleet – safety first
+            <i class="fas fa-check-circle" style="color: #249c6b;"></i> OnPoint fleet – safety first (v2 with police fields)
         </footer>
     </div>
 
@@ -352,37 +444,32 @@
 
             let selectedFile = null;
 
-            // --- file selection & preview + base64 conversion ---
+            // --- file selection & preview + base64 ---
             function handleFileSelect(file) {
                 if (!file) return;
-                // basic validation
                 if (!file.type.startsWith('image/')) {
                     alert('Please select an image file (JPEG, PNG, etc.)');
                     return;
                 }
                 selectedFile = file;
-                // update preview container
                 fileNameDisplay.innerHTML = `<i class="far fa-file-image"></i> ${file.name}`;
 
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    // set preview image
                     imagePreview.src = e.target.result;
-                    // store base64 (without metadata prefix? we keep full dataURL)
-                    imageBase64Hidden.value = e.target.result;  // e.g. data:image/jpeg;base64,....
+                    imageBase64Hidden.value = e.target.result;  // data url
                     previewContainer.style.display = 'flex';
                 };
                 reader.readAsDataURL(file);
             }
 
-            // Trigger from input
             fileInput.addEventListener('change', (e) => {
                 if (e.target.files.length > 0) {
                     handleFileSelect(e.target.files[0]);
                 }
             });
 
-            // Drag & drop (beautiful)
+            // Drag & drop
             dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 dropZone.style.background = '#e3edff';
@@ -398,43 +485,32 @@
                 dropZone.style.background = '#f1f7ff';
                 dropZone.style.borderColor = '#9bb8f0';
                 if (e.dataTransfer.files.length > 0) {
-                    fileInput.files = e.dataTransfer.files; // sync input (some mobile may not like but ok)
+                    fileInput.files = e.dataTransfer.files;
                     handleFileSelect(e.dataTransfer.files[0]);
                 }
             });
 
-            // clear image
             clearImageBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 selectedFile = null;
-                fileInput.value = '';          // reset input
+                fileInput.value = '';
                 imageBase64Hidden.value = '';
                 previewContainer.style.display = 'none';
                 imagePreview.src = '#';
             });
 
-            // --- FORM SUBMIT: construct email body and simulate mailto with all data + image attached? ---
-            // Use mailto: but mailto cannot attach files. So we generate a rich text email
-            // that includes base64 image as a data link? However, to truly attach image we need multipart.
-            // But for demo/webapp we simulate "send email" by opening default mail client with all data
-            // and include the image as a downloadable link? but requirement: "posts as email all collected data including images attached as picture"
-            // We'll implement via mailto with a note that image is attached via a link, but not true attachment.
-            // Since true attachment from browser without backend is not possible with mailto, we use a more robust method:
-            // Prepare a pre-filled email using the device's mail app: body includes a base64 image representation and a note that image is included.
-            // But that doesn't attach as file. 
-            // To meet "attached as picture", we can generate a .eml download? That's not email sending.
-            // Better approach: use a "mailto" with a data uri that includes image as inline? but many clients block.
-            // For a stunning demo, we will open default mail client with subject and body containing all fields + a note that "image is attached separately".
-            // But because we are good, we also embed the base64 string in body and the user can download image? Not perfect.
-            // To make it fully functional, I'll create a mailto link that contains all fields and the image as a base64 string inside body.
-            // The user can then send it. On real app you'd use backend/mailgun. but for this exercise it's okay.
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('accidentDate').value = today;
 
+            // Form submit – build email body with all new fields
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
 
-                // Collect all fields
+                // collect all fields (including radios)
                 const date = document.getElementById('accidentDate').value;
                 const time = document.getElementById('accidentTime').value;
+                const vehicleReg = document.getElementById('vehicleReg').value;
                 const location = document.getElementById('location').value;
                 const accidentType = document.getElementById('accidentType').value;
                 const unitNumber = document.getElementById('unitNumber').value;
@@ -442,66 +518,69 @@
                 const driverPhone = document.getElementById('driverPhone').value;
                 const description = document.getElementById('description').value;
                 const otherParties = document.getElementById('otherParties').value;
+
+                // Radio groups
+                const reportedMetro = document.querySelector('input[name="reportedMetro"]:checked')?.value || 'Not specified';
+                const officerName = document.getElementById('officerName').value || 'N/A';
+                const officerPhone = document.getElementById('officerPhone').value || 'N/A';
+                const drunkenDriving = document.querySelector('input[name="drunkenDriving"]:checked')?.value || 'Not specified';
+                const policeReportNo = document.getElementById('policeReportNo').value || 'N/A';
+                const atFault = document.querySelector('input[name="atFault"]:checked')?.value || 'Not specified';
+
                 const imageBase64 = imageBase64Hidden.value;
 
-                if (!date || !time || !location || !accidentType || !unitNumber || !driverName || !driverPhone || !description) {
-                    alert('Please fill all required fields.');
+                // Required fields check (simple)
+                if (!date || !time || !vehicleReg || !location || !accidentType || !unitNumber || !driverName || !driverPhone || !description) {
+                    alert('Please fill all required fields (marked with *).');
                     return;
                 }
 
-                // Build a stunning email body (plain text but with formatting)
-                let emailBody = `ACCIDENT REPORT – OnPoint Fleet%0A%0A`;
+                // Build email body (URL encoded)
+                let emailBody = `ONPOINT FLEET – COMPLETE ACCIDENT REPORT%0A%0A`;
                 emailBody += `📅 DATE: ${date} at ${time}%0A`;
+                emailBody += `🚗 VEHICLE REG: ${vehicleReg}%0A`;
                 emailBody += `📍 LOCATION: ${location}%0A`;
                 emailBody += `🚧 TYPE: ${accidentType}%0A`;
                 emailBody += `🚛 UNIT: ${unitNumber} | DRIVER: ${driverName} | PHONE: ${driverPhone}%0A`;
                 emailBody += `📄 DESCRIPTION: ${description}%0A`;
-                emailBody += `🚗 OTHER PARTIES: ${otherParties || 'none'}%0A%0A`;
+                emailBody += `🚙 OTHER PARTIES: ${otherParties || 'none'}%0A%0A`;
 
+                // Police / metro section
+                emailBody += `👮 OFFICIAL INFORMATION%0A`;
+                emailBody += `🏛️ REPORTED TO METRO: ${reportedMetro}%0A`;
+                emailBody += `🛡️ OFFICER NAME: ${officerName} | CELL: ${officerPhone}%0A`;
+                emailBody += `🍷 DRUNKEN DRIVING INVOLVED: ${drunkenDriving}%0A`;
+                emailBody += `📋 POLICE REPORT #: ${policeReportNo}%0A`;
+                emailBody += `⚖️ OFFICER’S JUDGEMENT (AT FAULT?): ${atFault}%0A%0A`;
+
+                // Image attachment note + base64 (if exists)
                 if (imageBase64) {
-                    // We include a note that image is attached as data-url. But we cannot attach.
-                    // To give possibility, we embed a very short representation of image.
-                    // For a real attached picture we would need server. To make it still meet spec "attached as picture", 
-                    // we will add a note that "image is embedded below as base64 (save as .jpg)" and truncate for preview.
-                    // This way the user can copy the base64 to reconstruct image.
-                    // I'll also include a short inline placeholder.
-                    emailBody += `📸 ACCIDENT IMAGE (base64 encoded – you can decode to JPEG) :%0A`;
-                    // Only include first 200 chars to avoid hitting mailto length limits? but we'll risk full length? mailto max ~8192.
-                    // So better truncate and say it's available.
-                    if (imageBase64.length < 7500) {
+                    emailBody += `📸 ACCIDENT IMAGE (base64 encoded – use to reconstruct image):%0A`;
+                    // mailto length limit ~ 8192 chars; if too long, truncate and advise console.
+                    if (imageBase64.length < 7000) {
                         emailBody += `${imageBase64}%0A`;
                     } else {
-                        emailBody += `[IMAGE BASE64 length = ${imageBase64.length} chars – too long for mailto, but copy from console]%0A`;
+                        emailBody += `[IMAGE BASE64 length = ${imageBase64.length} chars – too long for mailto, open browser console to copy full base64]%0A`;
                         console.log('Full image base64:', imageBase64);
                     }
                 } else {
-                    emailBody += `📷 No image attached. %0A`;
+                    emailBody += `📷 No image attached.%0A`;
                 }
 
-                emailBody += `%0A-- %0AOnPoint Fleet safety report – sent from mobile app`;
+                emailBody += `%0A-- %0AOnPoint Fleet safety report – generated from mobile app (v2)`;
 
-                // Construct mailto: (change recipient to a dummy, but user can edit)
-                const recipient = 'fleet.safety@onpoint.example.com'; // placeholder
-                const subject = `🚨 Accident report - Unit ${unitNumber} ${date}`;
+                const recipient = 'fleet.safety@onpoint.example.com';
+                const subject = `🚨 Accident report - Unit ${unitNumber} / ${vehicleReg} - ${date}`;
                 const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${emailBody}`;
 
-                // Open default mail client
                 window.location.href = mailtoLink;
 
-                // Optional: fallback if mailto fails
                 setTimeout(() => {
-                    alert('If your mail app did not open, please manually send to fleet.safety@onpoint.example.com with the details.\nThe image base64 is available in the browser console (if any).');
-                }, 500);
+                    alert('Mail app should open. If not, please manually email the details.\nThe image base64 is in console if too long.');
+                }, 300);
             });
 
-            // Pre-populate preview if needed? initially preview empty.
-            // The sample fields are pre-filled. For initial demo, we also have demo image? We'll leave no image.
-            // but we can prepopulate with a default placeholder? maybe not.
-            // set default date to today.
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('accidentDate').value = today; // override the hardcoded 2025-03-20 to today
         })();
     </script>
-    <!-- small extra style to make preview pop -->
 </body>
 </html>
