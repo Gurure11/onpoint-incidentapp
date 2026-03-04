@@ -58,7 +58,7 @@
             background: #20b859;
             box-shadow: 0 20px 30px rgba(0,0,0,0.3);
         }
-        /* Counter pill */
+        /* Counter pill – modified to show incidents + 2026 */
         .counter-pill {
             position: fixed;
             top: 20px;
@@ -92,6 +92,18 @@
             padding: 6px 14px;
             font-size: 1.1rem;
             font-weight: 700;
+        }
+        /* New style for incident label below counter */
+        .incident-label {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #0b2b5c;
+            background: #ffd966cc;
+            padding: 4px 12px;
+            border-radius: 40px;
+            margin-top: 4px;
+            letter-spacing: 0.3px;
         }
 
         .report-card {
@@ -383,9 +395,15 @@
         <i class="fab fa-whatsapp"></i>
     </a>
 
-    <!-- Live counter for accidents (month + year) -->
-    <div class="counter-pill">
-        <div align=center><a href='https://www.counter12.com'><img src='https://www.counter12.com/img-3yZY1ZZwa29AB3dd-40.gif' border='0' alt='counter'></a><script type='text/javascript' src='https://www.counter12.com/ad.js?id=3yZY1ZZwa29AB3dd'></script></div>   </div>
+    <!-- Modified counter pill: embedded counter12 + "Incidents 2026" below -->
+    <div class="counter-pill" style="flex-direction: column; align-items: stretch; padding: 12px 20px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <!-- original counter12 code exactly as given -->
+            <div align=center><a href='https://www.counter12.com'><img src='https://www.counter12.com/img-3yZY1ZZwa29AB3dd-40.gif' border='0' alt='counter'></a><script type='text/javascript' src='https://www.counter12.com/ad.js?id=3yZY1ZZwa29AB3dd'></script></div>
+        </div>
+        <!-- label below: Incidents 2026 -->
+        <div class="incident-label"><i class="fas fa-car-crash"></i> App Visit 2026</div>
+    </div>
 
     <div class="report-card">
         <!-- Logo header -->
@@ -593,48 +611,49 @@
 
     <script>
         (function() {
-            // ---------- ACCIDENT COUNTER (monthly & yearly) using localStorage ----------
-            function updateCounters() {
+            // ---------- ACCIDENT COUNTER (only increments on send) using localStorage ----------
+            function getCurrentCounts() {
                 const now = new Date();
-                const currentMonth = now.getMonth();      // 0-11
+                const currentMonth = now.getMonth();
                 const currentYear = now.getFullYear();
-
+                
                 let monthly = parseInt(localStorage.getItem('onpoint_monthly') || '0');
                 let yearly = parseInt(localStorage.getItem('onpoint_yearly') || '0');
                 let storedMonth = parseInt(localStorage.getItem('onpoint_month') || currentMonth);
                 let storedYear = parseInt(localStorage.getItem('onpoint_year') || currentYear);
-
-                // reset monthly if month changed
-                if (storedMonth !== currentMonth || storedYear !== currentYear) {
-                    monthly = 0;
-                    localStorage.setItem('onpoint_month', currentMonth);
-                }
-                // reset yearly if year changed
+                
+                // Check if we need to reset counters based on time passage
+                // But DON'T modify them here - just return current values with reset flags
                 if (storedYear !== currentYear) {
-                    yearly = 0;
-                    localStorage.setItem('onpoint_year', currentYear);
+                    // Year changed - yearly counter should reset, but we'll do that in increment function
+                    return { monthly: 0, yearly: 0, shouldResetMonthly: true, shouldResetYearly: true, currentMonth, currentYear };
+                } else if (storedMonth !== currentMonth) {
+                    // Month changed - monthly counter should reset
+                    return { monthly: 0, yearly, shouldResetMonthly: true, shouldResetYearly: false, currentMonth, currentYear };
                 }
-
-                document.getElementById('monthCounter').innerText = monthly;
-                document.getElementById('yearCounter').innerText = yearly;
+                
+                return { monthly, yearly, shouldResetMonthly: false, shouldResetYearly: false, currentMonth, currentYear };
             }
 
             function incrementCounters() {
-                let monthly = parseInt(localStorage.getItem('onpoint_monthly') || '0');
-                let yearly = parseInt(localStorage.getItem('onpoint_yearly') || '0');
-                monthly++;
-                yearly++;
+                const counts = getCurrentCounts();
+                const now = new Date();
+                
+                // Start with appropriate base values
+                let monthly = counts.shouldResetMonthly ? 1 : counts.monthly + 1;
+                let yearly = counts.shouldResetYearly ? 1 : counts.yearly + 1;
+                
+                // Save the updated counters
                 localStorage.setItem('onpoint_monthly', monthly);
                 localStorage.setItem('onpoint_yearly', yearly);
-                // ensure month/year are stored
-                const now = new Date();
                 localStorage.setItem('onpoint_month', now.getMonth());
                 localStorage.setItem('onpoint_year', now.getFullYear());
-                updateCounters();
+                
+                console.log(`Counters updated - Monthly: ${monthly}, Yearly: ${yearly}`);
             }
 
-            // initial display
-            updateCounters();
+            // NO initial counter update - remove the call to updateCounters()
+            // We only want to increment when email is sent
 
             // ---------- DOM elements ----------
             const fileInput = document.getElementById('fileInput');
@@ -888,7 +907,7 @@
                 const data = getFormData();
                 if (!validateForm(data)) return;
 
-                // increment counters (only when action is valid)
+                // increment counters ONLY when send button is clicked
                 incrementCounters();
 
                 if (action === 'mailto') {
@@ -962,4 +981,3 @@
     </script>
 </body>
 </html>
-
