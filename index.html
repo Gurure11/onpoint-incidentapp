@@ -382,6 +382,19 @@
             .floating-wa { width: 55px; height: 55px; font-size: 2rem; bottom: 20px; right: 20px; }
             .app-download-row { flex-direction: column; align-items: flex-start; }
         }
+        #take{
+            color: blue;
+            text-align: center;
+            font-size: 25px;
+            
+        }
+        #take:hover{
+            opacity: 0.7;
+            transition: 0.7s;
+            cursor: hover;
+            color: red;
+            background-color: green;
+        }
     </style>
     <!-- Google Maps Geocoding API -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places&callback=initMap" async defer></script>
@@ -451,6 +464,10 @@
                class="app-link" target="_blank" rel="noopener">
                 <i class="fas fa-download"></i> get app (google drive)
             </a>
+        </div>
+        <br>
+        <div>
+            <a id="take" href="contacts.html">Vehicle Handover</a><br>
         </div>
 
         <!-- FORM STARTS -->
@@ -981,4 +998,5 @@
     </script>
 </body>
 </html>
+
 
