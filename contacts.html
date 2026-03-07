@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Vehicle Handover/Takeover | OnPoint OnTime Fleet</title>
     <style>
-        /* === STYLES (unchanged, kept exactly as provided) === */
+        /* === STYLES === */
         * {
             margin: 0;
             padding: 0;
@@ -26,18 +26,6 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
-            animation: slideIn 0.5s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
         }
 
         .header {
@@ -209,14 +197,14 @@
 
         .photo-preview {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 10px;
             margin-top: 15px;
         }
 
         .preview-image {
             width: 100%;
-            height: 80px;
+            height: 100px;
             object-fit: cover;
             border-radius: 8px;
             border: 2px solid #eef2f6;
@@ -300,18 +288,6 @@
             border-radius: 10px;
             text-align: center;
             margin-bottom: 20px;
-            animation: slideDown 0.5s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
         }
 
         .error-message {
@@ -321,7 +297,7 @@
             border-radius: 10px;
             text-align: center;
             margin-bottom: 20px;
-            animation: slideDown 0.5s ease-out;
+            display: none;
         }
 
         .datetime-group {
@@ -353,7 +329,6 @@
                 margin-right: 100px;
                 font-size: 15px;
                 text-align: center;
-                
             }
             .home:hover{
                 color: grey;
@@ -374,9 +349,9 @@
         <div class="success-message" id="successMessage">
             ✅ Form submitted successfully! A copy has been sent to fleet@onpointontime.co.za
         </div>
-        <div class="error-message" id="errorMessage" style="display: none;">❌ Submission failed. Please try again.</div>
+        <div class="error-message" id="errorMessage">❌ Submission failed. Please try again.</div>
 
-        <form id="vehicleForm">
+        <form id="vehicleForm" onsubmit="return false;">
             <!-- Employee Information Section -->
             <div class="form-section">
                 <h2><i>👤</i> Employee Information</h2>
@@ -583,7 +558,7 @@
             <!-- Home Link and Submit Button -->
             <div style="padding: 20px; text-align: center;">
                 <a href="index.html" class="home" style="color: #667eea; text-decoration: none; display: inline-block; margin-bottom: 15px;">🏠 Home Page</a>
-                <button type="submit" class="submit-btn" id="submitBtn">
+                <button type="button" class="submit-btn" id="submitBtn" onclick="submitForm()">
                     📧 Send Report to fleet@onpointontime.co.za
                 </button>
             </div>
@@ -597,11 +572,9 @@
     </div>
 
     <script>
-        // Google Apps Script Web App URL - REPLACE WITH YOUR DEPLOYED URL
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbzmplBdKfEWREVxGH26Oy3_5HttmS7GFZ-Ys-P9zCaag5x7MgAF11kucvviAaE1TI4u/exec';
-
         // Configuration
         const CONFIG = {
+            GAS_URL: 'https://script.google.com/macros/s/AKfycbxfbfFdl1mD5DSL-UBZIwmWj0lKmdlMGSk_0aTGM52GPfUBZDuSqrW4XYzNg45yi8IXrw/exec',
             SHEET_ID: '1vBDeyPBy3LLYg0EM2OFgceI3deVFhXL2Nr-IpdveZoU',
             DRIVE_FOLDER_ID: '13BuqOSAdUlfZJIm36A_R3mbF4HwHCfZY',
             SHEET_NAME: 'Vehicle Handovers',
@@ -639,43 +612,25 @@
             }
         });
 
-        // Drag and drop for photo upload
-        const photoArea = document.getElementById('photoUploadArea');
-        photoArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            photoArea.style.borderColor = '#667eea';
-            photoArea.style.background = '#f0f4ff';
-        });
-
-        photoArea.addEventListener('dragleave', () => {
-            photoArea.style.borderColor = '#cbd5e0';
-            photoArea.style.background = '#f8fafc';
-        });
-
-        photoArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            photoArea.style.borderColor = '#cbd5e0';
-            photoArea.style.background = '#f8fafc';
-            
-            const files = e.dataTransfer.files;
-            if(files.length > 0) {
-                document.getElementById('vehiclePhotos').files = files;
-                const event = new Event('change', { bubbles: true });
-                document.getElementById('vehiclePhotos').dispatchEvent(event);
-            }
-        });
-
-        // Add touch optimization for mobile
-        if('ontouchstart' in window) {
-            document.querySelectorAll('input, select, textarea').forEach(element => {
-                element.style.fontSize = '16px';
+        // Convert file to base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    const base64String = reader.result.split(',')[1];
+                    resolve({
+                        name: file.name,
+                        type: file.type,
+                        data: base64String
+                    });
+                };
+                reader.onerror = error => reject(error);
             });
         }
 
-        // Form submission handler
-        document.getElementById('vehicleForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
+        // Submit form function
+        async function submitForm() {
             // Validate required fields
             const requiredFields = ['employeeName', 'employeeNumber', 'idNumber', 'vehicleReg', 'mileage', 'handoverDate', 'handoverTime'];
             for(let field of requiredFields) {
@@ -691,102 +646,85 @@
             document.getElementById('errorMessage').style.display = 'none';
 
             try {
+                // Get checklist items
+                const checklistItems = Array.from(document.querySelectorAll('input[name="checklist"]:checked')).map(cb => cb.value);
+                
                 // Prepare form data
                 const formData = {
-                    // Configuration
                     sheetId: CONFIG.SHEET_ID,
                     driveFolderId: CONFIG.DRIVE_FOLDER_ID,
                     sheetName: CONFIG.SHEET_NAME,
                     emailRecipient: CONFIG.EMAIL_RECIPIENT,
                     
-                    // Employee Information
                     employeeName: document.getElementById('employeeName').value,
                     employeeNumber: document.getElementById('employeeNumber').value,
                     idNumber: document.getElementById('idNumber').value,
                     department: document.getElementById('department').value || 'Not Specified',
                     
-                    // Vehicle Information
                     vehicleReg: document.getElementById('vehicleReg').value,
                     vehicleModel: document.getElementById('vehicleModel').value || 'Not Specified',
                     mileage: document.getElementById('mileage').value,
                     serviceDue: document.getElementById('serviceDue').value || 'Not Specified',
                     
-                    // Handover Details
                     handoverType: document.querySelector('input[name="handoverType"]:checked')?.value || 'Handover',
                     fuelLevel: document.querySelector('input[name="fuelLevel"]:checked')?.value || '1/2',
-                    checklist: Array.from(document.querySelectorAll('input[name="checklist"]:checked')).map(cb => cb.value).join(', ') || 'None',
+                    checklist: checklistItems.join(', ') || 'None',
                     
-                    // Damage Report
                     abnormalityDesc: document.getElementById('abnormalityDesc').value || 'None',
                     damageLocation: document.getElementById('damageLocation').value || 'Not Applicable',
                     
-                    // Date and Time
                     handoverDate: document.getElementById('handoverDate').value,
                     handoverTime: document.getElementById('handoverTime').value,
                     
-                    // Additional
                     additionalNotes: document.getElementById('additionalNotes').value || 'None',
                     
-                    // Metadata
                     submissionTimestamp: new Date().toISOString(),
-                    submissionId: 'HND-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9)
+                    submissionId: 'HND-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                    
+                    photos: []
                 };
 
-                // Build multipart form data
-                const payload = new FormData();
-                
-                // Append metadata as JSON
-                payload.append('metadata', JSON.stringify(formData));
-
-                // Append photos
+                // Convert photos to base64
                 const photoInput = document.getElementById('vehiclePhotos');
-                for (let i = 0; i < photoInput.files.length; i++) {
-                    payload.append('photos', photoInput.files[i]);
+                if (photoInput.files.length > 0) {
+                    for (let i = 0; i < photoInput.files.length; i++) {
+                        const file = photoInput.files[i];
+                        const base64Photo = await fileToBase64(file);
+                        formData.photos.push(base64Photo);
+                    }
                 }
 
                 // Send to Google Apps Script
-                const response = await fetch(GAS_URL, {
+                const response = await fetch(CONFIG.GAS_URL, {
                     method: 'POST',
-                    body: payload
+                    mode: 'no-cors', // Use no-cors for Google Apps Script
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
                 });
 
-                let result;
-                const responseText = await response.text();
+                // Show success message
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('errorMessage').style.display = 'none';
                 
-                try {
-                    result = JSON.parse(responseText);
-                } catch (e) {
-                    console.log('Response text:', responseText);
-                    throw new Error('Invalid server response');
-                }
+                // Auto-hide success message after 5 seconds
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 5000);
 
-                if (result.status === 'success') {
-                    // Show success message
-                    document.getElementById('successMessage').style.display = 'block';
-                    document.getElementById('errorMessage').style.display = 'none';
+                // Reset form
+                if(confirm('Form submitted successfully! A copy has been sent to fleet@onpointontime.co.za\n\nWould you like to reset the form for another entry?')) {
+                    document.getElementById('vehicleForm').reset();
+                    document.getElementById('handoverDate').value = new Date().toISOString().split('T')[0];
+                    document.getElementById('handoverTime').value = 
+                        `${String(new Date().getHours()).padStart(2,'0')}:${String(new Date().getMinutes()).padStart(2,'0')}`;
+                    document.getElementById('photoPreview').innerHTML = '';
                     
-                    console.log('Submission successful:', result);
-
-                    // Auto-hide success message after 5 seconds
-                    setTimeout(() => {
-                        document.getElementById('successMessage').style.display = 'none';
-                    }, 5000);
-
-                    // Ask if user wants to reset form
-                    if(confirm('Form submitted successfully! A copy has been sent to fleet@onpointontime.co.za\n\nWould you like to reset the form for another entry?')) {
-                        this.reset();
-                        document.getElementById('handoverDate').value = new Date().toISOString().split('T')[0];
-                        document.getElementById('handoverTime').value = 
-                            `${String(new Date().getHours()).padStart(2,'0')}:${String(new Date().getMinutes()).padStart(2,'0')}`;
-                        document.getElementById('photoPreview').innerHTML = '';
-                        
-                        // Re-check default radio buttons
-                        document.getElementById('handover').checked = true;
-                        document.getElementById('half').checked = true;
-                    }
-                } else {
-                    throw new Error(result.message || 'Unknown error occurred');
+                    document.getElementById('handover').checked = true;
+                    document.getElementById('half').checked = true;
                 }
+
             } catch (error) {
                 console.error('Submission error:', error);
                 document.getElementById('errorMessage').style.display = 'block';
@@ -795,7 +733,10 @@
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('submitBtn').disabled = false;
             }
-        });
+        }
+
+        // Make function globally available
+        window.submitForm = submitForm;
     </script>
 </body>
 </html>
