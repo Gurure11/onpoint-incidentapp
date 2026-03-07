@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Vehicle Handover/Takeover | OnPoint OnTime Fleet</title>
     <style>
+        /* === STYLES (unchanged, kept exactly as provided) === */
         * {
             margin: 0;
             padding: 0;
@@ -373,6 +374,7 @@
         <div class="success-message" id="successMessage">
             ✅ Form submitted successfully! A copy has been sent to fleet@onpointontime.co.za
         </div>
+        <div class="error-message" id="errorMessage" style="display: none;">❌ Submission failed. Please try again.</div>
 
         <form id="vehicleForm">
             <!-- Employee Information Section -->
@@ -415,7 +417,7 @@
                     </div>
                     <div class="form-group">
                         <label>Vehicle Model</label>
-                        <input type="text" id="vehicleModel" placeholder="Toyota Hilux 2023" value="Auto-filled from database">
+                        <input type="text" id="vehicleModel" placeholder="Toyota Hilux 2023">
                     </div>
                 </div>
                 <div class="form-row">
@@ -567,9 +569,8 @@
                             <input type="time" id="handoverTime" required>
                         </div>
                     </div>
-                </div><br><br>
+                </div>
             </div>
-            <a class="home" href="index.html">Home Page</a><br><br>
 
             <!-- Additional Notes -->
             <div class="form-section">
@@ -579,8 +580,9 @@
                 </div>
             </div>
 
-            <!-- Submit Button -->
-            <div style="padding: 20px;">
+            <!-- Home Link and Submit Button -->
+            <div style="padding: 20px; text-align: center;">
+                <a href="index.html" class="home" style="color: #667eea; text-decoration: none; display: inline-block; margin-bottom: 15px;">🏠 Home Page</a>
                 <button type="submit" class="submit-btn" id="submitBtn">
                     📧 Send Report to fleet@onpointontime.co.za
                 </button>
@@ -595,6 +597,17 @@
     </div>
 
     <script>
+        // Google Apps Script Web App URL - REPLACE WITH YOUR DEPLOYED URL
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbzmplBdKfEWREVxGH26Oy3_5HttmS7GFZ-Ys-P9zCaag5x7MgAF11kucvviAaE1TI4u/exec';
+
+        // Configuration
+        const CONFIG = {
+            SHEET_ID: '1vBDeyPBy3LLYg0EM2OFgceI3deVFhXL2Nr-IpdveZoU',
+            DRIVE_FOLDER_ID: '13BuqOSAdUlfZJIm36A_R3mbF4HwHCfZY',
+            SHEET_NAME: 'Vehicle Handovers',
+            EMAIL_RECIPIENT: 'fleet@onpointontime.co.za'
+        };
+
         // Set default date and time
         document.addEventListener('DOMContentLoaded', function() {
             const today = new Date().toISOString().split('T')[0];
@@ -604,15 +617,6 @@
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             document.getElementById('handoverTime').value = `${hours}:${minutes}`;
-
-            // Auto-fill vehicle model (simulated)
-            const vehicleReg = document.getElementById('vehicleReg');
-            vehicleReg.addEventListener('input', function() {
-                if(this.value.length > 3) {
-                    // Simulated database lookup
-                    document.getElementById('vehicleModel').value = 'Toyota Hilux 2.8 GD-6';
-                }
-            });
         });
 
         // Photo upload preview
@@ -635,72 +639,7 @@
             }
         });
 
-        // Form submission
-        document.getElementById('vehicleForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Validate required fields
-            const requiredFields = ['employeeName', 'employeeNumber', 'idNumber', 'vehicleReg', 'mileage', 'handoverDate', 'handoverTime'];
-            for(let field of requiredFields) {
-                if(!document.getElementById(field).value) {
-                    alert(`Please fill in all required fields`);
-                    return;
-                }
-            }
-
-            // Show loading overlay
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            document.getElementById('submitBtn').disabled = true;
-
-            // Collect form data
-            const formData = {
-                employeeName: document.getElementById('employeeName').value,
-                employeeNumber: document.getElementById('employeeNumber').value,
-                idNumber: document.getElementById('idNumber').value,
-                department: document.getElementById('department').value,
-                vehicleReg: document.getElementById('vehicleReg').value,
-                vehicleModel: document.getElementById('vehicleModel').value,
-                mileage: document.getElementById('mileage').value,
-                serviceDue: document.getElementById('serviceDue').value,
-                handoverType: document.querySelector('input[name="handoverType"]:checked')?.value || 'Handover',
-                fuelLevel: document.querySelector('input[name="fuelLevel"]:checked')?.value || '1/2',
-                checklist: Array.from(document.querySelectorAll('input[name="checklist"]:checked')).map(cb => cb.value),
-                abnormalityDesc: document.getElementById('abnormalityDesc').value,
-                damageLocation: document.getElementById('damageLocation').value,
-                handoverDate: document.getElementById('handoverDate').value,
-                handoverTime: document.getElementById('handoverTime').value,
-                additionalNotes: document.getElementById('additionalNotes').value,
-                photos: document.getElementById('vehiclePhotos').files.length
-            };
-
-            // Simulate sending email (in production, this would be a fetch to your backend)
-            setTimeout(() => {
-                // Hide loading overlay
-                document.getElementById('loadingOverlay').style.display = 'none';
-                document.getElementById('submitBtn').disabled = false;
-
-                // Show success message
-                const successMsg = document.getElementById('successMessage');
-                successMsg.style.display = 'block';
-                
-                // Log form data for demo
-                console.log('Form submitted:', formData);
-                console.log('Email sent to: fleet@onpointontime.co.za');
-
-                // Auto-hide success message after 5 seconds
-                setTimeout(() => {
-                    successMsg.style.display = 'none';
-                }, 5000);
-
-                // Optional: Reset form
-                if(confirm('Form submitted successfully! Would you like to reset the form for another entry?')) {
-                    this.reset();
-                    document.getElementById('handoverDate').value = new Date().toISOString().split('T')[0];
-                }
-            }, 2000);
-        });
-
-        // Drag and drop for photo upload (mobile friendly)
+        // Drag and drop for photo upload
         const photoArea = document.getElementById('photoUploadArea');
         photoArea.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -721,7 +660,6 @@
             const files = e.dataTransfer.files;
             if(files.length > 0) {
                 document.getElementById('vehiclePhotos').files = files;
-                // Trigger change event
                 const event = new Event('change', { bubbles: true });
                 document.getElementById('vehiclePhotos').dispatchEvent(event);
             }
@@ -730,21 +668,134 @@
         // Add touch optimization for mobile
         if('ontouchstart' in window) {
             document.querySelectorAll('input, select, textarea').forEach(element => {
-                element.style.fontSize = '16px'; // Prevent zoom on iOS
+                element.style.fontSize = '16px';
             });
         }
 
-        // Service worker registration for offline capability (optional)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(err => {
-                    console.log('ServiceWorker registration failed: ', err);
+        // Form submission handler
+        document.getElementById('vehicleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validate required fields
+            const requiredFields = ['employeeName', 'employeeNumber', 'idNumber', 'vehicleReg', 'mileage', 'handoverDate', 'handoverTime'];
+            for(let field of requiredFields) {
+                if(!document.getElementById(field).value.trim()) {
+                    alert(`Please fill in all required fields`);
+                    return;
+                }
+            }
+
+            // Show loading overlay
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('errorMessage').style.display = 'none';
+
+            try {
+                // Prepare form data
+                const formData = {
+                    // Configuration
+                    sheetId: CONFIG.SHEET_ID,
+                    driveFolderId: CONFIG.DRIVE_FOLDER_ID,
+                    sheetName: CONFIG.SHEET_NAME,
+                    emailRecipient: CONFIG.EMAIL_RECIPIENT,
+                    
+                    // Employee Information
+                    employeeName: document.getElementById('employeeName').value,
+                    employeeNumber: document.getElementById('employeeNumber').value,
+                    idNumber: document.getElementById('idNumber').value,
+                    department: document.getElementById('department').value || 'Not Specified',
+                    
+                    // Vehicle Information
+                    vehicleReg: document.getElementById('vehicleReg').value,
+                    vehicleModel: document.getElementById('vehicleModel').value || 'Not Specified',
+                    mileage: document.getElementById('mileage').value,
+                    serviceDue: document.getElementById('serviceDue').value || 'Not Specified',
+                    
+                    // Handover Details
+                    handoverType: document.querySelector('input[name="handoverType"]:checked')?.value || 'Handover',
+                    fuelLevel: document.querySelector('input[name="fuelLevel"]:checked')?.value || '1/2',
+                    checklist: Array.from(document.querySelectorAll('input[name="checklist"]:checked')).map(cb => cb.value).join(', ') || 'None',
+                    
+                    // Damage Report
+                    abnormalityDesc: document.getElementById('abnormalityDesc').value || 'None',
+                    damageLocation: document.getElementById('damageLocation').value || 'Not Applicable',
+                    
+                    // Date and Time
+                    handoverDate: document.getElementById('handoverDate').value,
+                    handoverTime: document.getElementById('handoverTime').value,
+                    
+                    // Additional
+                    additionalNotes: document.getElementById('additionalNotes').value || 'None',
+                    
+                    // Metadata
+                    submissionTimestamp: new Date().toISOString(),
+                    submissionId: 'HND-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9)
+                };
+
+                // Build multipart form data
+                const payload = new FormData();
+                
+                // Append metadata as JSON
+                payload.append('metadata', JSON.stringify(formData));
+
+                // Append photos
+                const photoInput = document.getElementById('vehiclePhotos');
+                for (let i = 0; i < photoInput.files.length; i++) {
+                    payload.append('photos', photoInput.files[i]);
+                }
+
+                // Send to Google Apps Script
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: payload
                 });
-            });
-        }
+
+                let result;
+                const responseText = await response.text();
+                
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    console.log('Response text:', responseText);
+                    throw new Error('Invalid server response');
+                }
+
+                if (result.status === 'success') {
+                    // Show success message
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('errorMessage').style.display = 'none';
+                    
+                    console.log('Submission successful:', result);
+
+                    // Auto-hide success message after 5 seconds
+                    setTimeout(() => {
+                        document.getElementById('successMessage').style.display = 'none';
+                    }, 5000);
+
+                    // Ask if user wants to reset form
+                    if(confirm('Form submitted successfully! A copy has been sent to fleet@onpointontime.co.za\n\nWould you like to reset the form for another entry?')) {
+                        this.reset();
+                        document.getElementById('handoverDate').value = new Date().toISOString().split('T')[0];
+                        document.getElementById('handoverTime').value = 
+                            `${String(new Date().getHours()).padStart(2,'0')}:${String(new Date().getMinutes()).padStart(2,'0')}`;
+                        document.getElementById('photoPreview').innerHTML = '';
+                        
+                        // Re-check default radio buttons
+                        document.getElementById('handover').checked = true;
+                        document.getElementById('half').checked = true;
+                    }
+                } else {
+                    throw new Error(result.message || 'Unknown error occurred');
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('errorMessage').innerText = `❌ Submission failed: ${error.message}`;
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
     </script>
 </body>
 </html>
-
-
-
