@@ -1,701 +1,870 @@
 <!DOCTYPE html>
-<html lang="af">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>OnPoint Vloot · ongelukverslag (met aanhegsel)</title>
-    <!-- Font & icons (Font Awesome & Google Font) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <title>Fuel Filling Tracker | OnPoint OnTime Fleet</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
+
         body {
-            background: #0b2b5c;
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
             min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .fuel-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2E7D32;
+            margin-top: 5px;
+        }
+
+        .form-section {
+            padding: 25px;
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .form-section h2 {
+            font-size: 20px;
+            color: #2E7D32;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #2E7D32;
+            padding-bottom: 10px;
+        }
+
+        .form-section h2 i {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #eef2f6;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #2E7D32;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+
+        .form-group input[readonly] {
+            background: #e9ecef;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .calculation-row {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #2E7D32;
+        }
+
+        .calculation-row h3 {
+            color: #1B5E20;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .calculation-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .calculation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .calculation-item .label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .calculation-item .value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
-            background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.06) 0%, transparent 20%),
-                              radial-gradient(circle at 80% 70%, rgba(255,215,0,0.08) 0%, transparent 25%);
-            animation: bgShift 18s infinite alternate ease-in-out;
-        }
-        @keyframes bgShift {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 5% 5%; }
-        }
-
-        .verslag-kaart {
-            max-width: 750px;
-            width: 100%;
-            background: rgba(255,255,255,0.88);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 42px;
-            box-shadow: 0 30px 55px -10px rgba(0,10,40,0.65), inset 0 1px 3px rgba(255,255,255,0.9);
-            padding: 2rem 1.8rem;
-            border: 1px solid rgba(255,255,255,0.7);
-            transition: all 0.2s ease;
-            position: relative;
-            z-index: 5;
-        }
-        .logo-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 0.8rem;
-            flex-wrap: wrap;
             gap: 10px;
         }
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 16px;
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+            color: white;
         }
-        .logo-prent {
-            width: 58px;
-            height: 58px;
-            border-radius: 16px;
-            background: #ffffff;
-            box-shadow: 0 12px 18px -8px #0e2a46;
-            border: 2px solid #ffc107;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            transition: transform 0.2s;
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #2E7D32;
+            border: 2px solid #2E7D32;
         }
-        .logo-prent:hover {
-            transform: scale(1.02) rotate(-1deg);
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
         }
-        .logo-prent img {
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .recent-entries {
+            margin-top: 30px;
+        }
+
+        .recent-entries h3 {
+            color: #2E7D32;
+            margin-bottom: 15px;
+        }
+
+        .entries-table {
             width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
-        }
-        .logo-teks {
-            font-weight: 800;
-            font-size: 1.9rem;
-            letter-spacing: -0.02em;
-            color: #0b1f3b;
-            line-height: 1.1;
-        }
-        .logo-teks small {
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #2d4e8c;
-            display: block;
-        }
-        .adres-kenteken {
-            background: #ffffffc0;
-            border-radius: 50px;
-            padding: 8px 18px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #10345e;
-            border: 1px solid #ffc107;
-            box-shadow: 0 6px 14px rgba(0,30,70,0.1);
-            backdrop-filter: blur(4px);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .adres-kenteken i {
-            color: #e63946;
-            font-size: 1rem;
-        }
-        .subopskrif {
-            font-size: 1rem;
-            color: #2f4b74;
-            font-weight: 500;
-            margin: 0 0 1.8rem 0;
-            border-left: 4px solid #2d7aff;
-            padding-left: 16px;
-            background: rgba(45, 122, 255, 0.04);
-            border-radius: 0 12px 12px 0;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-        .kaart-mini-houer {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-left: auto;
+            border-collapse: collapse;
             background: white;
-            border-radius: 40px;
-            padding: 4px 12px 4px 6px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        .kaart-mini-houer a {
-            color: #0b2b5c;
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-        .kaart-mini-houer i {
-            color: #ea4335;
-            font-size: 1.2rem;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        .lewende-karakters {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-            margin-bottom: 12px;
-            height: 45px;
+        .entries-table th {
+            background: #2E7D32;
+            color: white;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 500;
         }
-        .karakter {
-            width: 45px;
-            height: 45px;
-            background: #ffb703;
-            border-radius: 50% 50% 20px 20px;
-            display: flex;
-            align-items: center;
+
+        .entries-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eef2f6;
+            font-size: 13px;
+        }
+
+        .entries-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            z-index: 1000;
             justify-content: center;
-            font-size: 1.7rem;
-            animation: bons 2.2s infinite ease-in-out;
-            box-shadow: 0 8px 0 #b26500, 0 12px 20px rgba(0,0,0,0.2);
-            border: 2px solid white;
-            transform-origin: center bottom;
-        }
-        .karakter:nth-child(2) {
-            animation-delay: 0.3s;
-            background: #48cae4;
-            box-shadow: 0 8px 0 #0077b6;
-        }
-        .karakter:nth-child(3) {
-            animation-delay: 0.6s;
-            background: #a7c957;
-            box-shadow: 0 8px 0 #6b8e4c;
-        }
-        @keyframes bons {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            40% { transform: translateY(-12px) rotate(2deg); }
-            70% { transform: translateY(-4px) rotate(-1deg); }
-        }
-
-        .vorm-rooster { display: flex; flex-direction: column; gap: 1.5rem; }
-        .twee-kolomme { display: flex; flex-wrap: wrap; gap: 1rem; }
-        .twee-kolomme > div { flex: 1 1 180px; }
-        .inset-veld { display: flex; flex-direction: column; gap: 6px; }
-        .inset-veld label { font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.3px; color: #1f3a60; display: flex; align-items: center; gap: 8px; }
-        .inset-veld label i { color: #2d7aff; width: 20px; font-size: 1rem; }
-        .inset-veld input, .inset-veld select, .inset-veld textarea {
-            background: white; border: 1.5px solid #dbe3f0; border-radius: 20px; padding: 15px 20px; font-size: 1rem;
-            font-weight: 500; color: #0b1f3b; outline: none; transition: all 0.2s; box-shadow: 0 4px 10px -5px rgba(0,0,0,0.02);
-        }
-        .inset-veld input:focus, .inset-veld select:focus, .inset-veld textarea:focus {
-            border-color: #2d7aff; box-shadow: 0 8px 18px -10px #2d7aff, 0 0 0 4px rgba(45,122,255,0.15);
-        }
-        .inset-veld textarea { min-height: 90px; resize: vertical; }
-        .ja-nee-groep { display: flex; gap: 24px; align-items: center; background: #f4f9ff; border-radius: 30px; padding: 10px 20px; border: 1px solid #d2e0f5; }
-        .ja-nee-groep label { font-weight: 500; text-transform: none; font-size: 1rem; color: #10345e; gap: 6px; }
-        .ja-nee-groep input[type="radio"] { accent-color: #1e4f8a; width: 18px; height: 18px; margin-right: 4px; }
-        .foto-laai-area { background: #f1f7ff; border-radius: 28px; padding: 1.8rem 1.2rem; border: 2px dashed #9bb8f0; text-align: center; cursor: pointer; transition: background 0.2s, border-color 0.2s; margin-top: 0.5rem; position: relative; }
-        .foto-laai-area:hover { background: #e3edff; border-color: #2d7aff; }
-        .foto-laai-area i { font-size: 3rem; color: #2d7aff; opacity: 0.8; margin-bottom: 0.5rem; }
-        .foto-laai-area .laai-teks { font-weight: 700; font-size: 1.1rem; color: #103056; }
-        .foto-laai-area .laai-wenk { font-size: 0.85rem; color: #476b9f; margin-top: 6px; }
-        #lêerInset { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-        .prent-voorskou-ry { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 15px; align-items: center; }
-        .voorskou-duim { width: 70px; height: 70px; border-radius: 18px; object-fit: cover; border: 3px solid white; box-shadow: 0 10px 18px -10px #1e3a5f; }
-        .lêer-naam-kenteken { background: #ffffffd0; border-radius: 40px; padding: 8px 18px; font-size: 0.9rem; font-weight: 500; color: #092033; box-shadow: 0 4px 12px #d4e2fc; backdrop-filter: blur(2px); }
-        .datumtyd-ry { display: flex; flex-direction: row; gap: 1rem; flex-wrap: wrap; }
-        .datumtyd-ry .inset-veld { flex: 1 1 160px; }
-        .dien-in-knoppie { background: #0a1f38; border: none; border-radius: 50px; padding: 1.3rem 1.8rem; color: white; font-weight: 700; font-size: 1.3rem; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 14px; cursor: pointer; transition: all 0.3s; margin: 2rem 0 0.8rem; border: 1px solid #2d4e7b; box-shadow: 0 20px 35px -12px #0f2542; }
-        .dien-in-knoppie:hover { background: #123456; transform: scale(1.02); box-shadow: 0 28px 40px -12px #0f1e33; }
-        .dien-in-knoppie i { font-size: 1.6rem; }
-        .info-nota { font-size: 0.85rem; display: flex; align-items: center; gap: 8px; background: #eef5ffb0; border-radius: 30px; padding: 12px 18px; color: #1f3d66; font-weight: 500; border: 1px solid #ffffff; }
-        .info-nota i { color: #ff7b2d; }
-        footer { text-align: center; margin-top: 20px; color: #2a4c7a; font-weight: 400; opacity: 0.9; }
-        hr { border: 1px solid #c9d9f0; margin: 0.5rem 0 1rem; opacity: 0.4; }
-        .aanhegsel-kenteken {
-            background: #e8f0fe;
-            border-radius: 20px;
-            padding: 5px 12px;
-            font-size: 0.85rem;
-            display: inline-flex;
             align-items: center;
-            gap: 6px;
-            color: #1a4b8c;
-            border: 1px solid #b8d1fc;
-        }
-        .aflaai-skakel {
-            color: #2d7aff;
-            text-decoration: none;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-        .aflaai-skakel:hover {
-            text-decoration: underline;
+            flex-direction: column;
         }
 
-        @media (max-width: 480px) {
-            .verslag-kaart { padding: 1.5rem 1.2rem; border-radius: 32px; }
-            .logo-teks { font-size: 1.6rem; }
-            .dien-in-knoppie { font-size: 1.2rem; padding: 1.1rem; }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #2E7D32;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            display: none;
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .error-message {
+            background: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .calculation-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .fuel-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .vehicle-selector {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="verslag-kaart">
-        <!-- Logo header met eksterne logo.png -->
-        <div class="logo-header">
-            <div class="logo-area">
-                <div class="logo-prent">
-                    <img src="images/logo.png" alt="OnPoint logo" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-truck\' style=\'font-size:2.5rem; color:#1a3b5d;\'></i>';">
-                </div>
-                <div class="logo-teks">
-                    OnPoint <small>vloot & logistiek</small><br>
-					<a href="index.html">English</a>
-                </div>
+    <div class="container">
+        <div class="header">
+            <h1>⛽ Fuel Filling Tracker</h1>
+            <p>OnPoint OnTime Fleet Solutions - Fuel Efficiency Monitoring</p>
+        </div>
+
+        <div class="fuel-stats">
+            <div class="stat-card">
+                <div class="label">Avg km/L</div>
+                <div class="value" id="avgKmL">0.0</div>
             </div>
-            <div class="adres-kenteken">
-                <i class="fas fa-map-marker-alt"></i> 71 Pretoriusweg, President Park, Midrand
+            <div class="stat-card">
+                <div class="label">Total Fuel Cost</div>
+                <div class="value" id="totalFuelCost">R0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Total km</div>
+                <div class="value" id="totalKm">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Total Liters</div>
+                <div class="value" id="totalLiters">0</div>
             </div>
         </div>
 
-        <div class="lewende-karakters">
-            <div class="karakter"><i class="fas fa-smile"></i></div>
-            <div class="karakter"><i class="fas fa-truck"></i></div>
-            <div class="karakter"><i class="fas fa-shield-hal"></i></div>
+        <div class="success-message" id="successMessage">
+            ✅ Fuel entry saved successfully!
         </div>
+        <div class="error-message" id="errorMessage" style="display: none;">❌ Submission failed. Please try again.</div>
 
-        <div class="subopskrif">
-            <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i> voltooi ongelukverslag (met aanhegsel)
-            <div class="kaart-mini-houer">
-                <i class="fas fa-map-marked-alt"></i>
-                <a href="https://www.google.com/maps/search/?api=1&query=71+Pretorius+Rd+President+Park+AH+Midrand+1685+South+Africa" target="_blank" title="maak lewende kaart oop">
-                    71 Pretoriusweg · lewende kaart
-                </a>
-                <i class="fas fa-external-link-alt" style="font-size:0.7rem; opacity:0.6;"></i>
-            </div>
-        </div>
-
-        <!-- VORM BEGIN -->
-        <form id="ongelukVorm" class="vorm-rooster">
-            <div class="datumtyd-ry">
-                <div class="inset-veld">
-                    <label><i class="fas fa-calendar-alt"></i> Datum</label>
-                    <input type="date" id="ongelukDatum" name="ongelukDatum" required>
-                </div>
-                <div class="inset-veld">
-                    <label><i class="fas fa-clock"></i> Tyd</label>
-                    <input type="time" id="ongelukTyd" name="ongelukTyd" value="14:30" required>
+        <form id="fuelForm">
+            <div class="form-section">
+                <h2><i>📅</i> Entry Details</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date *</label>
+                        <input type="date" id="entryDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Driver Name *</label>
+                        <input type="text" id="driverName" placeholder="John Doe" required>
+                    </div>
                 </div>
             </div>
 
-            <div class="twee-kolomme">
-                <div class="inset-veld">
-                    <label><i class="fas fa-car"></i> Voertuig registrasie</label>
-                    <input type="text" id="voertuigReg" placeholder="ABC-1234" value="VLOTE-408" required>
-                </div>
-                <div class="inset-veld">
-                    <label><i class="fas fa-map-pin"></i> Ligging / straat</label>
-                    <input type="text" id="ligging" placeholder="bv. I-95 myl 42" value="Sentrumlaan & 5de Straat" required>
-                </div>
-            </div>
-
-            <div class="twee-kolomme">
-                <div class="inset-veld">
-                    <label><i class="fas fa-tag"></i> Ongeluk tipe</label>
-                    <select id="ongelukTipe" required>
-                        <option value="" disabled>– kies –</option>
-                        <option value="Agterkant" selected>Agterkant botsing</option>
-                        <option value="Sy-impak">Sy-impak / T-been</option>
-                        <option value="Omslaan">Omslaan / skarnier</option>
-                        <option value="Enkel-voertuig">Enkele voertuig</option>
-                        <option value="Ander">Ander / voetganger</option>
-                    </select>
-                </div>
-                <div class="inset-veld">
-                    <label><i class="fas fa-id-card"></i> Eenheid #</label>
-                    <input type="text" id="eenheidNommer" placeholder="bv. 408" value="408" required>
+            <div class="form-section">
+                <h2><i>🚛</i> Vehicle Information</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Registration Number *</label>
+                        <div class="vehicle-selector">
+                            <input type="text" id="vehicleReg" placeholder="CA 123-456" required list="vehicles">
+                            <datalist id="vehicles">
+                                <option value="CA 123-456">Toyota Hilux</option>
+                                <option value="CY 789-012">Ford Ranger</option>
+                                <option value="CA 345-678">Nissan NP200</option>
+                                <option value="CY 901-234">Isuzu D-Max</option>
+                            </datalist>
+                            <button type="button" class="btn-secondary" style="padding: 8px;" onclick="loadVehicleHistory()">📋 Load Last</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Vehicle Model</label>
+                        <input type="text" id="vehicleModel" placeholder="Auto-filled" readonly>
+                    </div>
                 </div>
             </div>
 
-            <div class="twee-kolomme">
-                <div class="inset-veld">
-                    <label><i class="fas fa-user"></i> Bestuurder naam</label>
-                    <input type="text" id="bestuurderNaam" placeholder="Volle naam" value="James Keller" required>
+            <div class="form-section">
+                <h2><i>📊</i> Odometer Readings</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Odometer Start (km) *</label>
+                        <input type="number" id="odoStart" placeholder="45000" required min="0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Odometer Finish (km) *</label>
+                        <input type="number" id="odoFinish" placeholder="45300" required min="0" step="0.1" oninput="calculateKmTraveled()">
+                    </div>
                 </div>
-                <div class="inset-veld">
-                    <label><i class="fas fa-phone-alt"></i> Bestuurder selfoon</label>
-                    <input type="tel" id="bestuurderFoon" placeholder="(012) 345-6789" value="+27 12 345 6789" required>
-                </div>
-            </div>
-
-            <div class="inset-veld">
-                <label><i class="fas fa-file-signature"></i> Beskrywing</label>
-                <textarea id="beskrywing" placeholder="Beskryf skade, beserings, weer …" required>Voorbuffer stukkend, lugsakke ontplooi. Effense reën. Ander bestuurder het besonderhede uitgeruil.</textarea>
-            </div>
-
-            <div class="inset-veld">
-                <label><i class="fas fa-car-crash"></i> Ander partye betrokke</label>
-                <input type="text" id="anderPartye" placeholder="bv. Toyota Corolla, ABC123" value="Honda CR-V, nommerplaat 7GHJ432">
-            </div>
-
-            <hr>
-            <div style="font-weight: 600; color: #0f2d55; margin-bottom: 8px;"><i class="fas fa-gavel" style="margin-right: 8px;"></i>AMPTELIKE / POLISIE INLIGTING</div>
-
-            <div class="inset-veld">
-                <label><i class="fas fa-building"></i> Aan metro rapporteer</label>
-                <div class="ja-nee-groep">
-                    <label><input type="radio" name="metroGerapporteer" value="Ja" checked> Ja</label>
-                    <label><input type="radio" name="metroGerapporteer" value="Nee"> Nee</label>
+                <div class="calculation-row">
+                    <div class="calculation-item">
+                        <span class="label">📏 Distance Traveled:</span>
+                        <span class="value" id="kmTraveled">0 km</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="twee-kolomme">
-                <div class="inset-veld">
-                    <label><i class="fas fa-user-shield"></i> Beampte naam</label>
-                    <input type="text" id="beampteNaam" placeholder="bv. M. Davis" value="Beampte M. Davis">
+            <div class="form-section">
+                <h2><i>⛽</i> Fuel & Cost Details</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fuel Top Up (Liters) *</label>
+                        <input type="number" id="fuelLiters" placeholder="50.0" required min="0" step="0.01" oninput="calculateEfficiency()">
+                    </div>
+                    <div class="form-group">
+                        <label>Price per Liter (R/L)</label>
+                        <input type="number" id="pricePerLiter" placeholder="23.50" step="0.01" value="23.50" oninput="calculateEfficiency()">
+                    </div>
                 </div>
-                <div class="inset-veld">
-                    <label><i class="fas fa-mobile-alt"></i> Beampte selfoon</label>
-                    <input type="tel" id="beampteFoon" placeholder="(012) 987-6543" value="012-987-6543">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Amount Paid (R) *</label>
+                        <input type="number" id="amountPaid" placeholder="1175.00" required min="0" step="0.01" oninput="calculateFromAmount()">
+                    </div>
+                    <div class="form-group">
+                        <label>Lubrication Type</label>
+                        <select id="lubricationType">
+                            <option value="">Select Lubrication</option>
+                            <option value="Engine Oil">Engine Oil</option>
+                            <option value="Gearbox Oil">Gearbox Oil</option>
+                            <option value="Hydraulic Oil">Hydraulic Oil</option>
+                            <option value="Coolant">Coolant</option>
+                            <option value="None">None</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cost of Lubrication (R)</label>
+                        <input type="number" id="lubricationCost" placeholder="0.00" min="0" step="0.01" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Total Cost (R)</label>
+                        <input type="number" id="totalCost" placeholder="1175.00" readonly>
+                    </div>
                 </div>
             </div>
 
-            <div class="inset-veld">
-                <label><i class="fas fa-wine-bottle"></i> Dronkbestuur betrokke</label>
-                <div class="ja-nee-groep">
-                    <label><input type="radio" name="dronkBestuur" value="Ja"> Ja</label>
-                    <label><input type="radio" name="dronkBestuur" value="Nee" checked> Nee</label>
+            <div class="form-section">
+                <h2><i>📈</i> Fuel Efficiency Calculation</h2>
+                <div class="calculation-grid">
+                    <div class="calculation-item">
+                        <span class="label">⛽ km/liter:</span>
+                        <span class="value" id="kmPerLiter">0.00</span>
+                    </div>
+                    <div class="calculation-item">
+                        <span class="label">💰 Cost per km:</span>
+                        <span class="value" id="costPerKm">R0.00</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="inset-veld">
-                <label><i class="fas fa-hashtag"></i> Voorval polisieverslag #</label>
-                <input type="text" id="polisieVerslagNo" placeholder="bv. 23-78901" value="PD-2309-452">
-            </div>
-
-            <div class="inset-veld">
-                <label><i class="fas fa-balance-scale"></i> Beampte se oordeel (is jy skuldig?)</label>
-                <div class="ja-nee-groep">
-                    <label><input type="radio" name="skuldig" value="Ja"> Ja, skuldig</label>
-                    <label><input type="radio" name="skuldig" value="Nee" checked> Nee, nie skuldig nie</label>
+            <div class="form-section">
+                <h2><i>📝</i> Additional Notes</h2>
+                <div class="form-group">
+                    <textarea id="notes" rows="3" placeholder="Any additional notes about fueling or vehicle condition..."></textarea>
                 </div>
             </div>
 
-            <hr>
-            <!-- FOTO LAAI AREA -->
-            <div class="foto-laai-area" id="losGebied">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <div class="laai-teks">heg ongelukfoto aan</div>
-                <div class="laai-wenk">tik om te blaai of sleep — sal aan e-pos geheg word</div>
-                <input type="file" id="lêerInset" accept="image/*" capture="environment">
-            </div>
-
-            <!-- lewendige voorskou van gekose beeld en naam -->
-            <div id="voorskouHouer" class="prent-voorskou-ry" style="display: none;">
-                <img id="beeldVoorskou" class="voorskou-duim" src="#" alt="voorskou">
-                <span id="lêerNaamVertoon" class="lêer-naam-kenteken"><i class="far fa-image"></i> ongeluk.jpg</span>
-                <div class="aanhegsel-kenteken">
-                    <i class="fas fa-paperclip"></i> Gereed om aan te heg
+            <div style="padding: 25px;">
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        💾 Save Fuel Entry
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="generateReport()">
+                        📄 Generate PDF Report
+                    </button>
                 </div>
-                <button type="button" id="skoonBeeldKnoppie" style="background: none; border:none; color:#b00; margin-left:auto; font-size:1.5rem; cursor:pointer;"><i class="fas fa-times-circle"></i></button>
-            </div>
-
-            <!-- stoor lêerdata vir aanhegsel simulasie -->
-            <input type="hidden" id="beeldBase64" value="">
-            <input type="hidden" id="beeldLêerNaam" value="">
-            <input type="hidden" id="beeldLêerTipe" value="">
-
-            <!-- Oplossing 1: Verbeterde mailto met aanhegsel instruksies -->
-            <button type="button" id="posKnoppie" class="dien-in-knoppie" style="background: #1a3b5d;">
-                <i class="fas fa-envelope"></i> Opsie 1: Maak in E-pos Kliënt oop
-            </button>
-            
-            <!-- Oplossing 2: Laai EML lêer af (werk soos regte aanhegsel) -->
-            <button type="button" id="emlKnoppie" class="dien-in-knoppie" style="background: #2d4e8c; margin-top: 0;">
-                <i class="fas fa-download"></i> Opsie 2: Laai E-pos af (met aanhegsel)
-            </button>
-            
-            <div class="info-nota" style="margin-top: 10px;">
-                <i class="fas fa-info-circle"></i> 
-                <span id="aanhegselStatus">Geen beeld gekies nie</span>
-            </div>
-            
-            <div class="info-nota" style="background: #fff3cd; border-color: #ffeeba;">
-                <i class="fas fa-lightbulb" style="color: #856404;"></i>
-                <strong>Wenk:</strong> Opsie 2 laai 'n volledige .eml lêer af met die beeld aangeheg. Maak dit oop in Outlook, Thunderbird, of Windows Mail om die aanhegsel te sien.
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="index.html" style="color: #2E7D32; text-decoration: none;">← Back to Dashboard</a>
+                </div>
             </div>
         </form>
-        <footer>
-            <i class="fas fa-check-circle" style="color: #249c6b;"></i> OnPoint vloot – veiligheid eerste · 71 Pretoriusweg, President Park, Midrand
-        </footer>
+
+        <div class="recent-entries" style="padding: 0 25px 25px 25px;">
+            <h3>Recent Fuel Entries</h3>
+            <table class="entries-table" id="recentEntries">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Driver</th>
+                        <th>Reg #</th>
+                        <th>km</th>
+                        <th>Liters</th>
+                        <th>km/L</th>
+                    </tr>
+                </thead>
+                <tbody id="entriesBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px;">No recent entries</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div style="color: #333; font-weight: 600;">Processing...</div>
     </div>
 
     <script>
-        (function() {
-            const lêerInset = document.getElementById('lêerInset');
-            const losGebied = document.getElementById('losGebied');
-            const voorskouHouer = document.getElementById('voorskouHouer');
-            const beeldVoorskou = document.getElementById('beeldVoorskou');
-            const lêerNaamVertoon = document.getElementById('lêerNaamVertoon');
-            const skoonBeeldKnoppie = document.getElementById('skoonBeeldKnoppie');
-            const beeldBase64Hidden = document.getElementById('beeldBase64');
-            const beeldLêerNaamHidden = document.getElementById('beeldLêerNaam');
-            const beeldLêerTipeHidden = document.getElementById('beeldLêerTipe');
-            const aanhegselStatus = document.getElementById('aanhegselStatus');
+        // Configuration
+        const GAS_URL = 'YOUR_APPS_SCRIPT_URL_HERE'; // Replace with your Apps Script URL
+        
+        // Set default date
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('entryDate').value = today;
+            loadRecentEntries();
+            loadStats();
+        });
+
+        // Calculate km traveled
+        function calculateKmTraveled() {
+            const start = parseFloat(document.getElementById('odoStart').value) || 0;
+            const finish = parseFloat(document.getElementById('odoFinish').value) || 0;
             
-            const posKnoppie = document.getElementById('posKnoppie');
-            const emlKnoppie = document.getElementById('emlKnoppie');
-
-            let gekoseLêer = null;
-            let huidigeBase64 = '';
-            let huidigeLêerData = null;
-
-            function hanteerLêerKies(lêer) {
-                if (!lêer) return;
-                if (!lêer.type.startsWith('image/')) {
-                    alert('Kies asseblief \'n beeldlêer (JPEG, PNG, ens.)');
-                    return;
-                }
-                gekoseLêer = lêer;
-                huidigeLêerData = lêer;
-                lêerNaamVertoon.innerHTML = `<i class="far fa-file-image"></i> ${lêer.name}`;
-                beeldLêerNaamHidden.value = lêer.name;
-                beeldLêerTipeHidden.value = lêer.type;
-
-                const leser = new FileReader();
-                leser.onload = (e) => {
-                    huidigeBase64 = e.target.result.split(',')[1]; // Verwyder data:image/xyz;base64, deel
-                    beeldVoorskou.src = e.target.result;
-                    beeldBase64Hidden.value = huidigeBase64;
-                    voorskouHouer.style.display = 'flex';
-                    aanhegselStatus.innerHTML = `<i class="fas fa-paperclip"></i> Aanhegsel gereed: ${lêer.name} (${(lêer.size/1024).toFixed(1)} KB)`;
-                };
-                leser.readAsDataURL(lêer);
+            if (finish >= start) {
+                const traveled = (finish - start).toFixed(1);
+                document.getElementById('kmTraveled').textContent = traveled + ' km';
+                calculateEfficiency();
+            } else {
+                document.getElementById('kmTraveled').textContent = 'Invalid reading';
             }
+        }
 
-            lêerInset.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    hanteerLêerKies(e.target.files[0]);
-                }
-            });
-
-            losGebied.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                losGebied.style.background = '#e3edff';
-                losGebied.style.borderColor = '#0a52c2';
-            });
+        // Calculate fuel efficiency
+        function calculateEfficiency() {
+            const start = parseFloat(document.getElementById('odoStart').value) || 0;
+            const finish = parseFloat(document.getElementById('odoFinish').value) || 0;
+            const liters = parseFloat(document.getElementById('fuelLiters').value) || 0;
+            const pricePerLiter = parseFloat(document.getElementById('pricePerLiter').value) || 0;
+            const lubricationCost = parseFloat(document.getElementById('lubricationCost').value) || 0;
             
-            losGebied.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                losGebied.style.background = '#f1f7ff';
-                losGebied.style.borderColor = '#9bb8f0';
-            });
+            if (finish > start && liters > 0) {
+                const kmTraveled = finish - start;
+                const kmPerLiter = (kmTraveled / liters).toFixed(2);
+                document.getElementById('kmPerLiter').textContent = kmPerLiter;
+                
+                // Calculate amount paid if not manually entered
+                if (pricePerLiter > 0 && !document.getElementById('amountPaid').value) {
+                    const amount = (liters * pricePerLiter).toFixed(2);
+                    document.getElementById('amountPaid').value = amount;
+                }
+                
+                // Calculate total cost
+                const amountPaid = parseFloat(document.getElementById('amountPaid').value) || 0;
+                const totalCost = (amountPaid + lubricationCost).toFixed(2);
+                document.getElementById('totalCost').value = totalCost;
+                
+                // Calculate cost per km
+                if (kmTraveled > 0) {
+                    const costPerKm = (totalCost / kmTraveled).toFixed(2);
+                    document.getElementById('costPerKm').textContent = 'R' + costPerKm;
+                }
+            }
+        }
+
+        // Calculate from amount paid
+        function calculateFromAmount() {
+            const amountPaid = parseFloat(document.getElementById('amountPaid').value) || 0;
+            const pricePerLiter = parseFloat(document.getElementById('pricePerLiter').value) || 0;
+            const lubricationCost = parseFloat(document.getElementById('lubricationCost').value) || 0;
             
-            losGebied.addEventListener('drop', (e) => {
-                e.preventDefault();
-                losGebied.style.background = '#f1f7ff';
-                losGebied.style.borderColor = '#9bb8f0';
-                if (e.dataTransfer.files.length > 0) {
-                    lêerInset.files = e.dataTransfer.files;
-                    hanteerLêerKies(e.dataTransfer.files[0]);
-                }
-            });
+            if (pricePerLiter > 0 && amountPaid > 0) {
+                const liters = (amountPaid / pricePerLiter).toFixed(2);
+                document.getElementById('fuelLiters').value = liters;
+            }
+            
+            // Update total cost
+            const totalCost = (amountPaid + lubricationCost).toFixed(2);
+            document.getElementById('totalCost').value = totalCost;
+            
+            calculateEfficiency();
+        }
 
-            skoonBeeldKnoppie.addEventListener('click', (e) => {
-                e.stopPropagation();
-                gekoseLêer = null;
-                huidigeLêerData = null;
-                lêerInset.value = '';
-                beeldBase64Hidden.value = '';
-                beeldLêerNaamHidden.value = '';
-                beeldLêerTipeHidden.value = '';
-                huidigeBase64 = '';
-                voorskouHouer.style.display = 'none';
-                beeldVoorskou.src = '#';
-                aanhegselStatus.innerHTML = 'Geen beeld gekies nie';
-            });
+        // Load vehicle history
+        function loadVehicleHistory() {
+            const reg = document.getElementById('vehicleReg').value;
+            if (reg) {
+                // Simulate loading last reading
+                document.getElementById('odoStart').value = '45250';
+                document.getElementById('odoFinish').value = '45500';
+                calculateKmTraveled();
+            }
+        }
 
-            // Stel vandag se datum
-            const vandag = new Date().toISOString().split('T')[0];
-            document.getElementById('ongelukDatum').value = vandag;
+        // Generate PDF Report
+        function generateReport() {
+            const data = {
+                date: document.getElementById('entryDate').value,
+                driver: document.getElementById('driverName').value,
+                vehicleReg: document.getElementById('vehicleReg').value,
+                vehicleModel: document.getElementById('vehicleModel').value,
+                odoStart: document.getElementById('odoStart').value,
+                odoFinish: document.getElementById('odoFinish').value,
+                kmTraveled: document.getElementById('kmTraveled').textContent,
+                fuelLiters: document.getElementById('fuelLiters').value,
+                pricePerLiter: document.getElementById('pricePerLiter').value,
+                amountPaid: document.getElementById('amountPaid').value,
+                lubricationType: document.getElementById('lubricationType').value,
+                lubricationCost: document.getElementById('lubricationCost').value,
+                totalCost: document.getElementById('totalCost').value,
+                kmPerLiter: document.getElementById('kmPerLiter').textContent,
+                costPerKm: document.getElementById('costPerKm').textContent,
+                notes: document.getElementById('notes').value
+            };
 
-            // Hulpfunksie om alle vormdata te kry
-            function kryVormData() {
-                return {
-                    datum: document.getElementById('ongelukDatum').value,
-                    tyd: document.getElementById('ongelukTyd').value,
-                    voertuigReg: document.getElementById('voertuigReg').value,
-                    ligging: document.getElementById('ligging').value,
-                    ongelukTipe: document.getElementById('ongelukTipe').value,
-                    eenheidNommer: document.getElementById('eenheidNommer').value,
-                    bestuurderNaam: document.getElementById('bestuurderNaam').value,
-                    bestuurderFoon: document.getElementById('bestuurderFoon').value,
-                    beskrywing: document.getElementById('beskrywing').value,
-                    anderPartye: document.getElementById('anderPartye').value,
-                    metroGerapporteer: document.querySelector('input[name="metroGerapporteer"]:checked')?.value || 'Nie gespesifiseer',
-                    beampteNaam: document.getElementById('beampteNaam').value || 'N/B',
-                    beampteFoon: document.getElementById('beampteFoon').value || 'N/B',
-                    dronkBestuur: document.querySelector('input[name="dronkBestuur"]:checked')?.value || 'Nie gespesifiseer',
-                    polisieVerslagNo: document.getElementById('polisieVerslagNo').value || 'N/B',
-                    skuldig: document.querySelector('input[name="skuldig"]:checked')?.value || 'Nie gespesifiseer'
-                };
+            // Check if required fields are filled
+            if (!data.driver || !data.vehicleReg || !data.odoStart || !data.odoFinish) {
+                alert('Please fill in all required fields before generating report');
+                return;
             }
 
-            // Valideer vorm
-            function valideerVorm(data) {
-                if (!data.datum || !data.tyd || !data.voertuigReg || !data.ligging || !data.ongelukTipe || 
-                    !data.eenheidNommer || !data.bestuurderNaam || !data.bestuurderFoon || !data.beskrywing) {
-                    alert('Vul asseblief alle verpligte velde in (Datum, Tyd, Voertuig, Ligging, Tipe, Eenheid, Bestuurder Naam, Foon, Beskrywing).');
-                    return false;
-                }
-                return true;
-            }
+            // Open report in new window
+            const reportWindow = window.open('', '_blank');
+            generatePDFReport(data, reportWindow);
+        }
 
-            // Skep e-pos boodskap teks
-            function skepEposBody(data) {
-                let bodyTeks = '';
-                bodyTeks += `ONPOINT VLOOT – VOLLEDIGE ONGELUKVERSLAG\n`;
-                bodyTeks += `=========================================\n\n`;
-                bodyTeks += `📅 DATUM: ${data.datum} om ${data.tyd}\n`;
-                bodyTeks += `🚗 VOERTUIG REG: ${data.voertuigReg}\n`;
-                bodyTeks += `📍 LIGGING: ${data.ligging}\n`;
-                bodyTeks += `🚧 TIPE: ${data.ongelukTipe}\n`;
-                bodyTeks += `🚛 EENHEID: ${data.eenheidNommer}\n`;
-                bodyTeks += `🧑‍✈️ BESTUURDER: ${data.bestuurderNaam}\n`;
-                bodyTeks += `📞 BESTUURDER FOON: ${data.bestuurderFoon}\n`;
-                bodyTeks += `📄 BESKRYWING: ${data.beskrywing}\n`;
-                bodyTeks += `🚙 ANDER PARTYE: ${data.anderPartye || 'geen rapporteer'}\n\n`;
-                bodyTeks += `👮 AMPTELIKE / POLISIE INLIGTING\n`;
-                bodyTeks += `--------------------------------\n`;
-                bodyTeks += `🏛️ AAN METRO GERAPPORTEER: ${data.metroGerapporteer}\n`;
-                bodyTeks += `🛡️ BEAMPTE NAAM: ${data.beampteNaam}\n`;
-                bodyTeks += `📞 BEAMPTE FOON: ${data.beampteFoon}\n`;
-                bodyTeks += `🍷 DRONKBESTUUR: ${data.dronkBestuur}\n`;
-                bodyTeks += `📋 POLISIEVERSLAG #: ${data.polisieVerslagNo}\n`;
-                bodyTeks += `⚖️ SKULDIG?: ${data.skuldig}\n\n`;
-                
-                if (gekoseLêer) {
-                    bodyTeks += `📸 AANHEGSEL: ${gekoseLêer.name} (${(gekoseLêer.size/1024).toFixed(1)} KB)\n`;
-                    bodyTeks += `Nota: Hierdie e-pos kliënt mag dalk nie outomatiese aanhegsels ondersteun nie.\n`;
-                    bodyTeks += `Gebruik asseblief Opsie 2 hieronder om die volledige e-pos met aanhegsel af te laai.\n`;
-                }
-                
-                bodyTeks += `\n-- \n`;
-                bodyTeks += `OnPoint Vloot veiligheidsverslag – gegenereer vanaf mobiele app\n`;
-                bodyTeks += `71 Pretoriusweg, President Park, Midrand`;
-                
-                return bodyTeks;
-            }
-
-            // Opsie 1: Verbeterde mailto (met aanhegsel nota)
-            posKnoppie.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                const data = kryVormData();
-                if (!valideerVorm(data)) return;
-
-                const ontvanger = 'vloot@onpointontime.co.za';
-                const onderwerp = `🚨 Ongelukverslag - Eenheid ${data.eenheidNommer} / ${data.voertuigReg} - ${data.datum}`;
-                const bodyTeks = skepEposBody(data);
-                
-                // Skep mailto skakel
-                const posSkakel = `mailto:${ontvanger}?subject=${encodeURIComponent(onderwerp)}&body=${encodeURIComponent(bodyTeks)}`;
-                
-                if (gekoseLêer) {
-                    // Wys instruksies vir handmatige aanhegsel
-                    const aanhegMsg = `\n\n📎 OM DIE BEELD AAN TE HEG:\n` +
-                                    `1. Stoor hierdie beeld van die voorskou\n` +
-                                    `2. Sleep en los ${gekoseLêer.name} in jou e-pos\n` +
-                                    `3. Of gebruik die skuifspeld-ikoon om dit handmatig aan te heg`;
+        // Generate PDF-friendly HTML report
+        function generatePDFReport(data, reportWindow) {
+            const reportHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Fuel Report - ${data.vehicleReg}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+                        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #2E7D32; padding-bottom: 20px; }
+                        .header h1 { color: #2E7D32; margin-bottom: 5px; }
+                        .header h2 { color: #666; font-weight: normal; }
+                        .section { margin-bottom: 25px; }
+                        .section h3 { color: #2E7D32; border-left: 4px solid #2E7D32; padding-left: 10px; margin-bottom: 15px; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        td { padding: 10px; border-bottom: 1px solid #ddd; }
+                        .label { font-weight: bold; width: 40%; background: #f5f5f5; }
+                        .value { color: #2E7D32; font-weight: bold; }
+                        .summary { background: #e8f5e9; padding: 20px; border-radius: 5px; }
+                        .summary-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px; }
+                        .footer { text-align: center; margin-top: 40px; color: #666; font-size: 12px; }
+                        @media print {
+                            body { margin: 0; }
+                            button { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>⛽ OnPoint OnTime Fleet Solutions</h1>
+                        <h2>Fuel Filling Report</h2>
+                        <p>Generated: ${new Date().toLocaleString()}</p>
+                    </div>
                     
-                    // Dateer body op met aanhegsel instruksies
-                    const verbeterdeBody = bodyTeks + aanhegMsg;
-                    const verbeterdeSkakel = `mailto:${ontvanger}?subject=${encodeURIComponent(onderwerp)}&body=${encodeURIComponent(verbeterdeBody)}`;
-                    window.location.href = verbeterdeSkakel;
-                } else {
-                    window.location.href = posSkakel;
-                }
-            });
-
-            // Opsie 2: Laai EML lêer af (met regte aanhegsel)
-            emlKnoppie.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                const data = kryVormData();
-                if (!valideerVorm(data)) return;
-
-                // Skep e-pos inhoud
-                const ontvanger = 'vloot@onpointontime.co.za';
-                const onderwerp = `Ongelukverslag - Eenheid ${data.eenheidNommer} / ${data.voertuigReg} - ${data.datum}`;
-                const bodyTeks = skepEposBody(data);
-                
-                // Genereer grens vir multi-deel e-pos
-                const grens = '----=_VolgendeDeel_' + Math.random().toString(36).substring(2, 15);
-                
-                let emlInhoud = '';
-                
-                // Hoofde
-                emlInhoud += `From: "OnPoint Vloot Bestuurder" <bestuurder@onpointvloot.co.za>\r\n`;
-                emlInhoud += `To: ${ontvanger}\r\n`;
-                emlInhoud += `Subject: ${onderwerp}\r\n`;
-                emlInhoud += `MIME-Version: 1.0\r\n`;
-                emlInhoud += `Content-Type: multipart/mixed; boundary="${grens}"\r\n`;
-                emlInhoud += `\r\n`;
-                emlInhoud += `Hierdie is 'n multi-deel boodskap in MIME-formaat.\r\n`;
-                emlInhoud += `\r\n`;
-                emlInhoud += `--${grens}\r\n`;
-                
-                // Teks deel
-                emlInhoud += `Content-Type: text/plain; charset="utf-8"\r\n`;
-                emlInhoud += `Content-Transfer-Encoding: 7bit\r\n`;
-                emlInhoud += `\r\n`;
-                emlInhoud += bodyTeks.replace(/\n/g, '\r\n');
-                emlInhoud += `\r\n`;
-                emlInhoud += `\r\n`;
-                
-                // Aanhegsel deel (as beeld bestaan)
-                if (gekoseLêer && huidigeBase64) {
-                    emlInhoud += `--${grens}\r\n`;
-                    emlInhoud += `Content-Type: ${gekoseLêer.type}; name="${gekoseLêer.name}"\r\n`;
-                    emlInhoud += `Content-Transfer-Encoding: base64\r\n`;
-                    emlInhoud += `Content-Disposition: attachment; filename="${gekoseLêer.name}"\r\n`;
-                    emlInhoud += `\r\n`;
+                    <div class="section">
+                        <h3>📋 Entry Details</h3>
+                        <table>
+                            <tr><td class="label">Date:</td><td>${data.date}</td></tr>
+                            <tr><td class="label">Driver:</td><td>${data.driver}</td></tr>
+                            <tr><td class="label">Vehicle Registration:</td><td>${data.vehicleReg}</td></tr>
+                            <tr><td class="label">Vehicle Model:</td><td>${data.vehicleModel || 'Not specified'}</td></tr>
+                        </table>
+                    </div>
                     
-                    // Voeg base64 inhoud by in stukkies van 76 karakters per lyn (standaard vir e-pos)
-                    const base64Data = huidigeBase64;
-                    for (let i = 0; i < base64Data.length; i += 76) {
-                        emlInhoud += base64Data.substr(i, 76) + '\r\n';
-                    }
-                    emlInhoud += `\r\n`;
-                }
-                
-                // Maak grens toe
-                emlInhoud += `--${grens}--\r\n`;
-                
-                // Skep aflaai
-                const blob = new Blob([emlInhoud], { type: 'message/rfc822' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `ongelukverslag_${data.eenheidNommer}_${data.datum.replace(/-/g, '')}.eml`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                if (gekoseLêer) {
-                    alert('✅ EML lêer afgelaai met beeld aangeheg! Maak dit oop in Outlook, Thunderbird, of Windows Mail.');
-                }
-            });
+                    <div class="section">
+                        <h3>📊 Odometer Readings</h3>
+                        <table>
+                            <tr><td class="label">Odometer Start:</td><td>${data.odoStart} km</td></tr>
+                            <tr><td class="label">Odometer Finish:</td><td>${data.odoFinish} km</td></tr>
+                            <tr><td class="label">Distance Traveled:</td><td class="value">${data.kmTraveled}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div class="section">
+                        <h3>⛽ Fuel Details</h3>
+                        <table>
+                            <tr><td class="label">Fuel Added:</td><td>${data.fuelLiters} liters</td></tr>
+                            <tr><td class="label">Price per Liter:</td><td>R${data.pricePerLiter}</td></tr>
+                            <tr><td class="label">Amount Paid:</td><td>R${data.amountPaid}</td></tr>
+                            <tr><td class="label">Lubrication:</td><td>${data.lubricationType || 'None'}</td></tr>
+                            <tr><td class="label">Lubrication Cost:</td><td>R${data.lubricationCost}</td></tr>
+                            <tr><td class="label">Total Cost:</td><td class="value">R${data.totalCost}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div class="section summary">
+                        <h3>📈 Fuel Efficiency Summary</h3>
+                        <div class="summary-item">
+                            <span>Fuel Consumption:</span>
+                            <strong>${data.kmPerLiter} km/liter</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>Cost per Kilometer:</span>
+                            <strong>${data.costPerKm}/km</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>Total Distance:</span>
+                            <strong>${data.kmTraveled}</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>Total Fuel Cost:</span>
+                            <strong>R${data.totalCost}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3>📝 Additional Notes</h3>
+                        <p>${data.notes || 'No additional notes'}</p>
+                    </div>
+                    
+                    <div class="footer">
+                        <p>OnPoint OnTime Fleet Solutions - Fuel Efficiency Monitoring System</p>
+                        <p>This is a computer-generated report. Valid without signature.</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button onclick="window.print()" style="padding: 10px 20px; background: #2E7D32; color: white; border: none; border-radius: 5px; cursor: pointer;">🖨️ Print / Save as PDF</button>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            reportWindow.document.write(reportHTML);
+            reportWindow.document.close();
+        }
 
-            // Dateer aanhegsel status by op laai
-            aanhegselStatus.innerHTML = 'Geen beeld gekies nie';
-        })();
+        // Form submission
+        document.getElementById('fuelForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validate
+            const start = parseFloat(document.getElementById('odoStart').value);
+            const finish = parseFloat(document.getElementById('odoFinish').value);
+            
+            if (finish <= start) {
+                alert('Odometer finish must be greater than start');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            // Prepare data
+            const formData = {
+                date: document.getElementById('entryDate').value,
+                driver: document.getElementById('driverName').value,
+                vehicleReg: document.getElementById('vehicleReg').value,
+                vehicleModel: document.getElementById('vehicleModel').value,
+                odoStart: start,
+                odoFinish: finish,
+                kmTraveled: finish - start,
+                fuelLiters: parseFloat(document.getElementById('fuelLiters').value) || 0,
+                pricePerLiter: parseFloat(document.getElementById('pricePerLiter').value) || 0,
+                amountPaid: parseFloat(document.getElementById('amountPaid').value) || 0,
+                lubricationType: document.getElementById('lubricationType').value,
+                lubricationCost: parseFloat(document.getElementById('lubricationCost').value) || 0,
+                totalCost: parseFloat(document.getElementById('totalCost').value) || 0,
+                kmPerLiter: parseFloat(document.getElementById('kmPerLiter').textContent) || 0,
+                costPerKm: parseFloat(document.getElementById('costPerKm').textContent.replace('R', '')) || 0,
+                notes: document.getElementById('notes').value,
+                timestamp: new Date().toISOString(),
+                submissionId: 'FUEL-' + Date.now()
+            };
+            
+            try {
+                // Send to Google Apps Script
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                // Show success
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('errorMessage').style.display = 'none';
+                
+                // Reset form except driver and vehicle
+                document.getElementById('odoStart').value = finish;
+                document.getElementById('odoFinish').value = '';
+                document.getElementById('fuelLiters').value = '';
+                document.getElementById('amountPaid').value = '';
+                document.getElementById('lubricationCost').value = '0';
+                document.getElementById('notes').value = '';
+                
+                // Update calculations
+                calculateKmTraveled();
+                
+                // Reload recent entries
+                loadRecentEntries();
+                loadStats();
+                
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 3000);
+                
+            } catch (error) {
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('errorMessage').textContent = 'Error: ' + error.message;
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        });
+
+        // Load recent entries
+        function loadRecentEntries() {
+            // Simulated recent entries
+            const entries = [
+                { date: '2024-03-15', driver: 'John Doe', reg: 'CA 123-456', km: '350', liters: '45.5', kmPerLiter: '7.7' },
+                { date: '2024-03-14', driver: 'Jane Smith', reg: 'CY 789-012', km: '420', liters: '52.0', kmPerLiter: '8.1' },
+                { date: '2024-03-13', driver: 'Bob Johnson', reg: 'CA 345-678', km: '280', liters: '35.2', kmPerLiter: '8.0' }
+            ];
+            
+            const tbody = document.getElementById('entriesBody');
+            tbody.innerHTML = entries.map(entry => `
+                <tr>
+                    <td>${entry.date}</td>
+                    <td>${entry.driver}</td>
+                    <td>${entry.reg}</td>
+                    <td>${entry.km}</td>
+                    <td>${entry.liters}</td>
+                    <td><strong>${entry.kmPerLiter}</strong></td>
+                </tr>
+            `).join('');
+        }
+
+        // Load statistics
+        function loadStats() {
+            document.getElementById('avgKmL').textContent = '8.2';
+            document.getElementById('totalFuelCost').textContent = 'R12,450';
+            document.getElementById('totalKm').textContent = '3,250';
+            document.getElementById('totalLiters').textContent = '425';
+        }
     </script>
 </body>
 </html>
