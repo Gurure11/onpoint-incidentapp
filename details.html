@@ -431,17 +431,17 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Fuel Top Up (Liters) *</label>
-                        <input type="number" id="fuelLiters" placeholder="50.0" required min="0" step="0.01" oninput="calculateEfficiency()">
+                        <input type="number" id="fuelLiters" placeholder="50.0" required min="0" step="0.01" oninput="syncFuelCalculations()">
                     </div>
                     <div class="form-group">
                         <label>Price per Liter (R/L)</label>
-                        <input type="number" id="pricePerLiter" placeholder="23.50" step="0.01" value="23.50" oninput="calculateEfficiency()">
+                        <input type="number" id="pricePerLiter" placeholder="23.50" step="0.01" value="23.50" oninput="syncFuelCalculations()">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Amount Paid (R) *</label>
-                        <input type="number" id="amountPaid" placeholder="1175.00" required min="0" step="0.01" oninput="calculateFromAmount()">
+                        <input type="number" id="amountPaid" placeholder="1175.00" required min="0" step="0.01" oninput="syncFuelCalculationsFromAmount()">
                     </div>
                     <div class="form-group">
                         <label>Lubrication Type</label>
@@ -458,7 +458,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Cost of Lubrication (R)</label>
-                        <input type="number" id="lubricationCost" placeholder="0.00" min="0" step="0.01" value="0" oninput="calculateEfficiency()">
+                        <input type="number" id="lubricationCost" placeholder="0.00" min="0" step="0.01" value="0" oninput="updateTotalsAndEfficiency()">
                     </div>
                     <div class="form-group">
                         <label>Total Cost (R)</label>
@@ -568,60 +568,73 @@
             if (finish >= start) {
                 const traveled = (finish - start).toFixed(1);
                 document.getElementById('kmTraveled').textContent = traveled + ' km';
-                calculateEfficiency();
+                updateTotalsAndEfficiency();
             } else {
                 document.getElementById('kmTraveled').textContent = 'Invalid reading';
             }
         }
 
-        // Calculate fuel efficiency
-        function calculateEfficiency() {
+        // Core function: updates everything based on liters & price
+        function syncFuelCalculations() {
+            const liters = parseFloat(document.getElementById('fuelLiters').value) || 0;
+            const price = parseFloat(document.getElementById('pricePerLiter').value) || 0;
+            
+            // Calculate amount paid (liters * price) and set it
+            if (liters > 0 && price > 0) {
+                const amount = (liters * price).toFixed(2);
+                document.getElementById('amountPaid').value = amount;
+            } else {
+                document.getElementById('amountPaid').value = '';
+            }
+            
+            // Update totals and efficiency
+            updateTotalsAndEfficiency();
+        }
+
+        // Called when Amount Paid is manually changed
+        function syncFuelCalculationsFromAmount() {
+            const amount = parseFloat(document.getElementById('amountPaid').value) || 0;
+            const price = parseFloat(document.getElementById('pricePerLiter').value) || 0;
+            
+            if (amount > 0 && price > 0) {
+                // Calculate liters from amount and price
+                const liters = (amount / price).toFixed(2);
+                document.getElementById('fuelLiters').value = liters;
+            } else if (amount > 0 && !price) {
+                // If price is missing, we can't adjust liters; just update totals later
+            }
+            
+            updateTotalsAndEfficiency();
+        }
+
+        // Update total cost, km/l, cost per km
+        function updateTotalsAndEfficiency() {
             const start = parseFloat(document.getElementById('odoStart').value) || 0;
             const finish = parseFloat(document.getElementById('odoFinish').value) || 0;
             const liters = parseFloat(document.getElementById('fuelLiters').value) || 0;
-            const pricePerLiter = parseFloat(document.getElementById('pricePerLiter').value) || 0;
-            const lubricationCost = parseFloat(document.getElementById('lubricationCost').value) || 0;
+            const amountPaid = parseFloat(document.getElementById('amountPaid').value) || 0;
+            const lubrication = parseFloat(document.getElementById('lubricationCost').value) || 0;
             
-            if (finish > start && liters > 0) {
-                const kmTraveled = finish - start;
+            // Total cost
+            const total = (amountPaid + lubrication).toFixed(2);
+            document.getElementById('totalCost').value = total;
+            
+            // km per liter
+            const kmTraveled = finish - start;
+            if (kmTraveled > 0 && liters > 0) {
                 const kmPerLiter = (kmTraveled / liters).toFixed(2);
                 document.getElementById('kmPerLiter').textContent = kmPerLiter;
-                
-                // Calculate amount paid if not manually entered
-                if (pricePerLiter > 0 && !document.getElementById('amountPaid').value) {
-                    const amount = (liters * pricePerLiter).toFixed(2);
-                    document.getElementById('amountPaid').value = amount;
-                }
-                
-                // Calculate total cost
-                const amountPaid = parseFloat(document.getElementById('amountPaid').value) || 0;
-                const totalCost = (amountPaid + lubricationCost).toFixed(2);
-                document.getElementById('totalCost').value = totalCost;
-                
-                // Calculate cost per km
-                if (kmTraveled > 0) {
-                    const costPerKm = (totalCost / kmTraveled).toFixed(2);
-                    document.getElementById('costPerKm').textContent = 'R' + costPerKm;
-                }
-            }
-        }
-
-        // Calculate from amount paid
-        function calculateFromAmount() {
-            const amountPaid = parseFloat(document.getElementById('amountPaid').value) || 0;
-            const pricePerLiter = parseFloat(document.getElementById('pricePerLiter').value) || 0;
-            const lubricationCost = parseFloat(document.getElementById('lubricationCost').value) || 0;
-            
-            if (pricePerLiter > 0 && amountPaid > 0) {
-                const liters = (amountPaid / pricePerLiter).toFixed(2);
-                document.getElementById('fuelLiters').value = liters;
+            } else {
+                document.getElementById('kmPerLiter').textContent = '0.00';
             }
             
-            // Update total cost
-            const totalCost = (amountPaid + lubricationCost).toFixed(2);
-            document.getElementById('totalCost').value = totalCost;
-            
-            calculateEfficiency();
+            // cost per km
+            if (kmTraveled > 0 && total > 0) {
+                const costPerKm = (total / kmTraveled).toFixed(2);
+                document.getElementById('costPerKm').textContent = 'R' + costPerKm;
+            } else {
+                document.getElementById('costPerKm').textContent = 'R0.00';
+            }
         }
 
         // Load vehicle history
