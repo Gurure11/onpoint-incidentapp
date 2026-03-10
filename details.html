@@ -3,930 +3,680 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vehicle Fuel Management System</title>
+    <title>ONPOINT FLEET · advanced fuel & cost log</title>
+    <!-- Google Font & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- jsPDF and html2canvas for PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
         }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            background: linear-gradient(145deg, #0a1e2f 0%, #1f4a6e 100%);
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+        /* animated character background */
+        .character-scene {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .fuel-mascot {
+            position: absolute;
+            bottom: 20px;
+            left: 3%;
+            width: 160px;
+            animation: float 4s ease-in-out infinite;
+            filter: drop-shadow(0 20px 15px #00000066);
+        }
+        .lube-character {
+            position: absolute;
+            bottom: 40px;
+            right: 5%;
+            width: 140px;
+            animation: wobble 5s infinite;
+        }
+        .toll-character {
+            position: absolute;
+            top: 100px;
+            right: 10%;
+            width: 100px;
+            animation: drive 8s infinite linear;
+            opacity: 0.7;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        @keyframes wobble {
+            0%,100%{ transform: translateX(0) rotate(0); }
+            25%{ transform: translateX(-10px) rotate(-5deg); }
+            75%{ transform: translateX(10px) rotate(5deg); }
+        }
+        @keyframes drive {
+            0% { transform: translateX(-200px) scaleX(1); }
+            45% { transform: translateX(200px) scaleX(1); }
+            50% { transform: translateX(200px) scaleX(-1); }
+            95% { transform: translateX(-200px) scaleX(-1); }
+            100% { transform: translateX(-200px) scaleX(1); }
         }
 
-        .container {
+        /* main card */
+        .dashboard {
             max-width: 1400px;
             margin: 0 auto;
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 1.5rem;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .card.full-width {
+            grid-column: span 2;
         }
 
-        /* Header/Navigation */
-        .header {
-            background: white;
-            border-radius: 15px;
-            padding: 20px 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        /* header */
+        .logo-row {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
             flex-wrap: wrap;
-            gap: 20px;
+        }
+        .badge {
+            background: #0e2f44;
+            color: white;
+            font-weight: 700;
+            font-size: 1.6rem;
+            padding: 0.3rem 1.8rem 0.3rem 2rem;
+            border-radius: 60px;
+            letter-spacing: -0.5px;
+            box-shadow: -6px 6px 0 #7aa7c9;
+        }
+        .badge i {
+            margin-right: 12px;
+            color: #fedb9f;
+        }
+        .sheet-id {
+            background: #edf5fb;
+            padding: 0.6rem 1.5rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            color: #0e3a55;
+            font-weight: 500;
+            border: 1px solid white;
+            margin-left: auto;
         }
 
-        .header h1 {
-            color: #333;
-            font-size: 1.8em;
+        /* form grids */
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .field label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #1b4b6e;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .field input, .field select, .field textarea {
+            background: white;
+            border: 2px solid #d0e2f2;
+            border-radius: 18px;
+            padding: 0.8rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #102b3f;
+            transition: 0.2s;
+        }
+        .field input:focus, .field select:focus {
+            border-color: #2c7da0;
+            box-shadow: 0 8px 18px -12px #1e4f6e;
+        }
+
+        /* cost sections */
+        .cost-section {
+            background: #e8f1f9;
+            border-radius: 28px;
+            padding: 1.5rem;
+            margin: 1.2rem 0;
+        }
+        .section-title {
+            font-weight: 700;
+            color: #0c3e5e;
+            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+        .inline-cost {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
         }
-
-        .nav-btn {
-            padding: 12px 25px;
+        .add-btn {
+            background: #1d6f94;
+            color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1em;
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: 0.15s;
+            height: fit-content;
+        }
+        .add-btn:hover {
+            background: #0e5c80;
+        }
+
+        /* totals panel */
+        .totals-panel {
+            background: linear-gradient(135deg, #0f3348 0%, #1b5577 100%);
+            border-radius: 30px;
+            padding: 1.8rem;
+            margin: 1.5rem 0;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            color: white;
+            box-shadow: 0 15px 25px -10px #061b28;
+        }
+        .total-item {
+            text-align: center;
+        }
+        .total-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            opacity: 0.7;
+            letter-spacing: 0.5px;
+        }
+        .total-value {
+            font-size: 1.9rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .total-value small {
+            font-size: 0.9rem;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+
+        /* action buttons */
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.8rem;
+        }
+        .btn {
+            border: none;
+            border-radius: 50px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .nav-btn.primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .nav-btn.secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-
-        .nav-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        /* Tab Navigation */
-        .tabs {
-            display: flex;
             gap: 10px;
-            margin-bottom: 30px;
+            transition: 0.15s;
             background: white;
-            padding: 15px;
-            border-radius: 50px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            color: #0f3348;
+            border: 2px solid #c5dff2;
         }
-
-        .tab {
-            flex: 1;
-            padding: 15px 25px;
-            border: none;
-            border-radius: 40px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: transparent;
-            color: #666;
+        .btn-primary {
+            background: #fedb9f;
+            border-color: #feca7a;
+            color: #0f2a3b;
+            font-weight: 700;
         }
-
-        .tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .btn-primary:hover {
+            background: #ffd28c;
+            transform: scale(1.02);
+        }
+        .btn-success {
+            background: #1e7920;
+            border-color: #1a9e3a;
             color: white;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-success:hover {
+            background: #166318;
         }
 
-        .tab:hover:not(.active) {
-            background: #f0f0f0;
-        }
-
-        /* Dashboard Content */
-        .dashboard-content {
-            display: block;
-        }
-
-        .form-content {
-            display: none;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            border-left: 5px solid #667eea;
-            transition: transform 0.3s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-title {
-            color: #666;
-            font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .stat-value small {
-            font-size: 0.5em;
-            color: #999;
-        }
-
-        /* Table Styles */
-        .table-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            overflow: auto;
-            max-height: 600px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1800px;
-        }
-
-        th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 12px;
-            font-weight: 600;
-            font-size: 0.85em;
-            text-transform: uppercase;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            color: #555;
-            font-size: 0.9em;
-        }
-
-        tr:hover {
-            background-color: #f8f9ff;
-        }
-
-        tr:nth-child(even) {
-            background-color: #fafafa;
-        }
-
-        .drive-link {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 0.85em;
-        }
-
-        .drive-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Form Styles */
-        .form-container {
+        .toll-entry {
             background: white;
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-
-        .form-title {
-            font-size: 1.8em;
-            color: #333;
-            margin-bottom: 30px;
-            text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .form-grid {
+            padding: 1rem;
+            margin-bottom: 0.8rem;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
+            grid-template-columns: 1fr 1fr 0.8fr 0.5fr auto;
+            gap: 0.8rem;
+            align-items: center;
+            border: 1px solid #bcd6ec;
         }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 600;
-            font-size: 0.95em;
-        }
-
-        .form-group label span {
-            color: #e53e3e;
-            margin-left: 4px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        select.form-control {
-            cursor: pointer;
-            background-color: white;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .calculated-field {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-        }
-
-        .calculated-field label {
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .calculated-field .value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #28a745;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .remove-toll {
+            background: #dc3545;
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1.2em;
-            font-weight: 600;
+            border-radius: 30px;
+            padding: 0.4rem 1rem;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 30px;
         }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .loading {
+        .response-message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 50px;
+            font-weight: 600;
             text-align: center;
-            padding: 60px;
-        }
-
-        .spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #667eea;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error {
-            background: #fee;
-            color: #c00;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-            border: 2px solid #fcc;
-        }
-
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-            border: 2px solid #c3e6cb;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            color: white;
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .tabs {
-                flex-direction: column;
-                border-radius: 20px;
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
-    <!-- Google Apps Script loader (use jsapi for standalone web app) -->
-    <script src="https://apis.google.com/js/api.js?onload=initGapi"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>
-                <span>🚗⛽</span>
-                Vehicle Fuel Management System
-            </h1>
-            <div class="nav-buttons">
-                <!-- Home link uses the embedded script URL -->
-                <a href="https://script.google.com/macros/s/AKfycbzeenJ8TsvrqdAoVXnwm8UpqwTfjDA55g7xTGz1IXrYjjYLS6endFdDmBZA2PIg4O7K/exec" class="nav-btn secondary">🏠 Home</a>
-                <button class="nav-btn primary" onclick="refreshData()">🔄 Refresh</button>
-            </div>
+    <div class="character-scene">
+        <div class="fuel-mascot">
+            <svg viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="50" fill="#FEDB9F"/>
+                <circle cx="40" cy="45" r="8" fill="white"/>
+                <circle cx="80" cy="45" r="8" fill="white"/>
+                <circle cx="42" cy="47" r="4" fill="#274873"/>
+                <circle cx="78" cy="47" r="4" fill="#274873"/>
+                <path d="M50 70 Q60 85, 70 70" stroke="#274873" stroke-width="5" fill="none"/>
+                <rect x="30" y="90" width="60" height="18" fill="#457b9d" rx="9"/>
+                <text x="48" y="106" font-size="14" fill="white" font-weight="bold">⛽</text>
+            </svg>
         </div>
-
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
-            <button class="tab" onclick="showTab('form')">➕ New Fuel Entry</button>
+        <div class="lube-character">
+            <svg viewBox="0 0 100 100">
+                <path d="M30 40 L70 40 L80 70 L20 70 Z" fill="#a5d8ff"/>
+                <circle cx="35" cy="35" r="12" fill="#74c0fc"/>
+                <circle cx="65" cy="35" r="12" fill="#74c0fc"/>
+                <text x="42" y="42" fill="white" font-size="16">🛢️</text>
+            </svg>
         </div>
+        <div class="toll-character">
+            <svg viewBox="0 0 80 40">
+                <rect x="10" y="10" width="60" height="20" fill="#ffd966" rx="5"/>
+                <circle cx="25" cy="35" r="8" fill="#333"/>
+                <circle cx="55" cy="35" r="8" fill="#333"/>
+                <text x="30" y="25" fill="#333" font-size="12">🚦</text>
+            </svg>
+        </div>
+    </div>
 
-        <!-- Dashboard Content -->
-        <div id="dashboardContent" class="dashboard-content">
-            <div id="statsContainer" class="stats-grid"></div>
-            
-            <div id="loading" class="loading">
-                <div class="spinner"></div>
-                <p>Loading fuel data...</p>
+    <div class="dashboard">
+        <!-- MAIN FORM CARD -->
+        <div class="card">
+            <div class="logo-row">
+                <div class="badge"><i class="fas fa-gas-pump"></i> ONPOINT FLEET</div>
+                <div class="sheet-id"><i class="fas fa-file-excel"></i> SHEET: Fuel Entries</div>
             </div>
 
-            <div id="error" class="error" style="display: none;"></div>
+            <form id="fuelForm">
+                <!-- Basic Info -->
+                <div class="form-grid-3">
+                    <div class="field"><label><i class="fas fa-user"></i>Driver</label><input type="text" id="driverName" required></div>
+                    <div class="field"><label><i class="fas fa-calendar"></i>Date</label><input type="date" id="logDate" required></div>
+                    <div class="field"><label><i class="fas fa-tag"></i>Vehicle</label><input type="text" id="vehicleReg" placeholder="Reg number"></div>
+                </div>
 
-            <div id="tableContainer" class="table-container" style="display: none;">
-                <table id="dataTable">
-                    <thead id="tableHeader"></thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-            </div>
-        </div>
+                <!-- Odometer -->
+                <div class="form-grid-2">
+                    <div class="field"><label><i class="fas fa-tachometer-alt"></i>Odo start (km)</label><input type="number" id="odoStart" step="0.1" required></div>
+                    <div class="field"><label><i class="fas fa-flag-checkered"></i>Odo finish (km)</label><input type="number" id="odoFinish" step="0.1" required></div>
+                </div>
 
-        <!-- Form Content -->
-        <div id="formContent" class="form-content">
-            <div class="form-container">
-                <h2 class="form-title">New Fuel Entry Form</h2>
-                
-                <div id="formSuccess" class="success-message" style="display: none;"></div>
-                <div id="formError" class="error" style="display: none;"></div>
-                
-                <form id="fuelForm" onsubmit="submitForm(event)">
-                    <div class="form-grid">
-                        <!-- Driver Information -->
-                        <div class="form-group">
-                            <label>Driver Name <span>*</span></label>
-                            <input type="text" class="form-control" id="driverName" required>
+                <!-- Fuel Section with Price per Liter -->
+                <div class="cost-section">
+                    <div class="section-title"><i class="fas fa-oil-can"></i> FUEL TRANSACTION</div>
+                    <div class="form-grid-3">
+                        <div class="field"><label>Fuel type</label>
+                            <select id="fuelType" required><option value="">Select</option><option value="Petrol">Petrol</option><option value="Diesel">Diesel</option></select>
                         </div>
-
-                        <!-- Vehicle Information -->
-                        <div class="form-group">
-                            <label>Vehicle Registration <span>*</span></label>
-                            <input type="text" class="form-control" id="vehicleReg" required list="vehiclesList">
-                            <datalist id="vehiclesList"></datalist>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Vehicle Model <span>*</span></label>
-                            <input type="text" class="form-control" id="vehicleModel" required>
-                        </div>
-
-                        <!-- Odometer Readings -->
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Odometer Start (km) <span>*</span></label>
-                                <input type="number" class="form-control" id="odometerStart" required min="0" step="1" onchange="calculateKmTraveled()">
-                            </div>
-                            <div class="form-group">
-                                <label>Odometer Finish (km) <span>*</span></label>
-                                <input type="number" class="form-control" id="odometerFinish" required min="0" step="1" onchange="calculateKmTraveled()">
-                            </div>
-                        </div>
-
-                        <!-- Km Traveled (Auto-calculated) -->
-                        <div class="form-group">
-                            <label>Km Traveled</label>
-                            <input type="number" class="form-control" id="kmTraveled" readonly style="background-color: #f8f9fa;">
-                        </div>
-
-                        <!-- Fuel Information -->
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Fuel Liters <span>*</span></label>
-                                <input type="number" class="form-control" id="fuelLiters" required min="0" step="0.01" onchange="calculateAmounts()">
-                            </div>
-                            <div class="form-group">
-                                <label>Price per Liter ($) <span>*</span></label>
-                                <input type="number" class="form-control" id="pricePerLiter" required min="0" step="0.01" onchange="calculateAmounts()">
-                            </div>
-                        </div>
-
-                        <!-- Amount Paid (Auto-calculated) -->
-                        <div class="form-group">
-                            <label>Amount Paid ($)</label>
-                            <input type="number" class="form-control" id="amountPaid" readonly style="background-color: #f8f9fa;">
-                        </div>
-
-                        <!-- Lubrication -->
-                        <div class="form-group">
-                            <label>Lubrication Type</label>
-                            <select class="form-control" id="lubricationType" onchange="calculateAmounts()">
-                                <option value="">None</option>
-                                <option value="Engine Oil">Engine Oil</option>
-                                <option value="Gearbox Oil">Gearbox Oil</option>
-                                <option value="Brake Fluid">Brake Fluid</option>
-                                <option value="Coolant">Coolant</option>
-                                <option value="Grease">Grease</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Lubrication Cost ($)</label>
-                            <input type="number" class="form-control" id="lubricationCost" min="0" step="0.01" value="0" onchange="calculateAmounts()">
-                        </div>
-
-                        <!-- Cost Center -->
-                        <div class="form-group">
-                            <label>Cost Center <span>*</span></label>
-                            <select class="form-control" id="costCenter" required>
-                                <option value="">Select Cost Center</option>
-                                <option value="Onpoint Group HQ">Onpoint Group HQ</option>
-                                <option value="DI Solutions">DI Solutions</option>
-                                <option value="Aqua Telecoms">Aqua Telecoms</option>
-                                <option value="Nkanyezi Projects">Nkanyezi Projects</option>
-                                <option value="Onpoint Ontime Solutions">Onpoint Ontime Solutions</option>
-                            </select>
-                        </div>
-
-                        <!-- Department -->
-                        <div class="form-group">
-                            <label>Department <span>*</span></label>
-                            <select class="form-control" id="department" required>
-                                <option value="">Select Department</option>
-                                <option value="Admin">Admin</option>
-                                <option value="Business Development">Business Development</option>
-                                <option value="Finance & IT">Finance & IT</option>
-                                <option value="Fleet">Fleet</option>
-                                <option value="HR">HR</option>
-                                <option value="Operations">Operations</option>
-                                <option value="Procurements">Procurements</option>
-                                <option value="Sales">Sales</option>
-                                <option value="SHEQ">SHEQ</option>
-                                <option value="Tendering">Tendering</option>
-                                <option value="Warehouse">Warehouse</option>
-                            </select>
-                        </div>
-
-                        <!-- Notes -->
-                        <div class="form-group" style="grid-column: 1 / -1;">
-                            <label>Notes</label>
-                            <textarea class="form-control" id="notes" rows="3"></textarea>
-                        </div>
-
-                        <!-- Total Cost Display -->
-                        <div class="form-group" style="grid-column: 1 / -1;">
-                            <div class="calculated-field">
-                                <label>Total Cost (Fuel + Lubrication)</label>
-                                <div class="value" id="totalCostDisplay">$0.00</div>
-                            </div>
-                        </div>
+                        <div class="field"><label>Price per liter (R)</label><input type="number" id="pricePerLiter" step="0.01" min="0" required></div>
+                        <div class="field"><label>Liters</label><input type="number" id="fuelLiters" step="0.01" min="0" required></div>
                     </div>
+                    <div style="text-align:right; font-weight:600; margin-top:0.8rem;">⛽ Fuel total: R<span id="fuelTotalDisplay">0.00</span></div>
+                </div>
 
-                    <button type="submit" class="submit-btn" id="submitBtn">Save Fuel Entry</button>
-                </form>
-            </div>
+                <!-- Lubrication Cost -->
+                <div class="cost-section">
+                    <div class="section-title"><i class="fas fa-oil-can"></i> LUBRICATION / FLUIDS (with cost)</div>
+                    <div class="form-grid-3">
+                        <div class="field"><label>Lube type</label>
+                            <select id="lubeType">
+                                <option value="Engine Oil">Engine oil</option><option value="Brake fluid">Brake fluid</option>
+                                <option value="Coolant">Coolant</option><option value="Transmission oil">Transmission oil</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="field"><label>Quantity (L)</label><input type="number" id="lubeQty" step="0.1" min="0" value="0"></div>
+                        <div class="field"><label>Total cost (R)</label><input type="number" id="lubeCost" step="0.01" min="0" value="0"></div>
+                    </div>
+                    <div style="margin-top:0.8rem;"><textarea id="lubeNotes" rows="2" placeholder="Additional notes about lubrication..."></textarea></div>
+                </div>
+
+                <!-- Cost Center & Department -->
+                <div class="form-grid-2">
+                    <div class="field"><label><i class="fas fa-building"></i>Cost center</label>
+                        <select id="costCenter" required>
+                            <option value="">Select</option>
+                            <option value="Onpoint Group HQ">Onpoint Group HQ</option>
+                            <option value="DI Solutions">DI Solutions</option>
+                            <option value="Aqua Telecoms">Aqua Telecoms</option>
+                            <option value="Nkanyezi Projects">Nkanyezi Projects</option>
+                            <option value="Onpoint Ontime Solutions">Onpoint Ontime Solutions</option>
+                        </select>
+                    </div>
+                    <div class="field"><label><i class="fas fa-users"></i>Department</label>
+                        <select id="department" required>
+                            <option value="">Select</option>
+                            <option value="Admin">Admin</option><option value="Business Development">Business Development</option>
+                            <option value="Finance & IT">Finance & IT</option><option value="Fleet Management">Fleet Management</option>
+                            <option value="HR">HR</option><option value="Operations">Operations</option>
+                            <option value="Procurements">Procurements</option><option value="Sales">Sales</option>
+                            <option value="SHEQ">SHEQ</option><option value="Tendering">Tendering</option>
+                            <option value="Warehouse">Warehouse</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Toll Gates Dynamic Section -->
+                <div class="cost-section">
+                    <div class="section-title"><i class="fas fa-road"></i> TOLL GATE COSTS</div>
+                    <div id="tollContainer"></div>
+                    <button type="button" class="add-btn" id="addTollBtn"><i class="fas fa-plus"></i> Add toll gate</button>
+                </div>
+
+                <!-- GRAND TOTAL PANEL -->
+                <div class="totals-panel" id="totalsPanel">
+                    <div class="total-item"><span class="total-label">km travelled</span><div class="total-value" id="kmTraveled">0.0</div></div>
+                    <div class="total-item"><span class="total-label">km/liter</span><div class="total-value" id="kmPerLiter">0.00</div></div>
+                    <div class="total-item"><span class="total-label">fuel cost</span><div class="total-value" id="fuelCostTotal">R0</div></div>
+                    <div class="total-item"><span class="total-label">TOTAL PAID</span><div class="total-value" id="grandTotalPaid">R0</div></div>
+                </div>
+
+                <!-- hidden field for sheet ID -->
+                <input type="hidden" id="sheetId" value="1SnhLTWgzJfkKNmIvtj8uwa-8x7TsnRtqkfX3deEuHIQ">
+                
+                <!-- Action Buttons -->
+                <div class="action-bar">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-cloud-upload-alt"></i> SUBMIT TO SHEETS</button>
+                    <button type="button" class="btn" id="pdfDownloadBtn"><i class="fas fa-file-pdf"></i> PDF REPORT</button>
+                    <button type="button" class="btn" id="emailPdfBtn"><i class="fas fa-envelope"></i> EMAIL PDF</button>
+                </div>
+                <div id="submitResponse" class="response-message"></div>
+            </form>
         </div>
 
-        <!-- Footer -->
-        <div class="footer">
-            <p>Last updated: <span id="lastUpdated">Never</span></p>
+        <!-- RIGHT PANEL: SUMMARY & PREVIEW (optional) -->
+        <div class="card">
+            <h3 style="color:#0f3348; margin-bottom:1.5rem;"><i class="fas fa-chart-pie"></i> TRIP SUMMARY</h3>
+            <div style="background:#edf5fb; border-radius:30px; padding:1.5rem;">
+                <div style="display:grid; gap:1rem;">
+                    <div><i class="fas fa-gas-pump"></i> Fuel efficiency: <strong id="summaryEfficiency">-</strong></div>
+                    <div><i class="fas fa-wrench"></i> Lube cost: <strong id="summaryLube">R0.00</strong></div>
+                    <div><i class="fas fa-toll"></i> Toll total: <strong id="summaryToll">R0.00</strong></div>
+                    <hr>
+                    <div style="font-size:1.5rem; font-weight:700;">TOTAL: <span id="summaryTotal">R0.00</span></div>
+                </div>
+            </div>
+            <div style="margin-top:2rem;">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Ctext x='10' y='30' font-size='14' fill='%23333'%3EOnpoint Group - Fleet Management%3C/text%3E%3Ctext x='10' y='60' font-size='10' fill='%23666'%3EAccurate logging since 2026%3C/text%3E%3C/svg%3E" style="width:100%; opacity:0.5;">
+            </div>
         </div>
     </div>
 
     <script>
-        // Embedded Google Apps Script URL (your provided endpoint)
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeenJ8TsvrqdAoVXnwm8UpqwTfjDA55g7xTGz1IXrYjjYLS6endFdDmBZA2PIg4O7K/exec';
-
-        // Tab switching
-        function showTab(tab) {
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(t => t.classList.remove('active'));
+        (function() {
+            // DOM elements
+            const odoStart = document.getElementById('odoStart');
+            const odoFinish = document.getElementById('odoFinish');
+            const fuelLiters = document.getElementById('fuelLiters');
+            const pricePerLiter = document.getElementById('pricePerLiter');
+            const lubeCost = document.getElementById('lubeCost');
+            const fuelTotalDisplay = document.getElementById('fuelTotalDisplay');
+            const kmTraveledSpan = document.getElementById('kmTraveled');
+            const kmPerLiterSpan = document.getElementById('kmPerLiter');
+            const fuelCostTotalSpan = document.getElementById('fuelCostTotal');
+            const grandTotalSpan = document.getElementById('grandTotalPaid');
+            const summaryLube = document.getElementById('summaryLube');
+            const summaryToll = document.getElementById('summaryToll');
+            const summaryTotal = document.getElementById('summaryTotal');
+            const summaryEfficiency = document.getElementById('summaryEfficiency');
+            const tollContainer = document.getElementById('tollContainer');
+            const addTollBtn = document.getElementById('addTollBtn');
             
-            if (tab === 'dashboard') {
-                document.getElementById('dashboardContent').style.display = 'block';
-                document.getElementById('formContent').style.display = 'none';
-                tabs[0].classList.add('active');
-                loadData(); // Refresh dashboard data when switching to dashboard
-            } else {
-                document.getElementById('dashboardContent').style.display = 'none';
-                document.getElementById('formContent').style.display = 'block';
-                tabs[1].classList.add('active');
-                loadVehicles(); // Load vehicles for datalist
+            let tollEntries = [];
+
+            // Set today's date
+            document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+
+            // Update all calculations
+            function updateTotals() {
+                const start = parseFloat(odoStart.value) || 0;
+                const finish = parseFloat(odoFinish.value) || 0;
+                const liters = parseFloat(fuelLiters.value) || 0;
+                const price = parseFloat(pricePerLiter.value) || 0;
+                const lube = parseFloat(lubeCost.value) || 0;
+                
+                // Fuel total
+                const fuelTotal = liters * price;
+                fuelTotalDisplay.innerText = fuelTotal.toFixed(2);
+                
+                // KM travelled
+                const km = (finish > start) ? finish - start : 0;
+                kmTraveledSpan.innerText = km.toFixed(1);
+                
+                // KM per liter
+                const kmPerL = (liters > 0 && km > 0) ? km / liters : 0;
+                kmPerLiterSpan.innerText = kmPerL.toFixed(2);
+                summaryEfficiency.innerText = kmPerL.toFixed(2) + ' km/L';
+                
+                // Fuel cost total display
+                fuelCostTotalSpan.innerText = 'R' + fuelTotal.toFixed(2);
+                
+                // Toll total
+                const tollTotal = tollEntries.reduce((sum, entry) => sum + (parseFloat(entry.cost) || 0), 0);
+                summaryToll.innerText = 'R' + tollTotal.toFixed(2);
+                
+                // Grand total (fuel + lube + toll)
+                const grandTotal = fuelTotal + lube + tollTotal;
+                grandTotalSpan.innerText = 'R' + grandTotal.toFixed(2);
+                summaryLube.innerText = 'R' + lube.toFixed(2);
+                summaryTotal.innerText = 'R' + grandTotal.toFixed(2);
             }
-        }
 
-        // Initialize API and load data on page load
-        window.onload = function() {
-            // For standalone web app we can directly use fetch to call the script URL
-            // But to match original code structure, we'll implement google.script.run mock with fetch
-            setupMockGoogleScript();
-            loadData();
-            loadVehicles();
-        };
-
-        // Setup mock google.script.run that uses fetch to call the real Apps Script URL
-        function setupMockGoogleScript() {
-            window.google = window.google || {};
-            window.google.script = window.google.script || {};
-            window.google.script.run = {
-                _successHandler: null,
-                _failureHandler: null,
-                withSuccessHandler: function(fn) {
-                    this._successHandler = fn;
-                    return this;
-                },
-                withFailureHandler: function(fn) {
-                    this._failureHandler = fn;
-                    return this;
-                },
-                // Mock method for getFuelData
-                getFuelData: function() {
-                    fetch(SCRIPT_URL + '?action=getFuelData')
-                        .then(response => response.json())
-                        .then(data => {
-                            if (this._successHandler) this._successHandler(data);
-                        })
-                        .catch(err => {
-                            if (this._failureHandler) this._failureHandler(err.toString());
+            // Add toll gate entry
+            function addTollRow(tollData = { name: '', cost: 0 }) {
+                const index = tollEntries.length;
+                const div = document.createElement('div');
+                div.className = 'toll-entry';
+                div.innerHTML = `
+                    <input type="text" placeholder="Toll name" class="toll-name" value="${tollData.name}">
+                    <input type="number" step="0.01" placeholder="Cost (R)" class="toll-cost" value="${tollData.cost}">
+                    <button type="button" class="remove-toll"><i class="fas fa-trash"></i> Remove</button>
+                `;
+                const nameInput = div.querySelector('.toll-name');
+                const costInput = div.querySelector('.toll-cost');
+                const removeBtn = div.querySelector('.remove-toll');
+                
+                nameInput.addEventListener('input', () => {
+                    tollEntries[index].name = nameInput.value;
+                    updateTotals();
+                });
+                costInput.addEventListener('input', () => {
+                    tollEntries[index].cost = parseFloat(costInput.value) || 0;
+                    updateTotals();
+                });
+                removeBtn.addEventListener('click', () => {
+                    div.remove();
+                    tollEntries.splice(index, 1);
+                    // Re-index remaining entries
+                    document.querySelectorAll('.toll-entry').forEach((el, i) => {
+                        const nameIn = el.querySelector('.toll-name');
+                        const costIn = el.querySelector('.toll-cost');
+                        nameIn.removeEventListener('input', updateTotals);
+                        costIn.removeEventListener('input', updateTotals);
+                        // Re-attach with correct index
+                        nameIn.addEventListener('input', () => {
+                            tollEntries[i].name = nameIn.value;
+                            updateTotals();
                         });
-                },
-                // Mock method for getVehicles
-                getVehicles: function() {
-                    fetch(SCRIPT_URL + '?action=getVehicles')
-                        .then(response => response.json())
-                        .then(data => {
-                            if (this._successHandler) this._successHandler(data);
-                        })
-                        .catch(err => {
-                            if (this._failureHandler) this._failureHandler(err.toString());
+                        costIn.addEventListener('input', () => {
+                            tollEntries[i].cost = parseFloat(costIn.value) || 0;
+                            updateTotals();
                         });
-                },
-                // Mock method for saveFuelEntry
-                saveFuelEntry: function(formData) {
-                    fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors', // necessary for Apps Script redirects
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: new URLSearchParams({ action: 'save', ...formData })
-                    })
-                    .then(() => {
-                        // With no-cors we cannot read response; we assume success and return a dummy result
-                        // In practice you'd need to avoid no-cors to read response, but for demo we simulate
-                        if (this._successHandler) this._successHandler({ success: true, submissionId: 'GSheet-' + Date.now() });
-                    })
-                    .catch(err => {
-                        if (this._failureHandler) this._failureHandler(err.toString());
                     });
-                }
-            };
-        }
-
-        // Load dashboard data using fetch directly (bypass mock for reliability)
-        function loadData() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('tableContainer').style.display = 'none';
-            document.getElementById('error').style.display = 'none';
-            
-            fetch(SCRIPT_URL + '?action=getFuelData')
-                .then(response => response.json())
-                .then(result => displayData(result))
-                .catch(error => displayError(error.toString()));
-        }
-
-        function displayData(result) {
-            document.getElementById('loading').style.display = 'none';
-            
-            if (!result.success) {
-                displayError(result.error || 'Unknown error');
-                return;
-            }
-
-            document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
-            
-            calculateStats(result.data);
-            displayHeaders(result.headers);
-            displayRows(result.data);
-            
-            document.getElementById('tableContainer').style.display = 'block';
-        }
-
-        function calculateStats(data) {
-            let totalKm = 0, totalFuel = 0, totalCost = 0, totalLubeCost = 0;
-            
-            data.forEach(row => {
-                totalKm += parseFloat(row['Km Traveled']) || 0;
-                totalFuel += parseFloat(row['Fuel Liters']) || 0;
-                totalCost += parseFloat(row['Total Cost']) || 0;
-                totalLubeCost += parseFloat(row['Lubrication Cost']) || 0;
-            });
-            
-            const avgKmPerLiter = totalFuel > 0 ? (totalKm / totalFuel).toFixed(2) : 0;
-            const avgCostPerKm = totalKm > 0 ? (totalCost / totalKm).toFixed(2) : 0;
-            
-            const statsHTML = `
-                <div class="stat-card">
-                    <div class="stat-title">Total Entries</div>
-                    <div class="stat-value">${data.length}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">Total Distance</div>
-                    <div class="stat-value">${Number(totalKm).toLocaleString()} <small>km</small></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">Total Fuel</div>
-                    <div class="stat-value">${Number(totalFuel).toLocaleString()} <small>L</small></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">Total Cost</div>
-                    <div class="stat-value">$${Number(totalCost).toFixed(2)}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">Avg Efficiency</div>
-                    <div class="stat-value">${avgKmPerLiter} <small>km/L</small></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">Avg Cost/km</div>
-                    <div class="stat-value">$${avgCostPerKm}</div>
-                </div>
-            `;
-            
-            document.getElementById('statsContainer').innerHTML = statsHTML;
-        }
-
-        function displayHeaders(headers) {
-            const thead = document.getElementById('tableHeader');
-            let html = '<tr>';
-            
-            // Important headers to show (including new ones)
-            const importantHeaders = [
-                'Timestamp', 'Driver Name', 'Vehicle Registration', 'Vehicle Model',
-                'Km Traveled', 'Fuel Liters', 'Total Cost', 'Cost Center', 'Department',
-                'Lubrication Type', 'Drive Folder Link'
-            ];
-            
-            headers.forEach(header => {
-                if (importantHeaders.includes(header)) {
-                    html += `<th>${header}</th>`;
-                }
-            });
-            
-            html += '</tr>';
-            thead.innerHTML = html;
-        }
-
-        function displayRows(data) {
-            const tbody = document.getElementById('tableBody');
-            let html = '';
-
-            data.forEach(row => {
-                html += '<tr>';
-                
-                // Show important fields
-                const fields = [
-                    row['Timestamp'], row['Driver Name'], row['Vehicle Registration'],
-                    row['Vehicle Model'], row['Km Traveled'], row['Fuel Liters'],
-                    row['Total Cost'], row['Cost Center'], row['Department'],
-                    row['Lubrication Type']
-                ];
-                
-                fields.forEach(value => {
-                    let displayValue = value || '';
-                    if (value && !isNaN(value) && value.toString().includes('.')) {
-                        // If it looks like a number with decimals, but we want to format only if it's a cost field
-                        // We'll just display as is; but for Total Cost we format in data prep
-                        if (typeof value === 'number' || !isNaN(parseFloat(value))) {
-                            // avoid double formatting, just trust the server
-                        }
-                    }
-                    html += `<td>${displayValue}</td>`;
+                    updateTotals();
                 });
                 
-                // Drive folder link
-                const driveLink = row['Drive Folder Link'];
-                if (driveLink) {
-                    html += `<td><a href="${driveLink}" target="_blank" class="drive-link">📁 View</a></td>`;
-                } else {
-                    html += '<td></td>';
-                }
-                
-                html += '</tr>';
-            });
-
-            document.getElementById('tableBody').innerHTML = html;
-        }
-
-        function displayError(error) {
-            document.getElementById('loading').style.display = 'none';
-            const errorDiv = document.getElementById('error');
-            errorDiv.style.display = 'block';
-            errorDiv.innerHTML = `Error: ${error}<br><br><button class="nav-btn primary" onclick="loadData()">Try Again</button>`;
-        }
-
-        // Form Functions
-        function calculateKmTraveled() {
-            const start = parseFloat(document.getElementById('odometerStart').value) || 0;
-            const finish = parseFloat(document.getElementById('odometerFinish').value) || 0;
-            const kmTraveled = finish - start;
-            
-            if (kmTraveled >= 0) {
-                document.getElementById('kmTraveled').value = kmTraveled.toFixed(1);
-            } else {
-                document.getElementById('kmTraveled').value = 0;
-                alert('Odometer Finish must be greater than Odometer Start');
+                tollContainer.appendChild(div);
+                tollEntries.push({ name: tollData.name, cost: parseFloat(tollData.cost) || 0 });
+                updateTotals();
             }
-        }
 
-        function calculateAmounts() {
-            const liters = parseFloat(document.getElementById('fuelLiters').value) || 0;
-            const price = parseFloat(document.getElementById('pricePerLiter').value) || 0;
-            const lubeCost = parseFloat(document.getElementById('lubricationCost').value) || 0;
-            
-            const amountPaid = liters * price;
-            const totalCost = amountPaid + lubeCost;
-            
-            document.getElementById('amountPaid').value = amountPaid.toFixed(2);
-            document.getElementById('totalCostDisplay').textContent = `$${totalCost.toFixed(2)}`;
-        }
+            addTollBtn.addEventListener('click', () => addTollRow());
 
-        function loadVehicles() {
-            fetch(SCRIPT_URL + '?action=getVehicles')
-                .then(response => response.json())
-                .then(vehicles => {
-                    const datalist = document.getElementById('vehiclesList');
-                    datalist.innerHTML = '';
-                    vehicles.forEach(v => {
-                        const option = document.createElement('option');
-                        option.value = v.registration;
-                        option.label = `${v.registration} - ${v.model}`;
-                        datalist.appendChild(option);
+            // Add listeners for calculation
+            [odoStart, odoFinish, fuelLiters, pricePerLiter, lubeCost].forEach(el => 
+                el.addEventListener('input', updateTotals)
+            );
+
+            // Initial update
+            updateTotals();
+
+            // Submit to Google Sheets
+            document.getElementById('fuelForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Gather all data
+                const driver = document.getElementById('driverName').value;
+                const date = document.getElementById('logDate').value;
+                const vehicle = document.getElementById('vehicleReg').value;
+                const start = parseFloat(odoStart.value);
+                const finish = parseFloat(odoFinish.value);
+                const fuelType = document.getElementById('fuelType').value;
+                const price = parseFloat(pricePerLiter.value);
+                const liters = parseFloat(fuelLiters.value);
+                const fuelTotal = liters * price;
+                const lubeType = document.getElementById('lubeType').value;
+                const lubeQty = parseFloat(document.getElementById('lubeQty').value) || 0;
+                const lubeTotal = parseFloat(lubeCost.value) || 0;
+                const lubeNotes = document.getElementById('lubeNotes').value;
+                const costCenter = document.getElementById('costCenter').value;
+                const department = document.getElementById('department').value;
+                
+                // Toll data
+                const tolls = tollEntries.map(t => `${t.name}:R${t.cost.toFixed(2)}`).join('; ');
+                const tollTotal = tollEntries.reduce((sum, t) => sum + t.cost, 0);
+                
+                const km = finish - start;
+                const kmPerL = liters > 0 ? km / liters : 0;
+                const grandTotal = fuelTotal + lubeTotal + tollTotal;
+                
+                const payload = {
+                    sheetId: document.getElementById('sheetId').value,
+                    timestamp: new Date().toISOString(),
+                    driver, date, vehicle,
+                    odoStart: start, odoFinish: finish,
+                    fuelType, pricePerLiter: price, fuelLiters: liters, fuelTotal,
+                    lubrication: `${lubeType} ${lubeQty}L cost R${lubeTotal} (${lubeNotes})`,
+                    lubeCost: lubeTotal,
+                    tolls, tollTotal,
+                    costCenter, department,
+                    kmTraveled: km, kmPerLiter: kmPerL, grandTotal
+                };
+                
+                const scriptURL = 'https://script.google.com/macros/s/AKfycbzeenJ8TsvrqdAoVXnwm8UpqwTfjDA55g7xTGz1IXrYjjYLS6endFdDmBZA2PIg4O7K/exec';
+                
+                document.getElementById('submitResponse').innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Submitting...';
+                
+                try {
+                    await fetch(scriptURL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
                     });
-                })
-                .catch(err => console.warn('Could not load vehicles'));
-        }
-
-        function submitForm(event) {
-            event.preventDefault();
-            
-            // Validate km traveled
-            const kmTraveled = parseFloat(document.getElementById('kmTraveled').value);
-            if (kmTraveled <= 0) {
-                alert('Please enter valid odometer readings');
-                return;
-            }
-            
-            // Disable submit button
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Saving...';
-            
-            // Prepare form data
-            const formData = {
-                action: 'save',
-                driverName: document.getElementById('driverName').value,
-                vehicleReg: document.getElementById('vehicleReg').value,
-                vehicleModel: document.getElementById('vehicleModel').value,
-                odometerStart: document.getElementById('odometerStart').value,
-                odometerFinish: document.getElementById('odometerFinish').value,
-                kmTraveled: kmTraveled,
-                fuelLiters: document.getElementById('fuelLiters').value,
-                pricePerLiter: document.getElementById('pricePerLiter').value,
-                lubricationType: document.getElementById('lubricationType').value,
-                lubricationCost: document.getElementById('lubricationCost').value || 0,
-                costCenter: document.getElementById('costCenter').value,
-                department: document.getElementById('department').value,
-                notes: document.getElementById('notes').value
-            };
-            
-            // Send using fetch to Apps Script (no-cors mode to avoid preflight, but we won't get response body)
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', // necessary for Apps Script redirects to work
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams(formData)
-            })
-            .then(() => {
-                // With no-cors, we cannot read response, but we assume success
-                // Show success message to user
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Save Fuel Entry';
-                
-                const successDiv = document.getElementById('formSuccess');
-                successDiv.style.display = 'block';
-                successDiv.innerHTML = `✅ Fuel entry saved successfully! (Synced to Google Sheets)`;
-                
-                // Reset form
-                document.getElementById('fuelForm').reset();
-                document.getElementById('kmTraveled').value = '';
-                document.getElementById('amountPaid').value = '';
-                document.getElementById('totalCostDisplay').textContent = '$0.00';
-                
-                // Hide success message after 5 seconds
-                setTimeout(() => {
-                    successDiv.style.display = 'none';
-                }, 5000);
-                
-                // Switch to dashboard after successful save
-                setTimeout(() => {
-                    showTab('dashboard');
-                }, 2000);
-            })
-            .catch(error => {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Save Fuel Entry';
-                
-                const errorDiv = document.getElementById('formError');
-                errorDiv.style.display = 'block';
-                errorDiv.innerHTML = `❌ Error: ${error}`;
+                    document.getElementById('submitResponse').innerHTML = '<span style="color:#0f6d31;">✅ Successfully logged to Google Sheets</span>';
+                } catch (error) {
+                    document.getElementById('submitResponse').innerHTML = '<span style="color:#b13e3e;">❌ Submission failed</span>';
+                }
             });
-        }
 
-        function refreshData() {
-            loadData();
-        }
+            // PDF Generation
+            window.jsPDF = window.jspdf.jsPDF;
+            document.getElementById('pdfDownloadBtn').addEventListener('click', function() {
+                const doc = new jsPDF();
+                
+                // Build PDF content
+                doc.setFontSize(20);
+                doc.text('ONPOINT GROUP - FUEL LOG REPORT', 20, 20);
+                doc.setFontSize(12);
+                doc.text(`Driver: ${document.getElementById('driverName').value || 'N/A'}`, 20, 40);
+                doc.text(`Date: ${document.getElementById('logDate').value}`, 20, 50);
+                doc.text(`Vehicle: ${document.getElementById('vehicleReg').value || 'N/A'}`, 20, 60);
+                doc.text(`Odometer: ${odoStart.value || 0} km → ${odoFinish.value || 0} km`, 20, 70);
+                doc.text(`Distance: ${kmTraveledSpan.innerText} km`, 20, 80);
+                doc.text(`Fuel: ${fuelLiters.value || 0} L × R${pricePerLiter.value || 0} = R${fuelTotalDisplay.innerText}`, 20, 90);
+                doc.text(`Lubrication cost: R${lubeCost.value || 0}`, 20, 100);
+                doc.text(`Toll gates: ${tollEntries.length} entries total R${summaryToll.innerText.replace('R','')}`, 20, 110);
+                doc.text(`GRAND TOTAL PAID: R${grandTotalSpan.innerText.replace('R','')}`, 20, 130);
+                doc.text(`Cost center: ${document.getElementById('costCenter').value} / ${document.getElementById('department').value}`, 20, 150);
+                
+                doc.save(`fuel_log_${document.getElementById('logDate').value}.pdf`);
+            });
 
-        // Ensure google.script.run is mocked for compatibility with original script calls (like in loadVehicles)
-        // Already called in setupMockGoogleScript.
+            // Email PDF (dummy - opens mail client)
+            document.getElementById('emailPdfBtn').addEventListener('click', function() {
+                const subject = `Fuel Log Report ${document.getElementById('logDate').value}`;
+                const body = `Please find attached the fuel log report.\n\nTotal paid: ${grandTotalSpan.innerText}`;
+                window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            });
+
+        })();
     </script>
 </body>
 </html>
