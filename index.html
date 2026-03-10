@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>OnPoint Fleet · accident report + app QR</title>
+    <title>OnPoint Fleet · accident report + depts</title>
     <!-- Font & icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
     <!-- Google Maps Geocoding API - Using a valid API key -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places&callback=initMap" async defer></script>
     <style>
-        /* All your existing CSS remains exactly the same */
+        /* All your existing CSS remains exactly the same (with minor additions) */
         * {
             margin: 0;
             padding: 0;
@@ -377,6 +377,49 @@
             text-decoration: underline;
         }
 
+        /* Professional action buttons for fuel log & handover */
+        .action-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+            align-items: center;
+        }
+        .action-card {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 12px 25px;
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: #0b2b5c;
+            font-weight: 700;
+            box-shadow: 0 10px 18px -8px rgba(11,43,92,0.3);
+            border: 1px solid rgba(255,215,0,0.6);
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
+            background: rgba(255,255,255,0.9);
+        }
+        .action-card i {
+            font-size: 1.8rem;
+            color: #1e4f8a;
+        }
+        .action-card:hover {
+            background: #ffd966;
+            transform: translateY(-4px);
+            border-color: #0b2b5c;
+        }
+        .action-card small {
+            font-weight: 400;
+            font-size: 0.8rem;
+            color: #2f4b74;
+        }
+        .action-text {
+            display: flex;
+            flex-direction: column;
+        }
+
         @media (max-width: 480px) {
             .report-card { padding: 1.5rem 1.2rem; border-radius: 32px; }
             .logo-text { font-size: 1.6rem; }
@@ -384,20 +427,8 @@
             .counter-pill { top: 10px; right: 10px; padding: 8px 15px; gap: 12px; font-size: 0.8rem; }
             .floating-wa { width: 55px; height: 55px; font-size: 2rem; bottom: 20px; right: 20px; }
             .app-download-row { flex-direction: column; align-items: flex-start; }
-        }
-        .take{
-            color: blue;
-            text-align: center;
-            font-size: 15px;
-            align-items: center;
-            
-        }
-        .take:hover{
-            opacity: 0.7;
-            transition: 0.7s;
-            cursor: hover;
-            color: red;
-            background-color: green;
+            .action-links { flex-direction: column; align-items: stretch; }
+            .action-card { justify-content: center; }
         }
     </style>
 </head>
@@ -419,7 +450,7 @@
                 <script type='text/javascript' src='https://www.counter12.com/ad.js?id=3yZY1ZZwa29AB3dd'></script>
             </div>
         </div>
-        <!-- label below: Incidents 2026 -->
+        <!-- label below: App Visit 2026 -->
         <div class="incident-label"><i class="fas fa-car-crash"></i> App Visit 2026</div>
     </div>
 
@@ -456,7 +487,7 @@
             </div>
         </div>
 
-        <!-- NEW: APP DOWNLOAD QR CODE (exactly as requested) -->
+        <!-- NEW: APP DOWNLOAD QR CODE (updated link) -->
         <div class="app-download-row" id="appQrRow">
             <div class="qr-container">
                 <canvas id="qrCanvas" width="60" height="60"></canvas>
@@ -470,15 +501,23 @@
                 <i class="fas fa-download"></i> get app (google drive)
             </a>
         </div>
-        <br>
-        <div>
-            <a class="take" href="contacts.html">Vehicle Handover</a><br>
-            <small>click above if you are swapping vehicles</small><br><br>
-        </div>
-        <div>
-            <a class="take" href="details.html">Fuel Log</a><br>
-            <small>click here when filling fuel</small><br><br>
-
+        
+        <!-- PROFESSIONAL ACTION LINKS (Fuel Log & Vehicle Handover) -->
+        <div class="action-links">
+            <a href="details.html" class="action-card">
+                <i class="fas fa-gas-pump"></i>
+                <span class="action-text">
+                    <span>Fuel Log</span>
+                    <small>record fuel fill-ups</small>
+                </span>
+            </a>
+            <a href="contacts.html" class="action-card">
+                <i class="fas fa-truck-moving"></i>
+                <span class="action-text">
+                    <span>Vehicle Handover</span>
+                    <small>swap vehicles</small>
+                </span>
+            </a>
         </div>
 
         <!-- FORM STARTS -->
@@ -501,7 +540,8 @@
                 </div>
                 <div class="input-field">
                     <label><i class="fas fa-map-pin"></i> Location / street</label>
-                    <input type="text" id="location" name="location" placeholder="Detecting address automatically..." value="" required>
+                    <!-- now a plain input field (manual entry / autofilled by script but user can edit) -->
+                    <input type="text" id="location" name="location" placeholder="Enter address or use GPS detect" value="" required>
                 </div>
             </div>
 
@@ -518,8 +558,22 @@
                     </select>
                 </div>
                 <div class="input-field">
-                    <label><i class="fas fa-id-card"></i> Unit #</label>
-                    <input type="text" id="unitNumber" name="unitNumber" value="408" required>
+                    <!-- CHANGED: Unit# -> Department with dropdown -->
+                    <label><i class="fas fa-users"></i> Department</label>
+                    <select id="department" name="department" required>
+                        <option value="" disabled>– select department –</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Business Development">Business Development</option>
+                        <option value="Finance & IT">Finance & IT</option>
+                        <option value="Fleet" selected>Fleet</option>
+                        <option value="Human Resource">Human Resource</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Procurements">Procurements</option>
+                        <option value="Sales">Sales</option>
+                        <option value="SHEQ">SHEQ</option>
+                        <option value="Tendering">Tendering</option>
+                        <option value="Warehouse">Warehouse</option>
+                    </select>
                 </div>
             </div>
 
@@ -625,7 +679,7 @@
             
             <div class="info-note" style="background: #fff3cd; border-color: #ffeeba;">
                 <i class="fas fa-lightbulb" style="color: #856404;"></i>
-                <strong>Live map + address:</strong> street address is auto‑filled using Google Maps. <i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp button bottom right.
+                <strong>Live map + address:</strong> street address can be typed or auto‑filled. <i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp button bottom right.
             </div>
         </form>
         <footer>
@@ -635,8 +689,7 @@
 
     <script>
         (function() {
-            // ========== GOOGLE APPS SCRIPT URL - NOW EMBEDDED AND FUNCTIONAL ==========
-            // The exact URL you provided - now properly configured
+            // ========== GOOGLE APPS SCRIPT URL ==========
             const GAS_URL = 'https://script.google.com/macros/s/AKfycbx4SoTlyTCO9wNBybzxPzcI60_lML3G2S-WKtM-1XCDjtedNsFVZZsaDn2_fE4xO-_Z/exec';
             
             // Google Sheet ID - Your provided sheet
@@ -714,7 +767,7 @@
             // set today's date
             document.getElementById('accidentDate').value = new Date().toISOString().split('T')[0];
 
-            // ---------- GEOCODING + AUTO‑FILL LOCATION FIELD ----------
+            // ---------- GEOCODING + AUTO‑FILL LOCATION FIELD (but now it's a normal input, still can be autofilled) ----------
             function updateMapLink() {
                 if (gpsCoords.lat && gpsCoords.lon) {
                     const lat = gpsCoords.lat.toFixed(6);
@@ -731,6 +784,7 @@
                         geocoder.geocode({ location: { lat: gpsCoords.lat, lng: gpsCoords.lon } }, (results, status) => {
                             if (status === 'OK' && results[0]) {
                                 const address = results[0].formatted_address;
+                                // Auto-fill but user can overwrite
                                 locationInput.value = address;
                                 attachmentStatus.innerHTML = `<i class="fas fa-check-circle"></i> Address detected: ${address.substring(0, 50)}...`;
                             } else {
@@ -886,7 +940,7 @@
                     vehicleReg: document.getElementById('vehicleReg').value,
                     location: document.getElementById('location').value,
                     accidentType: document.getElementById('accidentType').value,
-                    unitNumber: document.getElementById('unitNumber').value,
+                    department: document.getElementById('department').value,   // changed from unitNumber to department
                     driverName: document.getElementById('driverName').value,
                     driverPhone: document.getElementById('driverPhone').value,
                     description: document.getElementById('description').value,
@@ -908,7 +962,7 @@
             }
 
             function validateForm(data) {
-                const required = [data.date, data.time, data.vehicleReg, data.location, data.accidentType, data.unitNumber, data.driverName, data.driverPhone, data.description];
+                const required = [data.date, data.time, data.vehicleReg, data.location, data.accidentType, data.department, data.driverName, data.driverPhone, data.description];
                 if (required.some(f => !f)) {
                     alert('Please fill all required fields');
                     return false;
@@ -975,8 +1029,8 @@
                 if (gpsCoords.lat && gpsCoords.lon) updateMapLink();
             };
 
-            // ---------- QR CODE for the app link (exactly as requested) ----------
-            const appLink = "https://drive.google.com/file/d/1fIw2dAfkfWjACAs2AyWrT8dL9gjbUBsz/view?usp=drive_link";
+            // ---------- QR CODE for the updated app link (exactly as requested) ----------
+            const appLink = "https://drive.google.com/file/d/1aFy2cAbXoWM8Oy7AzpqCWYXRDHnL1mk3/view?usp=drive_link";
             const qrCanvas = document.getElementById('qrCanvas');
             if (qrCanvas) {
                 QRCode.toCanvas(qrCanvas, appLink, { width: 60, margin: 0, color: { dark: '#0b2b5c', light: '#ffffff' } }, (error) => {
@@ -987,6 +1041,3 @@
     </script>
 </body>
 </html>
-
-
-
