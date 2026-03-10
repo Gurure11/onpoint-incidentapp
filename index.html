@@ -12,7 +12,7 @@
     <!-- Google Maps Geocoding API - Using a valid API key -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places&callback=initMap" async defer></script>
     <style>
-        /* All your existing CSS remains exactly the same (with minor additions) */
+        /* All your existing CSS remains exactly the same */
         * {
             margin: 0;
             padding: 0;
@@ -540,7 +540,6 @@
                 </div>
                 <div class="input-field">
                     <label><i class="fas fa-map-pin"></i> Location / street</label>
-                    <!-- now a plain input field (manual entry / autofilled by script but user can edit) -->
                     <input type="text" id="location" name="location" placeholder="Enter address or use GPS detect" value="" required>
                 </div>
             </div>
@@ -558,7 +557,6 @@
                     </select>
                 </div>
                 <div class="input-field">
-                    <!-- CHANGED: Unit# -> Department with dropdown -->
                     <label><i class="fas fa-users"></i> Department</label>
                     <select id="department" name="department" required>
                         <option value="" disabled>– select department –</option>
@@ -577,7 +575,7 @@
                 </div>
             </div>
 
-            <!-- NEW: COST CENTER FIELD -->
+            <!-- COST CENTER FIELD - FIXED POSITIONING -->
             <div class="input-field">
                 <label><i class="fas fa-building"></i> Cost Center</label>
                 <select id="costCenter" name="costCenter" required>
@@ -597,7 +595,7 @@
                 </div>
                 <div class="input-field">
                     <label><i class="fas fa-phone-alt"></i> Driver phone</label>
-                    <input type="tel" id="driverPhone" name="driverPhone" value="+1 555 321 7890" required>
+                    <input type="tel" id="driverPhone" name="driverPhone" value="+27 72 555 7890" required>
                 </div>
             </div>
 
@@ -629,7 +627,7 @@
                 </div>
                 <div class="input-field">
                     <label><i class="fas fa-mobile-alt"></i> Officer cell</label>
-                    <input type="tel" id="officerPhone" name="officerPhone" value="555-987-6543">
+                    <input type="tel" id="officerPhone" name="officerPhone" value="082 555 9876">
                 </div>
             </div>
 
@@ -781,7 +779,7 @@
             // set today's date
             document.getElementById('accidentDate').value = new Date().toISOString().split('T')[0];
 
-            // ---------- GEOCODING + AUTO‑FILL LOCATION FIELD (but now it's a normal input, still can be autofilled) ----------
+            // ---------- GEOCODING + AUTO‑FILL LOCATION FIELD ----------
             function updateMapLink() {
                 if (gpsCoords.lat && gpsCoords.lon) {
                     const lat = gpsCoords.lat.toFixed(6);
@@ -798,7 +796,6 @@
                         geocoder.geocode({ location: { lat: gpsCoords.lat, lng: gpsCoords.lon } }, (results, status) => {
                             if (status === 'OK' && results[0]) {
                                 const address = results[0].formatted_address;
-                                // Auto-fill but user can overwrite
                                 locationInput.value = address;
                                 attachmentStatus.innerHTML = `<i class="fas fa-check-circle"></i> Address detected: ${address.substring(0, 50)}...`;
                             } else {
@@ -828,7 +825,7 @@
                     (err) => {
                         console.warn('GPS failed, fallback to Midrand default');
                         gpsCoords.lat = -25.9989; 
-                        gpsCoords.lon = 28.1213; // Midrand approx
+                        gpsCoords.lon = 28.1213;
                         updateMapLink();
                         locationInput.value = '71 Pretorius Rd, President Park, Midrand (default)';
                         attachmentStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> GPS denied – using default Midrand address';
@@ -941,12 +938,13 @@
                 stampLocationSpan.innerText = 'locating…';
             });
 
-            // ---------- FORM DATA COLLECTION ----------
+            // ---------- FORM DATA COLLECTION - FIXED ORDER TO MATCH SHEET ----------
             function getFormData() {
                 const reported = document.querySelector('input[name="reportedMetro"]:checked');
                 const drunken = document.querySelector('input[name="drunkenDriving"]:checked');
                 const atFault = document.querySelector('input[name="atFault"]:checked');
                 
+                // IMPORTANT: This order MUST match your spreadsheet column order
                 return {
                     timestamp: new Date().toISOString(),
                     date: document.getElementById('accidentDate').value,
@@ -955,7 +953,7 @@
                     location: document.getElementById('location').value,
                     accidentType: document.getElementById('accidentType').value,
                     department: document.getElementById('department').value,
-                    costCenter: document.getElementById('costCenter').value, // NEW FIELD
+                    costCenter: document.getElementById('costCenter').value, // COST CENTER COMES HERE - CORRECT POSITION
                     driverName: document.getElementById('driverName').value,
                     driverPhone: document.getElementById('driverPhone').value,
                     description: document.getElementById('description').value,
@@ -979,7 +977,7 @@
             function validateForm(data) {
                 const required = [
                     data.date, data.time, data.vehicleReg, data.location, 
-                    data.accidentType, data.department, data.costCenter, // Added costCenter to required
+                    data.accidentType, data.department, data.costCenter, // Cost Center is now required
                     data.driverName, data.driverPhone, data.description
                 ];
                 if (required.some(f => !f)) {
@@ -1001,54 +999,40 @@
                 attachmentStatus.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sending to Google Sheets...';
 
                 try {
-                    // Send data to Google Apps Script using fetch with proper CORS mode
-                    const response = await fetch(GAS_URL, {
+                    // Send data to Google Apps Script
+                    await fetch(GAS_URL, {
                         method: 'POST',
-                        mode: 'no-cors', // Important for Google Apps Script
+                        mode: 'no-cors',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
                         },
                         body: new URLSearchParams(data)
                     });
-
-                    // Since we're using no-cors, we won't get a readable response
-                    // But we can assume success if no error was thrown
                     
                     // Increment counters on successful submission
                     incrementCounters();
                     
-                    // Show success message
                     attachmentStatus.innerHTML = '<i class="fas fa-check-circle" style="color:#0f9d58;"></i> Report submitted successfully to Google Sheets!';
                     
-                    // Optional: Clear form or show additional message
                     alert('✅ Accident report submitted successfully!\n\nData saved to Google Sheets.\nImage uploaded to Google Drive (if attached).');
-                    
-                    // Optionally reset the image
-                    if (confirm('Would you like to clear the form for a new report?')) {
-                        clearImageBtn.click();
-                        // Reset other fields if needed
-                    }
                     
                 } catch (error) {
                     console.error('Submission error:', error);
                     attachmentStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i> Error submitting report. Please try again.';
                     alert('❌ Error submitting report. Please check your connection and try again.');
                 } finally {
-                    // Restore button
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
                 }
             }
 
-            // Add submit button event listener
             submitBtn.addEventListener('click', submitToGoogleAppsScript);
 
-            // Google Maps callback
             window.initMap = function() {
                 if (gpsCoords.lat && gpsCoords.lon) updateMapLink();
             };
 
-            // ---------- QR CODE for the updated app link (exactly as requested) ----------
+            // ---------- QR CODE ----------
             const appLink = "https://drive.google.com/file/d/1aFy2cAbXoWM8Oy7AzpqCWYXRDHnL1mk3/view?usp=drive_link";
             const qrCanvas = document.getElementById('qrCanvas');
             if (qrCanvas) {
