@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>OnPoint Fleet · accident report + depts</title>
+    <title>OnPoint Fleet · accident report + cost center</title>
     <!-- Font & icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
@@ -577,6 +577,19 @@
                 </div>
             </div>
 
+            <!-- NEW: COST CENTER FIELD -->
+            <div class="input-field">
+                <label><i class="fas fa-building"></i> Cost Center</label>
+                <select id="costCenter" name="costCenter" required>
+                    <option value="" disabled selected>– select cost center –</option>
+                    <option value="Onpoint Group HQ">Onpoint Group HQ</option>
+                    <option value="DI Solutions">DI Solutions</option>
+                    <option value="Aqua Telecoms">Aqua Telecoms</option>
+                    <option value="Nkanyezi Projects">Nkanyezi Projects</option>
+                    <option value="Onpoint Ontime Solutions">Onpoint Ontime Solutions</option>
+                </select>
+            </div>
+
             <div class="two-cols">
                 <div class="input-field">
                     <label><i class="fas fa-user"></i> Driver's name</label>
@@ -690,6 +703,7 @@
     <script>
         (function() {
             // ========== GOOGLE APPS SCRIPT URL ==========
+            // REPLACE THIS WITH YOUR DEPLOYED WEB APP URL AFTER DEPLOYING THE SCRIPT
             const GAS_URL = 'https://script.google.com/macros/s/AKfycbz-7dRe7u46WEAGJcM8K1q8Y_MXuVKmVPE8Nn25q9wZ4FOaiOKCKCkzOeJ44qt5Oy4/exec';
             
             // Google Sheet ID - Your provided sheet
@@ -940,7 +954,8 @@
                     vehicleReg: document.getElementById('vehicleReg').value,
                     location: document.getElementById('location').value,
                     accidentType: document.getElementById('accidentType').value,
-                    department: document.getElementById('department').value,   // changed from unitNumber to department
+                    department: document.getElementById('department').value,
+                    costCenter: document.getElementById('costCenter').value, // NEW FIELD
                     driverName: document.getElementById('driverName').value,
                     driverPhone: document.getElementById('driverPhone').value,
                     description: document.getElementById('description').value,
@@ -962,9 +977,13 @@
             }
 
             function validateForm(data) {
-                const required = [data.date, data.time, data.vehicleReg, data.location, data.accidentType, data.department, data.driverName, data.driverPhone, data.description];
+                const required = [
+                    data.date, data.time, data.vehicleReg, data.location, 
+                    data.accidentType, data.department, data.costCenter, // Added costCenter to required
+                    data.driverName, data.driverPhone, data.description
+                ];
                 if (required.some(f => !f)) {
-                    alert('Please fill all required fields');
+                    alert('Please fill all required fields including Cost Center');
                     return false;
                 }
                 return true;
@@ -1041,4 +1060,3 @@
     </script>
 </body>
 </html>
-
