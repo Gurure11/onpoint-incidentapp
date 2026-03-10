@@ -2,936 +2,853 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>OnPoint Fleet · accident report</title>
-    <!-- Font & icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <!-- QR code generator -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-    <!-- Google Maps Geocoding API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places&callback=initMap" async defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Fuel Management System</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
+
         body {
-            background: #0b2b5c;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-            background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.06) 0%, transparent 20%),
-                              radial-gradient(circle at 80% 70%, rgba(255,215,0,0.08) 0%, transparent 25%);
-            animation: bgShift 18s infinite alternate ease-in-out;
-            position: relative;
-        }
-        @keyframes bgShift {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 5% 5%; }
+            padding: 20px;
         }
 
-        /* Floating WhatsApp button */
-        .floating-wa {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1000;
-            background: #25D366;
-            color: white;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            box-shadow: 0 12px 25px rgba(0,0,0,0.25), 0 4px 10px rgba(0,0,0,0.3);
-            transition: all 0.25s ease;
-            border: 3px solid white;
-            text-decoration: none;
-        }
-        .floating-wa:hover {
-            transform: scale(1.12) rotate(5deg);
-            background: #20b859;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.3);
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
-        /* Counter pill */
-        .counter-pill {
-            position: fixed;
-            top: 20px;
-            right: 30px;
-            background: #ffffffdd;
-            backdrop-filter: blur(8px);
-            border-radius: 60px;
-            padding: 12px 25px;
-            border: 1px solid #ffc107;
-            box-shadow: 0 15px 30px -8px #0b2b5c;
+        /* Header/Navigation */
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            z-index: 1000;
-            font-weight: 600;
-            color: #0b1f3b;
-        }
-        .incident-label {
-            text-align: center;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #0b2b5c;
-            background: #ffd966cc;
-            padding: 4px 12px;
-            border-radius: 40px;
-            margin-top: 4px;
-            letter-spacing: 0.3px;
-        }
-
-        .report-card {
-            max-width: 800px;
-            width: 100%;
-            background: rgba(255,255,255,0.88);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 42px;
-            box-shadow: 0 30px 55px -10px rgba(0,10,40,0.65), inset 0 1px 3px rgba(255,255,255,0.9);
-            padding: 2rem 1.8rem;
-            border: 1px solid rgba(255,255,255,0.7);
-            transition: all 0.2s ease;
-            position: relative;
-            z-index: 5;
-        }
-
-        .logo-header {
-            display: flex;
-            align-items: center;
             justify-content: space-between;
-            margin-bottom: 0.8rem;
+            align-items: center;
             flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
-        .logo-area {
+
+        .nav-buttons {
             display: flex;
-            align-items: center;
-            gap: 16px;
+            gap: 15px;
+            flex-wrap: wrap;
         }
-        .logo-image {
-            width: 58px;
-            height: 58px;
-            border-radius: 16px;
-            background: #ffffff;
-            box-shadow: 0 12px 18px -8px #0e2a46;
-            border: 2px solid #ffc107;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        .logo-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
-        }
-        .logo-text {
-            font-weight: 800;
-            font-size: 1.9rem;
-            letter-spacing: -0.02em;
-            color: #0b1f3b;
-            line-height: 1.1;
-        }
-        .logo-text small {
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #2d4e8c;
-            display: block;
-        }
-        .address-badge {
-            background: #ffffffc0;
-            border-radius: 50px;
-            padding: 8px 18px;
-            font-size: 0.85rem;
+
+        .nav-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
             font-weight: 600;
-            color: #10345e;
-            border: 1px solid #ffc107;
-            box-shadow: 0 6px 14px rgba(0,30,70,0.1);
-            backdrop-filter: blur(4px);
+            cursor: pointer;
+            transition: all 0.3s;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-        }
-        .address-badge i {
-            color: #e63946;
-            font-size: 1rem;
-        }
-
-        .subhead {
-            font-size: 1rem;
-            color: #2f4b74;
-            font-weight: 500;
-            margin: 0 0 1.8rem 0;
-            border-left: 4px solid #2d7aff;
-            padding-left: 16px;
-            background: rgba(45, 122, 255, 0.04);
-            border-radius: 0 12px 12px 0;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-        .map-mini-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-left: auto;
-            background: white;
-            border-radius: 40px;
-            padding: 4px 12px 4px 6px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        .map-mini-container a {
-            color: #0b2b5c;
-            font-weight: 600;
             text-decoration: none;
-            font-size: 0.9rem;
-        }
-        .map-mini-container i {
-            color: #ea4335;
-            font-size: 1.2rem;
         }
 
-        .live-characters {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-            margin-bottom: 12px;
-            height: 45px;
-        }
-        .character {
-            width: 45px;
-            height: 45px;
-            background: #ffb703;
-            border-radius: 50% 50% 20px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.7rem;
-            animation: bounce 2.2s infinite ease-in-out;
-            box-shadow: 0 8px 0 #b26500, 0 12px 20px rgba(0,0,0,0.2);
-            border: 2px solid white;
-            transform-origin: center bottom;
-        }
-        .character:nth-child(2) {
-            animation-delay: 0.3s;
-            background: #48cae4;
-            box-shadow: 0 8px 0 #0077b6;
-        }
-        .character:nth-child(3) {
-            animation-delay: 0.6s;
-            background: #a7c957;
-            box-shadow: 0 8px 0 #6b8e4c;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            40% { transform: translateY(-12px) rotate(2deg); }
-            70% { transform: translateY(-4px) rotate(-1deg); }
+        .nav-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
-        /* QR + app download row */
-        .app-download-row {
+        .nav-btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Tab Navigation */
+        .tabs {
             display: flex;
-            align-items: center;
-            background: rgba(255,255,240,0.5);
+            gap: 10px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
             border-radius: 40px;
-            padding: 10px 20px;
-            margin: 1.2rem 0 0.5rem;
-            border: 1px solid #ffd966;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: transparent;
+            color: #666;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .tab:hover:not(.active) {
+            background: #f0f0f0;
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            display: block;
+        }
+
+        .form-content {
+            display: none;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            flex-wrap: wrap;
-            justify-content: space-between;
+            margin-bottom: 30px;
         }
-        .qr-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s;
         }
-        #qrCanvas {
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-title {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-value small {
+            font-size: 0.5em;
+            color: #999;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: auto;
+            max-height: 600px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1800px;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 12px;
+            font-weight: 600;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        tr:hover {
+            background-color: #f8f9ff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        .drive-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.85em;
+        }
+
+        .drive-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Form Styles */
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .form-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .form-group label span {
+            color: #e53e3e;
+            margin-left: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        select.form-control {
+            cursor: pointer;
+            background-color: white;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .calculated-field {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .calculated-field label {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .calculated-field .value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
             width: 60px;
             height: 60px;
-            border-radius: 16px;
-            background: white;
-            padding: 6px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            border: 2px solid #2d7aff;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
         }
-        .app-link {
-            background: #0a2d5a;
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c00;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            border: 2px solid #fcc;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            border: 2px solid #c3e6cb;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
             color: white;
-            padding: 10px 20px;
-            border-radius: 40px;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: 0.2s;
-            border: 1px solid #ffc107;
-        }
-        .app-link:hover {
-            background: #123f6e;
-            transform: scale(1.02);
-        }
-        .scan-note {
-            font-size: 0.85rem;
-            color: #1b3e68;
-            font-weight: 500;
         }
 
-        /* Action buttons */
-        .action-links {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 18px;
-            align-items: center;
-        }
-        .action-card {
-            background: #ffffff;
-            border-radius: 28px;
-            padding: 12px 25px;
-            display: inline-flex;
-            align-items: center;
-            gap: 14px;
-            text-decoration: none;
-            color: #0b2b5c;
-            font-weight: 700;
-            box-shadow: 0 10px 18px -8px rgba(11,43,92,0.3);
-            border: 1px solid rgba(255,215,0,0.6);
-            transition: 0.2s;
-            backdrop-filter: blur(4px);
-            background: rgba(255,255,255,0.9);
-        }
-        .action-card i {
-            font-size: 1.8rem;
-            color: #1e4f8a;
-        }
-        .action-card:hover {
-            background: #ffd966;
-            transform: translateY(-4px);
-            border-color: #0b2b5c;
-        }
-        .action-card small {
-            font-weight: 400;
-            font-size: 0.8rem;
-            color: #2f4b74;
-        }
-        .action-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Form styles */
-        .form-grid { display: flex; flex-direction: column; gap: 1.5rem; }
-        .two-cols { display: flex; flex-wrap: wrap; gap: 1rem; }
-        .two-cols > div { flex: 1 1 180px; }
-        .input-field { display: flex; flex-direction: column; gap: 6px; }
-        .input-field label { font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.3px; color: #1f3a60; display: flex; align-items: center; gap: 8px; }
-        .input-field label i { color: #2d7aff; width: 20px; font-size: 1rem; }
-        .input-field input, .input-field select, .input-field textarea {
-            background: white; border: 1.5px solid #dbe3f0; border-radius: 20px; padding: 15px 20px; font-size: 1rem;
-            font-weight: 500; color: #0b1f3b; outline: none; transition: all 0.2s; box-shadow: 0 4px 10px -5px rgba(0,0,0,0.02);
-        }
-        .input-field input:focus, .input-field select:focus, .input-field textarea:focus {
-            border-color: #2d7aff; box-shadow: 0 8px 18px -10px #2d7aff, 0 0 0 4px rgba(45,122,255,0.15);
-        }
-        .input-field textarea { min-height: 90px; resize: vertical; }
-        
-        .yes-no-group { display: flex; gap: 24px; align-items: center; background: #f4f9ff; border-radius: 30px; padding: 10px 20px; border: 1px solid #d2e0f5; }
-        .yes-no-group label { font-weight: 500; text-transform: none; font-size: 1rem; color: #10345e; gap: 6px; }
-        .yes-no-group input[type="radio"] { accent-color: #1e4f8a; width: 18px; height: 18px; margin-right: 4px; }
-        
-        .photo-upload-area { background: #f1f7ff; border-radius: 28px; padding: 1.8rem 1.2rem; border: 2px dashed #9bb8f0; text-align: center; cursor: pointer; transition: background 0.2s, border-color 0.2s; margin-top: 0.5rem; position: relative; }
-        .photo-upload-area:hover { background: #e3edff; border-color: #2d7aff; }
-        .photo-upload-area i { font-size: 3rem; color: #2d7aff; opacity: 0.8; margin-bottom: 0.5rem; }
-        .photo-upload-area .upload-text { font-weight: 700; font-size: 1.1rem; color: #103056; }
-        .photo-upload-area .upload-hint { font-size: 0.85rem; color: #476b9f; margin-top: 6px; }
-        #fileInput { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-        
-        .image-preview-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 15px; align-items: center; }
-        .preview-thumb { width: 70px; height: 70px; border-radius: 18px; object-fit: cover; border: 3px solid white; box-shadow: 0 10px 18px -10px #1e3a5f; }
-        .file-name-badge { background: #ffffffd0; border-radius: 40px; padding: 8px 18px; font-size: 0.9rem; font-weight: 500; color: #092033; box-shadow: 0 4px 12px #d4e2fc; backdrop-filter: blur(2px); }
-        
-        .datetime-row { display: flex; flex-direction: row; gap: 1rem; flex-wrap: wrap; }
-        .datetime-row .input-field { flex: 1 1 160px; }
-        
-        .submit-btn { background: #0a1f38; border: none; border-radius: 50px; padding: 1.3rem 1.8rem; color: white; font-weight: 700; font-size: 1.3rem; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 14px; cursor: pointer; transition: all 0.3s; margin: 2rem 0 0.8rem; border: 1px solid #2d4e7b; box-shadow: 0 20px 35px -12px #0f2542; }
-        .submit-btn:hover { background: #123456; transform: scale(1.02); box-shadow: 0 28px 40px -12px #0f1e33; }
-        .submit-btn i { font-size: 1.6rem; }
-        
-        .info-note { font-size: 0.85rem; display: flex; align-items: center; gap: 8px; background: #eef5ffb0; border-radius: 30px; padding: 12px 18px; color: #1f3d66; font-weight: 500; border: 1px solid #ffffff; }
-        .info-note i { color: #ff7b2d; }
-        
-        footer { text-align: center; margin-top: 20px; color: #2a4c7a; font-weight: 400; opacity: 0.9; }
-        hr { border: 1px solid #c9d9f0; margin: 0.5rem 0 1rem; opacity: 0.4; }
-        
-        .attachment-badge {
-            background: #e8f0fe;
-            border-radius: 20px;
-            padding: 5px 12px;
-            font-size: 0.85rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            color: #1a4b8c;
-            border: 1px solid #b8d1fc;
-        }
-
-        @media (max-width: 480px) {
-            .report-card { padding: 1.5rem 1.2rem; border-radius: 32px; }
-            .logo-text { font-size: 1.6rem; }
-            .submit-btn { font-size: 1.2rem; padding: 1.1rem; }
-            .counter-pill { top: 10px; right: 10px; padding: 8px 15px; }
-            .floating-wa { width: 55px; height: 55px; font-size: 2rem; bottom: 20px; right: 20px; }
-            .app-download-row { flex-direction: column; align-items: flex-start; }
-            .action-links { flex-direction: column; align-items: stretch; }
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                border-radius: 20px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Floating WhatsApp button -->
-    <a href="https://wa.me/27672557297?text=Hello%20OnPoint%20Fleet%2C%20I%20need%20to%20report%20an%20incident" 
-       class="floating-wa" 
-       target="_blank" 
-       title="Chat with OnPoint on WhatsApp">
-        <i class="fab fa-whatsapp"></i>
-    </a>
-
-    <!-- Counter pill -->
-    <div class="counter-pill">
-        <div style="display: flex; align-items: center; gap: 12px; justify-content: center;">
-            <div align="center">
-                <a href='https://www.counter12.com'><img src='https://www.counter12.com/img-3yZY1ZZwa29AB3dd-40.gif' border='0' alt='counter'></a>
-                <script type='text/javascript' src='https://www.counter12.com/ad.js?id=3yZY1ZZwa29AB3dd'></script>
-            </div>
-        </div>
-        <div class="incident-label"><i class="fas fa-car-crash"></i> App Visit 2026</div>
-    </div>
-
-    <div class="report-card">
-        <!-- Logo header -->
-        <div class="logo-header">
-            <div class="logo-area">
-                <div class="logo-image">
-                    <img src="images/logo.png" alt="OnPoint logo" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-truck\' style=\'font-size:2.5rem; color:#1a3b5d;\'></i>';">
-                </div>
-                <div class="logo-text">
-                    OnPoint onTime <small>fleet & logistics</small>
-                </div>
-            </div>
-            <div class="address-badge">
-                <i class="fas fa-map-marker-alt"></i> 71 Pretorius Rd, President Park, Midrand
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <span>🚗⛽</span>
+                Vehicle Fuel Management System
+            </h1>
+            <div class="nav-buttons">
+                <a href="<?= ScriptApp.getService().getUrl() ?>" class="nav-btn secondary">🏠 Home</a>
+                <button class="nav-btn primary" onclick="refreshData()">🔄 Refresh</button>
             </div>
         </div>
 
-        <div class="live-characters">
-            <div class="character"><i class="fas fa-smile"></i></div>
-            <div class="character"><i class="fas fa-truck"></i></div>
-            <div class="character"><i class="fas fa-shield-hal"></i></div>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab" onclick="showTab('form')">➕ New Fuel Entry</button>
         </div>
 
-        <div class="subhead">
-            <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i> complete accident report (auto‑location + stamped photo)
-            <div class="map-mini-container" id="liveMapLink">
-                <i class="fas fa-map-marked-alt"></i>
-                <a href="#" id="dynamicMapLink" target="_blank" title="open live map – auto updates">
-                    obtaining location...
-                </a>
-                <i class="fas fa-external-link-alt" style="font-size:0.7rem; opacity:0.6;"></i>
-            </div>
-        </div>
-
-        <!-- QR CODE ROW -->
-        <div class="app-download-row" id="appQrRow">
-            <div class="qr-container">
-                <canvas id="qrCanvas" width="60" height="60"></canvas>
-                <div>
-                    <div style="font-weight:700; color:#0f2d55;">📲 OnPoint driver app</div>
-                    <span class="scan-note"><i class="fas fa-camera"></i> scan QR to download APK</span>
-                </div>
-            </div>
-            <a href="https://drive.google.com/file/d/1aFy2cAbXoWM8Oy7AzpqCWYXRDHnL1mk3/view?usp=drive_link" 
-               class="app-link" target="_blank" rel="noopener">
-                <i class="fas fa-download"></i> get app (google drive)
-            </a>
-        </div>
-        
-        <!-- ACTION LINKS -->
-        <div class="action-links">
-            <a href="details.html" class="action-card">
-                <i class="fas fa-gas-pump"></i>
-                <span class="action-text">
-                    <span>Fuel Log</span>
-                    <small>record fuel fill-ups</small>
-                </span>
-            </a>
-            <a href="contacts.html" class="action-card">
-                <i class="fas fa-truck-moving"></i>
-                <span class="action-text">
-                    <span>Vehicle Handover</span>
-                    <small>swap vehicles</small>
-                </span>
-            </a>
-        </div>
-
-        <!-- FORM STARTS -->
-        <form id="accidentForm" class="form-grid">
-            <div class="datetime-row">
-                <div class="input-field">
-                    <label><i class="fas fa-calendar-alt"></i> Date</label>
-                    <input type="date" id="accidentDate" name="accidentDate" required>
-                </div>
-                <div class="input-field">
-                    <label><i class="fas fa-clock"></i> Time</label>
-                    <input type="time" id="accidentTime" name="accidentTime" value="14:30" required>
-                </div>
-            </div>
-
-            <!-- COST CENTER AT THE TOP (FIRST DROPDOWN) -->
-            <div class="input-field">
-                <label><i class="fas fa-building"></i> Cost Center</label>
-                <select id="costCenter" name="costCenter" required>
-                    <option value="" disabled selected>– select cost center –</option>
-                    <option value="Onpoint Group HQ">Onpoint Group HQ</option>
-                    <option value="DI Solutions">DI Solutions</option>
-                    <option value="Aqua Telecoms">Aqua Telecoms</option>
-                    <option value="Nkanyezi Projects">Nkanyezi Projects</option>
-                    <option value="Onpoint Ontime Solutions">Onpoint Ontime Solutions</option>
-                </select>
-            </div>
-
-            <!-- DEPARTMENT (SECOND DROPDOWN) -->
-            <div class="input-field">
-                <label><i class="fas fa-users"></i> Department</label>
-                <select id="department" name="department" required>
-                    <option value="" disabled selected>– select department –</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Business Development">Business Development</option>
-                    <option value="Finance & IT">Finance & IT</option>
-                    <option value="Fleet">Fleet</option>
-                    <option value="HR">HR</option>
-                    <option value="Operations">Operations</option>
-                    <option value="Procurements">Procurements</option>
-                    <option value="Sales">Sales</option>
-                    <option value="SHEQ">SHEQ</option>
-                    <option value="Tendering">Tendering</option>
-                    <option value="WareHouse">WareHouse</option>
-                </select>
-            </div>
-
-            <div class="two-cols">
-                <div class="input-field">
-                    <label><i class="fas fa-car"></i> Vehicle reg.</label>
-                    <input type="text" id="vehicleReg" name="vehicleReg" value="FLEET-408" required>
-                </div>
-                <div class="input-field">
-                    <label><i class="fas fa-map-pin"></i> Location / street</label>
-                    <input type="text" id="location" name="location" placeholder="Enter address or use GPS detect" value="" required>
-                </div>
-            </div>
-
-            <div class="two-cols">
-                <div class="input-field">
-                    <label><i class="fas fa-tag"></i> Accident type</label>
-                    <select id="accidentType" name="accidentType" required>
-                        <option value="" disabled>– select –</option>
-                        <option value="Rear-end" selected>Rear-end collision</option>
-                        <option value="Side-impact">Side-impact / T-bone</option>
-                        <option value="Rollover">Rollover / jackknife</option>
-                        <option value="Single-vehicle">Single vehicle</option>
-                        <option value="Other">Other / pedestrian</option>
-                    </select>
-                </div>
-                <div class="input-field">
-                    <label><i class="fas fa-user"></i> Driver's name</label>
-                    <input type="text" id="driverName" name="driverName" value="James Keller" required>
-                </div>
-            </div>
-
-            <div class="two-cols">
-                <div class="input-field">
-                    <label><i class="fas fa-phone-alt"></i> Driver phone</label>
-                    <input type="tel" id="driverPhone" name="driverPhone" value="+27 72 555 7890" required>
-                </div>
-                <div class="input-field">
-                    <label><i class="fas fa-id-card"></i> Other parties involved</label>
-                    <input type="text" id="otherParties" name="otherParties" value="Honda CR-V, plate 7GHJ432">
-                </div>
-            </div>
-
-            <div class="input-field">
-                <label><i class="fas fa-file-signature"></i> Description</label>
-                <textarea id="description" name="description" required>Front bumper crushed, airbags deployed. Slight rain. Other driver exchanged info.</textarea>
-            </div>
-
-            <hr>
-            <div style="font-weight: 600; color: #0f2d55; margin-bottom: 8px;"><i class="fas fa-gavel" style="margin-right: 8px;"></i>OFFICIAL / POLICE INFORMATION</div>
-
-            <div class="input-field">
-                <label><i class="fas fa-building"></i> Reported to Metro</label>
-                <div class="yes-no-group">
-                    <label><input type="radio" name="reportedMetro" value="Yes" checked> Yes</label>
-                    <label><input type="radio" name="reportedMetro" value="No"> No</label>
-                </div>
-            </div>
-
-            <div class="two-cols">
-                <div class="input-field">
-                    <label><i class="fas fa-user-shield"></i> Officer name</label>
-                    <input type="text" id="officerName" name="officerName" value="Officer M. Davis">
-                </div>
-                <div class="input-field">
-                    <label><i class="fas fa-mobile-alt"></i> Officer cell</label>
-                    <input type="tel" id="officerPhone" name="officerPhone" value="082 555 9876">
-                </div>
-            </div>
-
-            <div class="input-field">
-                <label><i class="fas fa-wine-bottle"></i> Drunken driving involved</label>
-                <div class="yes-no-group">
-                    <label><input type="radio" name="drunkenDriving" value="Yes"> Yes</label>
-                    <label><input type="radio" name="drunkenDriving" value="No" checked> No</label>
-                </div>
-            </div>
-
-            <div class="input-field">
-                <label><i class="fas fa-hashtag"></i> Incident police report #</label>
-                <input type="text" id="policeReportNo" name="policeReportNo" value="PD-2309-452">
-            </div>
-
-            <div class="input-field">
-                <label><i class="fas fa-balance-scale"></i> Officer's judgement (are you at fault?)</label>
-                <div class="yes-no-group">
-                    <label><input type="radio" name="atFault" value="Yes"> Yes, at fault</label>
-                    <label><input type="radio" name="atFault" value="No" checked> No, not at fault</label>
-                </div>
-            </div>
-
-            <hr>
-            <!-- PHOTO UPLOAD AREA -->
-            <div class="photo-upload-area" id="dropZone">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <div class="upload-text">attach accident image with GPS & date stamp</div>
-                <div class="upload-hint">tap to browse — overlay will be added automatically</div>
-                <input type="file" id="fileInput" accept="image/*">
-            </div>
-
-            <!-- live preview -->
-            <div id="previewContainer" class="image-preview-row" style="display: none;">
-                <img id="imagePreview" class="preview-thumb" src="#" alt="stamped preview">
-                <span id="fileNameDisplay" class="file-name-badge"><i class="far fa-image"></i> accident.jpg</span>
-                <div class="attachment-badge">
-                    <i class="fas fa-map-marker-alt"></i> <span id="stampLocation">locating…</span>
-                </div>
-                <button type="button" id="clearImageBtn" style="background: none; border:none; color:#b00; margin-left:auto; font-size:1.5rem; cursor:pointer;"><i class="fas fa-times-circle"></i></button>
-            </div>
-
-            <!-- hidden fields -->
-            <input type="hidden" id="imageBase64" value="">
-            <input type="hidden" id="imageFileName" value="">
-            <input type="hidden" id="imageFileType" value="">
-            <input type="hidden" id="capturedLat" value="">
-            <input type="hidden" id="capturedLon" value="">
-            <input type="hidden" id="capturedGeoUrl" value="">
-
-            <!-- Submit button -->
-            <button type="button" id="submitToGAS" class="submit-btn" style="background: #0f9d58;">
-                <i class="fas fa-cloud-upload-alt"></i> Submit to Google Sheets
-            </button>
+        <!-- Dashboard Content -->
+        <div id="dashboardContent" class="dashboard-content">
+            <div id="statsContainer" class="stats-grid"></div>
             
-            <div class="info-note" style="margin-top: 10px;" id="attachmentStatus">
-                <i class="fas fa-info-circle"></i> No image — detecting address…
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading fuel data...</p>
             </div>
-            
-            <div class="info-note" style="background: #fff3cd; border-color: #ffeeba;">
-                <i class="fas fa-lightbulb" style="color: #856404;"></i>
-                <strong>Live map + address:</strong> street address can be typed or auto‑filled.
+
+            <div id="error" class="error" style="display: none;"></div>
+
+            <div id="tableContainer" class="table-container" style="display: none;">
+                <table id="dataTable">
+                    <thead id="tableHeader"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
             </div>
-        </form>
-        <footer>
-            <i class="fas fa-check-circle" style="color: #249c6b;"></i> OnPoint fleet – safety first · 71 Pretorius Rd, President Park, Midrand
-        </footer>
+        </div>
+
+        <!-- Form Content -->
+        <div id="formContent" class="form-content">
+            <div class="form-container">
+                <h2 class="form-title">New Fuel Entry Form</h2>
+                
+                <div id="formSuccess" class="success-message" style="display: none;"></div>
+                <div id="formError" class="error" style="display: none;"></div>
+                
+                <form id="fuelForm" onsubmit="submitForm(event)">
+                    <div class="form-grid">
+                        <!-- Driver Information -->
+                        <div class="form-group">
+                            <label>Driver Name <span>*</span></label>
+                            <input type="text" class="form-control" id="driverName" required>
+                        </div>
+
+                        <!-- Vehicle Information -->
+                        <div class="form-group">
+                            <label>Vehicle Registration <span>*</span></label>
+                            <input type="text" class="form-control" id="vehicleReg" required list="vehiclesList">
+                            <datalist id="vehiclesList"></datalist>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Vehicle Model <span>*</span></label>
+                            <input type="text" class="form-control" id="vehicleModel" required>
+                        </div>
+
+                        <!-- Odometer Readings -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Odometer Start (km) <span>*</span></label>
+                                <input type="number" class="form-control" id="odometerStart" required min="0" step="1" onchange="calculateKmTraveled()">
+                            </div>
+                            <div class="form-group">
+                                <label>Odometer Finish (km) <span>*</span></label>
+                                <input type="number" class="form-control" id="odometerFinish" required min="0" step="1" onchange="calculateKmTraveled()">
+                            </div>
+                        </div>
+
+                        <!-- Km Traveled (Auto-calculated) -->
+                        <div class="form-group">
+                            <label>Km Traveled</label>
+                            <input type="number" class="form-control" id="kmTraveled" readonly style="background-color: #f8f9fa;">
+                        </div>
+
+                        <!-- Fuel Information -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Fuel Liters <span>*</span></label>
+                                <input type="number" class="form-control" id="fuelLiters" required min="0" step="0.01" onchange="calculateAmounts()">
+                            </div>
+                            <div class="form-group">
+                                <label>Price per Liter ($) <span>*</span></label>
+                                <input type="number" class="form-control" id="pricePerLiter" required min="0" step="0.01" onchange="calculateAmounts()">
+                            </div>
+                        </div>
+
+                        <!-- Amount Paid (Auto-calculated) -->
+                        <div class="form-group">
+                            <label>Amount Paid ($)</label>
+                            <input type="number" class="form-control" id="amountPaid" readonly style="background-color: #f8f9fa;">
+                        </div>
+
+                        <!-- Lubrication -->
+                        <div class="form-group">
+                            <label>Lubrication Type</label>
+                            <select class="form-control" id="lubricationType" onchange="calculateAmounts()">
+                                <option value="">None</option>
+                                <option value="Engine Oil">Engine Oil</option>
+                                <option value="Gearbox Oil">Gearbox Oil</option>
+                                <option value="Brake Fluid">Brake Fluid</option>
+                                <option value="Coolant">Coolant</option>
+                                <option value="Grease">Grease</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Lubrication Cost ($)</label>
+                            <input type="number" class="form-control" id="lubricationCost" min="0" step="0.01" value="0" onchange="calculateAmounts()">
+                        </div>
+
+                        <!-- Cost Center -->
+                        <div class="form-group">
+                            <label>Cost Center <span>*</span></label>
+                            <select class="form-control" id="costCenter" required>
+                                <option value="">Select Cost Center</option>
+                                <option value="Onpoint Group HQ">Onpoint Group HQ</option>
+                                <option value="DI Solutions">DI Solutions</option>
+                                <option value="Aqua Telecoms">Aqua Telecoms</option>
+                                <option value="Nkanyezi Projects">Nkanyezi Projects</option>
+                                <option value="Onpoint Ontime Solutions">Onpoint Ontime Solutions</option>
+                            </select>
+                        </div>
+
+                        <!-- Department -->
+                        <div class="form-group">
+                            <label>Department <span>*</span></label>
+                            <select class="form-control" id="department" required>
+                                <option value="">Select Department</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Business Development">Business Development</option>
+                                <option value="Finance & IT">Finance & IT</option>
+                                <option value="Fleet">Fleet</option>
+                                <option value="HR">HR</option>
+                                <option value="Operations">Operations</option>
+                                <option value="Procurements">Procurements</option>
+                                <option value="Sales">Sales</option>
+                                <option value="SHEQ">SHEQ</option>
+                                <option value="Tendering">Tendering</option>
+                                <option value="Warehouse">Warehouse</option>
+                            </select>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Notes</label>
+                            <textarea class="form-control" id="notes" rows="3"></textarea>
+                        </div>
+
+                        <!-- Total Cost Display -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <div class="calculated-field">
+                                <label>Total Cost (Fuel + Lubrication)</label>
+                                <div class="value" id="totalCostDisplay">$0.00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">Save Fuel Entry</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Last updated: <span id="lastUpdated">Never</span></p>
+        </div>
     </div>
 
     <script>
-        (function() {
-            // ========== GOOGLE APPS SCRIPT URL ==========
-            // REPLACE WITH YOUR DEPLOYED WEB APP URL
-            const GAS_URL = 'https://script.google.com/macros/s/AKfycbwdbUcZMhWrqBalLB87NV5QlhMkKOsKYko6wTFbdAs20T0_IpCXppXiOpADiUBFajk/exec';
+        // Tab switching
+        function showTab(tab) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
             
-            // Google Sheet ID
-            const SHEET_ID = '1vhtaNNmY-YsyDiaA2IFodoBYdQsEcL09F7BgMJo4utI';
+            if (tab === 'dashboard') {
+                document.getElementById('dashboardContent').style.display = 'block';
+                document.getElementById('formContent').style.display = 'none';
+                tabs[0].classList.add('active');
+                loadData(); // Refresh dashboard data when switching to dashboard
+            } else {
+                document.getElementById('dashboardContent').style.display = 'none';
+                document.getElementById('formContent').style.display = 'block';
+                tabs[1].classList.add('active');
+                loadVehicles(); // Load vehicles for datalist
+            }
+        }
+
+        // Load dashboard data
+        window.onload = function() {
+            loadData();
+            loadVehicles();
+        };
+
+        function refreshData() {
+            loadData();
+        }
+
+        function loadData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('tableContainer').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
             
-            // Google Drive Folder ID
-            const DRIVE_FOLDER_ID = '1al8guXtgk-PJWwdNvd2umUXYv4AvwXSM';
-            // ===========================================================
+            google.script.run
+                .withSuccessHandler(displayData)
+                .withFailureHandler(displayError)
+                .getFuelData();
+        }
 
-            // DOM elements
-            const fileInput = document.getElementById('fileInput');
-            const dropZone = document.getElementById('dropZone');
-            const previewContainer = document.getElementById('previewContainer');
-            const imagePreview = document.getElementById('imagePreview');
-            const fileNameDisplay = document.getElementById('fileNameDisplay');
-            const stampLocationSpan = document.getElementById('stampLocation');
-            const clearImageBtn = document.getElementById('clearImageBtn');
-            const imageBase64Hidden = document.getElementById('imageBase64');
-            const imageFileNameHidden = document.getElementById('imageFileName');
-            const imageFileTypeHidden = document.getElementById('imageFileType');
-            const capturedLat = document.getElementById('capturedLat');
-            const capturedLon = document.getElementById('capturedLon');
-            const capturedGeoUrl = document.getElementById('capturedGeoUrl');
-            const attachmentStatus = document.getElementById('attachmentStatus');
-            const dynamicMapLink = document.getElementById('dynamicMapLink');
-            const locationInput = document.getElementById('location');
+        function displayData(result) {
+            document.getElementById('loading').style.display = 'none';
             
-            const submitBtn = document.getElementById('submitToGAS');
+            if (!result.success) {
+                displayError(result.error);
+                return;
+            }
 
-            // state
-            let currentBase64 = '';          
-            let gpsCoords = { lat: null, lon: null, accuracy: null };
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
             
-            // set today's date
-            document.getElementById('accidentDate').value = new Date().toISOString().split('T')[0];
+            calculateStats(result.data);
+            displayHeaders(result.headers);
+            displayRows(result.data);
+            
+            document.getElementById('tableContainer').style.display = 'block';
+        }
 
-            // GEOCODING + AUTO‑FILL LOCATION
-            function updateMapLink() {
-                if (gpsCoords.lat && gpsCoords.lon) {
-                    const lat = gpsCoords.lat.toFixed(6);
-                    const lon = gpsCoords.lon.toFixed(6);
-                    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
-                    capturedLat.value = lat;
-                    capturedLon.value = lon;
-                    capturedGeoUrl.value = mapsUrl;
-                    dynamicMapLink.href = mapsUrl;
-                    dynamicMapLink.innerHTML = `${lat}, ${lon} · live map`;
+        function calculateStats(data) {
+            let totalKm = 0, totalFuel = 0, totalCost = 0, totalLubeCost = 0;
+            
+            data.forEach(row => {
+                totalKm += parseFloat(row['Km Traveled']) || 0;
+                totalFuel += parseFloat(row['Fuel Liters']) || 0;
+                totalCost += parseFloat(row['Total Cost']) || 0;
+                totalLubeCost += parseFloat(row['Lubrication Cost']) || 0;
+            });
+            
+            const avgKmPerLiter = totalFuel > 0 ? (totalKm / totalFuel).toFixed(2) : 0;
+            const avgCostPerKm = totalKm > 0 ? (totalCost / totalKm).toFixed(2) : 0;
+            
+            const statsHTML = `
+                <div class="stat-card">
+                    <div class="stat-title">Total Entries</div>
+                    <div class="stat-value">${data.length}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Distance</div>
+                    <div class="stat-value">${Number(totalKm).toLocaleString()} <small>km</small></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Fuel</div>
+                    <div class="stat-value">${Number(totalFuel).toLocaleString()} <small>L</small></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Cost</div>
+                    <div class="stat-value">$${Number(totalCost).toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Avg Efficiency</div>
+                    <div class="stat-value">${avgKmPerLiter} <small>km/L</small></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Avg Cost/km</div>
+                    <div class="stat-value">$${avgCostPerKm}</div>
+                </div>
+            `;
+            
+            document.getElementById('statsContainer').innerHTML = statsHTML;
+        }
 
-                    if (window.google && google.maps) {
-                        const geocoder = new google.maps.Geocoder();
-                        geocoder.geocode({ location: { lat: gpsCoords.lat, lng: gpsCoords.lon } }, (results, status) => {
-                            if (status === 'OK' && results[0]) {
-                                locationInput.value = results[0].formatted_address;
-                                attachmentStatus.innerHTML = `<i class="fas fa-check-circle"></i> Address detected`;
-                            } else {
-                                locationInput.value = `${lat}, ${lon}`;
-                                attachmentStatus.innerHTML = `<i class="fas fa-map-pin"></i> GPS locked`;
-                            }
-                        });
-                    }
+        function displayHeaders(headers) {
+            const thead = document.getElementById('tableHeader');
+            let html = '<tr>';
+            
+            // Important headers to show (including new ones)
+            const importantHeaders = [
+                'Timestamp', 'Driver Name', 'Vehicle Registration', 'Vehicle Model',
+                'Km Traveled', 'Fuel Liters', 'Total Cost', 'Cost Center', 'Department',
+                'Lubrication Type', 'Drive Folder Link'
+            ];
+            
+            headers.forEach(header => {
+                if (importantHeaders.includes(header)) {
+                    html += `<th>${header}</th>`;
                 }
-            }
+            });
+            
+            html += '</tr>';
+            thead.innerHTML = html;
+        }
 
-            // Get location
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        gpsCoords.lat = pos.coords.latitude;
-                        gpsCoords.lon = pos.coords.longitude;
-                        updateMapLink();
-                    },
-                    (err) => {
-                        gpsCoords.lat = -25.9989; 
-                        gpsCoords.lon = 28.1213;
-                        updateMapLink();
-                        locationInput.value = '71 Pretorius Rd, President Park, Midrand';
-                        attachmentStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Using default address';
-                    }
-                );
-            }
+        function displayRows(data) {
+            const tbody = document.getElementById('tableBody');
+            let html = '';
 
-            // STAMP IMAGE WITH LOCATION + DATE
-            function stampImageWithOverlay(file) {
-                return new Promise((resolve, reject) => {
-                    if (!file) return reject('no file');
-                    
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            const ctx = canvas.getContext('2d');
-                            
-                            ctx.drawImage(img, 0, 0);
-                            
-                            const barHeight = 60;
-                            ctx.fillStyle = 'rgba(0,0,0,0.6)';
-                            ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
-                            
-                            ctx.font = 'bold 22px "Inter", Arial, sans-serif';
-                            ctx.fillStyle = '#ffc107';
-                            
-                            const now = new Date();
-                            const dateStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
-                            const locationStr = (gpsCoords.lat && gpsCoords.lon) ? 
-                                `${gpsCoords.lat.toFixed(5)}, ${gpsCoords.lon.toFixed(5)}` : 'location pending';
-                            
-                            ctx.fillText(`📅 ${dateStr}`, 20, canvas.height - 32);
-                            ctx.fillText(`📍 ${locationStr}`, 20, canvas.height - 8);
-                            
-                            const stampedBase64 = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
-                            const previewUrl = canvas.toDataURL('image/jpeg', 0.8);
-                            
-                            resolve({
-                                stampedBase64,
-                                previewUrl,
-                                fileName: `stamped_${file.name.replace(/\.[^/.]+$/, '')}.jpg`,
-                                locationText: locationStr
-                            });
-                        };
-                        img.src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-
-            async function handleFileSelect(file) {
-                if (!file || !file.type.startsWith('image/')) return;
+            data.forEach(row => {
+                html += '<tr>';
                 
-                try {
-                    attachmentStatus.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> stamping image...';
-                    const stamped = await stampImageWithOverlay(file);
-                    
-                    currentBase64 = stamped.stampedBase64;
-                    imageBase64Hidden.value = currentBase64;
-                    imageFileNameHidden.value = stamped.fileName;
-                    
-                    imagePreview.src = stamped.previewUrl;
-                    fileNameDisplay.innerHTML = `<i class="far fa-file-image"></i> ${stamped.fileName}`;
-                    stampLocationSpan.innerText = stamped.locationText;
-                    previewContainer.style.display = 'flex';
-                    
-                    attachmentStatus.innerHTML = `<i class="fas fa-check-circle" style="color:#2a7f2a;"></i> stamped ready`;
-                } catch (err) {
-                    alert('Error processing image');
-                }
-            }
-
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
-            });
-
-            dropZone.addEventListener('dragover', (e) => e.preventDefault());
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                if (e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files[0]);
-            });
-
-            clearImageBtn.addEventListener('click', () => {
-                fileInput.value = '';
-                imageBase64Hidden.value = '';
-                imageFileNameHidden.value = '';
-                currentBase64 = '';
-                previewContainer.style.display = 'none';
-                attachmentStatus.innerHTML = 'No image — GPS will be fetched live';
-            });
-
-            // FORM DATA COLLECTION - EXACT ORDER MATCHING SHEET HEADERS
-            function getFormData() {
-                const reported = document.querySelector('input[name="reportedMetro"]:checked');
-                const drunken = document.querySelector('input[name="drunkenDriving"]:checked');
-                const atFault = document.querySelector('input[name="atFault"]:checked');
-                
-                // IMPORTANT: This order MUST match spreadsheet columns exactly
-                return {
-                    timestamp: new Date().toISOString(),
-                    date: document.getElementById('accidentDate').value,
-                    time: document.getElementById('accidentTime').value,
-                    vehicleReg: document.getElementById('vehicleReg').value,
-                    location: document.getElementById('location').value,
-                    accidentType: document.getElementById('accidentType').value,
-                    costCenter: document.getElementById('costCenter').value,      // Column G
-                    department: document.getElementById('department').value,      // Column H
-                    driverName: document.getElementById('driverName').value,
-                    driverPhone: document.getElementById('driverPhone').value,
-                    description: document.getElementById('description').value,
-                    otherParties: document.getElementById('otherParties').value,
-                    reportedMetro: reported ? reported.value : 'Not specified',
-                    officerName: document.getElementById('officerName').value || 'N/A',
-                    officerPhone: document.getElementById('officerPhone').value || 'N/A',
-                    drunkenDriving: drunken ? drunken.value : 'Not specified',
-                    policeReportNo: document.getElementById('policeReportNo').value || 'N/A',
-                    atFault: atFault ? atFault.value : 'Not specified',
-                    lat: capturedLat.value || 'unknown',
-                    lon: capturedLon.value || 'unknown',
-                    geoUrl: capturedGeoUrl.value || '',
-                    imageFileName: imageFileNameHidden.value || '',
-                    imageBase64: currentBase64 || '',
-                    sheetId: SHEET_ID,
-                    driveFolderId: DRIVE_FOLDER_ID
-                };
-            }
-
-            function validateForm(data) {
-                const required = [
-                    data.date, data.time, data.vehicleReg, data.location, 
-                    data.accidentType, data.costCenter, data.department,
-                    data.driverName, data.driverPhone, data.description
+                // Show important fields
+                const fields = [
+                    row['Timestamp'], row['Driver Name'], row['Vehicle Registration'],
+                    row['Vehicle Model'], row['Km Traveled'], row['Fuel Liters'],
+                    row['Total Cost'], row['Cost Center'], row['Department'],
+                    row['Lubrication Type']
                 ];
-                if (required.some(f => !f)) {
-                    alert('Please fill all required fields including Cost Center and Department');
-                    return false;
+                
+                fields.forEach(value => {
+                    if (value && !isNaN(value) && value.toString().includes('.')) {
+                        value = `$${Number(value).toFixed(2)}`;
+                    }
+                    html += `<td>${value || ''}</td>`;
+                });
+                
+                // Drive folder link
+                const driveLink = row['Drive Folder Link'];
+                if (driveLink) {
+                    html += `<td><a href="${driveLink}" target="_blank" class="drive-link">📁 View</a></td>`;
+                } else {
+                    html += '<td></td>';
                 }
-                return true;
+                
+                html += '</tr>';
+            });
+
+            document.getElementById('tableBody').innerHTML = html;
+        }
+
+        function displayError(error) {
+            document.getElementById('loading').style.display = 'none';
+            const errorDiv = document.getElementById('error');
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML = `Error: ${error}<br><br><button class="nav-btn primary" onclick="loadData()">Try Again</button>`;
+        }
+
+        // Form Functions
+        function calculateKmTraveled() {
+            const start = parseFloat(document.getElementById('odometerStart').value) || 0;
+            const finish = parseFloat(document.getElementById('odometerFinish').value) || 0;
+            const kmTraveled = finish - start;
+            
+            if (kmTraveled >= 0) {
+                document.getElementById('kmTraveled').value = kmTraveled.toFixed(1);
+            } else {
+                document.getElementById('kmTraveled').value = 0;
+                alert('Odometer Finish must be greater than Odometer Start');
             }
+        }
 
-            // SUBMIT TO GOOGLE APPS SCRIPT
-            async function submitToGoogleAppsScript() {
-                const data = getFormData();
-                if (!validateForm(data)) return;
+        function calculateAmounts() {
+            const liters = parseFloat(document.getElementById('fuelLiters').value) || 0;
+            const price = parseFloat(document.getElementById('pricePerLiter').value) || 0;
+            const lubeCost = parseFloat(document.getElementById('lubricationCost').value) || 0;
+            
+            const amountPaid = liters * price;
+            const totalCost = amountPaid + lubeCost;
+            
+            document.getElementById('amountPaid').value = amountPaid.toFixed(2);
+            document.getElementById('totalCostDisplay').textContent = `$${totalCost.toFixed(2)}`;
+        }
 
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Submitting...';
-                submitBtn.disabled = true;
-                attachmentStatus.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sending to Google Sheets...';
+        function loadVehicles() {
+            google.script.run.withSuccessHandler(function(vehicles) {
+                const datalist = document.getElementById('vehiclesList');
+                datalist.innerHTML = '';
+                vehicles.forEach(v => {
+                    const option = document.createElement('option');
+                    option.value = v.registration;
+                    option.label = `${v.registration} - ${v.model}`;
+                    datalist.appendChild(option);
+                });
+            }).getVehicles();
+        }
 
-                try {
-                    await fetch(GAS_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: new URLSearchParams(data)
-                    });
-                    
-                    attachmentStatus.innerHTML = '<i class="fas fa-check-circle" style="color:#0f9d58;"></i> Report submitted successfully!';
-                    alert('✅ Accident report submitted successfully!');
-                    
-                } catch (error) {
-                    attachmentStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i> Error submitting report';
-                    alert('❌ Error submitting report');
-                } finally {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }
+        function submitForm(event) {
+            event.preventDefault();
+            
+            // Validate km traveled
+            const kmTraveled = parseFloat(document.getElementById('kmTraveled').value);
+            if (kmTraveled <= 0) {
+                alert('Please enter valid odometer readings');
+                return;
             }
-
-            submitBtn.addEventListener('click', submitToGoogleAppsScript);
-
-            window.initMap = function() {
-                if (gpsCoords.lat && gpsCoords.lon) updateMapLink();
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+            
+            // Prepare form data
+            const formData = {
+                driverName: document.getElementById('driverName').value,
+                vehicleReg: document.getElementById('vehicleReg').value,
+                vehicleModel: document.getElementById('vehicleModel').value,
+                odometerStart: document.getElementById('odometerStart').value,
+                odometerFinish: document.getElementById('odometerFinish').value,
+                kmTraveled: kmTraveled,
+                fuelLiters: document.getElementById('fuelLiters').value,
+                pricePerLiter: document.getElementById('pricePerLiter').value,
+                lubricationType: document.getElementById('lubricationType').value,
+                lubricationCost: document.getElementById('lubricationCost').value || 0,
+                costCenter: document.getElementById('costCenter').value,
+                department: document.getElementById('department').value,
+                notes: document.getElementById('notes').value
             };
-
-            // QR CODE
-            const appLink = "https://drive.google.com/file/d/1aFy2cAbXoWM8Oy7AzpqCWYXRDHnL1mk3/view?usp=drive_link";
-            const qrCanvas = document.getElementById('qrCanvas');
-            if (qrCanvas) {
-                QRCode.toCanvas(qrCanvas, appLink, { width: 60, margin: 0, color: { dark: '#0b2b5c', light: '#ffffff' } });
-            }
-        })();
+            
+            // Send to Apps Script
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save Fuel Entry';
+                    
+                    if (result.success) {
+                        // Show success message
+                        const successDiv = document.getElementById('formSuccess');
+                        successDiv.style.display = 'block';
+                        successDiv.innerHTML = `✅ Fuel entry saved successfully!<br>Submission ID: ${result.submissionId}`;
+                        
+                        // Reset form
+                        document.getElementById('fuelForm').reset();
+                        document.getElementById('kmTraveled').value = '';
+                        document.getElementById('amountPaid').value = '';
+                        document.getElementById('totalCostDisplay').textContent = '$0.00';
+                        
+                        // Hide success message after 5 seconds
+                        setTimeout(() => {
+                            successDiv.style.display = 'none';
+                        }, 5000);
+                        
+                        // Switch to dashboard after successful save
+                        setTimeout(() => {
+                            showTab('dashboard');
+                        }, 2000);
+                    } else {
+                        const errorDiv = document.getElementById('formError');
+                        errorDiv.style.display = 'block';
+                        errorDiv.innerHTML = `❌ Error: ${result.error}`;
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save Fuel Entry';
+                    
+                    const errorDiv = document.getElementById('formError');
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerHTML = `❌ Error: ${error}`;
+                })
+                .saveFuelEntry(formData);
+        }
     </script>
 </body>
 </html>
-
