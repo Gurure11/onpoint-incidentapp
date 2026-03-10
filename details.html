@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ONPOINT FLEET · advanced fuel & cost log</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>ONPOINT FLEET · mobile fuel log</title>
     <!-- Google Font & Font Awesome -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,56 +19,90 @@
             box-sizing: border-box;
             font-family: 'Inter', sans-serif;
         }
+        
         body {
             min-height: 100vh;
             background: linear-gradient(145deg, #0a1e2f 0%, #1f4a6e 100%);
-            padding: 1.5rem;
+            padding: 1rem;
             position: relative;
             overflow-x: hidden;
         }
-        /* animated character background */
+        
+        /* animated character background - hidden on very small devices */
         .character-scene {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 250px;
+            height: 200px;
             pointer-events: none;
             z-index: 1;
+            opacity: 0.5;
         }
+        
+        @media (min-width: 768px) {
+            .character-scene {
+                opacity: 1;
+            }
+        }
+        
         .fuel-mascot {
             position: absolute;
             bottom: 20px;
             left: 3%;
-            width: 160px;
+            width: 120px;
             animation: float 4s ease-in-out infinite;
             filter: drop-shadow(0 20px 15px #00000066);
         }
+        
+        @media (max-width: 480px) {
+            .fuel-mascot {
+                width: 80px;
+                bottom: 10px;
+            }
+        }
+        
         .lube-character {
             position: absolute;
             bottom: 40px;
             right: 5%;
-            width: 140px;
+            width: 100px;
             animation: wobble 5s infinite;
         }
+        
+        @media (max-width: 768px) {
+            .lube-character {
+                display: none;
+            }
+        }
+        
         .toll-character {
             position: absolute;
             top: 100px;
             right: 10%;
-            width: 100px;
+            width: 80px;
             animation: drive 8s infinite linear;
             opacity: 0.7;
         }
+        
+        @media (max-width: 768px) {
+            .toll-character {
+                display: none;
+            }
+        }
+        
         @keyframes float {
             0% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(2deg); }
             100% { transform: translateY(0px) rotate(0deg); }
         }
+        
         @keyframes wobble {
             0%,100%{ transform: translateX(0) rotate(0); }
             25%{ transform: translateX(-10px) rotate(-5deg); }
             75%{ transform: translateX(10px) rotate(5deg); }
         }
+        
         @keyframes drive {
             0% { transform: translateX(-200px) scaleX(1); }
             45% { transform: translateX(200px) scaleX(1); }
@@ -77,82 +111,134 @@
             100% { transform: translateX(-200px) scaleX(1); }
         }
 
-        /* main card */
+        /* main dashboard - mobile first */
         .dashboard {
             max-width: 1400px;
             margin: 0 auto;
             position: relative;
             z-index: 10;
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
+        
+        @media (min-width: 1024px) {
+            .dashboard {
+                display: grid;
+                grid-template-columns: 1.2fr 0.8fr;
+                gap: 1.5rem;
+            }
+        }
+        
         .card {
             background: rgba(255, 255, 255, 0.97);
             backdrop-filter: blur(12px);
-            border-radius: 40px;
+            border-radius: 30px;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
-            padding: 2rem;
+            padding: 1.5rem;
             border: 1px solid rgba(255,255,255,0.6);
+            width: 100%;
         }
+        
+        @media (min-width: 768px) {
+            .card {
+                padding: 2rem;
+                border-radius: 40px;
+            }
+        }
+        
         .card.full-width {
             grid-column: span 2;
         }
 
-        /* header */
+        /* header - responsive */
         .logo-row {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
             flex-wrap: wrap;
         }
+        
         .badge {
             background: #0e2f44;
             color: white;
             font-weight: 700;
-            font-size: 1.6rem;
-            padding: 0.3rem 1.8rem 0.3rem 2rem;
-            border-radius: 60px;
-            letter-spacing: -0.5px;
-            box-shadow: -6px 6px 0 #7aa7c9;
+            font-size: 1.2rem;
+            padding: 0.3rem 1.2rem;
+            border-radius: 40px;
+            letter-spacing: -0.3px;
+            box-shadow: -4px 4px 0 #7aa7c9;
+            white-space: nowrap;
         }
+        
+        @media (min-width: 768px) {
+            .badge {
+                font-size: 1.6rem;
+                padding: 0.3rem 1.8rem 0.3rem 2rem;
+                box-shadow: -6px 6px 0 #7aa7c9;
+            }
+        }
+        
         .badge i {
-            margin-right: 12px;
+            margin-right: 8px;
             color: #fedb9f;
         }
+        
         .sheet-id {
             background: #edf5fb;
-            padding: 0.6rem 1.5rem;
-            border-radius: 40px;
-            font-size: 0.85rem;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
             color: #0e3a55;
             font-weight: 500;
             border: 1px solid white;
-            margin-left: auto;
+            margin-left: 0;
+            word-break: break-word;
+        }
+        
+        @media (min-width: 768px) {
+            .sheet-id {
+                margin-left: auto;
+                padding: 0.6rem 1.5rem;
+                font-size: 0.85rem;
+            }
         }
 
-        /* form grids */
-        .form-grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.2rem;
-            margin-bottom: 1.5rem;
+        /* form grids - mobile first (stack vertically) */
+        .form-grid-3, .form-grid-2 {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
         }
-        .form-grid-2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.2rem;
-            margin-bottom: 1.5rem;
+        
+        @media (min-width: 640px) {
+            .form-grid-2 {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.2rem;
+            }
         }
+        
+        @media (min-width: 768px) {
+            .form-grid-3 {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.2rem;
+            }
+        }
+        
         .field {
             display: flex;
             flex-direction: column;
             gap: 0.4rem;
+            width: 100%;
         }
+        
         .field label {
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.3px;
             color: #1b4b6e;
@@ -160,163 +246,384 @@
             align-items: center;
             gap: 6px;
         }
+        
+        @media (min-width: 768px) {
+            .field label {
+                font-size: 0.8rem;
+            }
+        }
+        
         .field input, .field select, .field textarea {
             background: white;
             border: 2px solid #d0e2f2;
-            border-radius: 18px;
-            padding: 0.8rem 1.2rem;
-            font-size: 0.95rem;
+            border-radius: 16px;
+            padding: 0.8rem 1rem;
+            font-size: 0.9rem;
             font-weight: 500;
             color: #102b3f;
             transition: 0.2s;
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
         }
+        
+        @media (min-width: 768px) {
+            .field input, .field select, .field textarea {
+                border-radius: 18px;
+                padding: 0.8rem 1.2rem;
+                font-size: 0.95rem;
+            }
+        }
+        
         .field input:focus, .field select:focus {
             border-color: #2c7da0;
             box-shadow: 0 8px 18px -12px #1e4f6e;
+            outline: none;
         }
 
         /* cost sections */
         .cost-section {
             background: #e8f1f9;
-            border-radius: 28px;
-            padding: 1.5rem;
-            margin: 1.2rem 0;
+            border-radius: 24px;
+            padding: 1.2rem;
+            margin: 1rem 0;
         }
+        
+        @media (min-width: 768px) {
+            .cost-section {
+                border-radius: 28px;
+                padding: 1.5rem;
+            }
+        }
+        
         .section-title {
             font-weight: 700;
             color: #0c3e5e;
-            margin-bottom: 1.2rem;
-            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
+        
+        @media (min-width: 768px) {
+            .section-title {
+                font-size: 1.1rem;
+                margin-bottom: 1.2rem;
+            }
+        }
+        
         .inline-cost {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 1rem;
-            align-items: end;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
         }
+        
+        @media (min-width: 640px) {
+            .inline-cost {
+                display: grid;
+                grid-template-columns: 1fr 1fr auto;
+                gap: 1rem;
+                align-items: end;
+            }
+        }
+        
         .add-btn {
             background: #1d6f94;
             color: white;
             border: none;
-            border-radius: 50px;
-            padding: 0.8rem 1.5rem;
+            border-radius: 40px;
+            padding: 0.8rem 1.2rem;
             font-weight: 600;
             cursor: pointer;
             transition: 0.15s;
-            height: fit-content;
+            width: 100%;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
+        
+        @media (min-width: 640px) {
+            .add-btn {
+                width: auto;
+                padding: 0.8rem 1.5rem;
+            }
+        }
+        
         .add-btn:hover {
             background: #0e5c80;
         }
 
-        /* totals panel */
+        /* totals panel - responsive grid */
         .totals-panel {
             background: linear-gradient(135deg, #0f3348 0%, #1b5577 100%);
-            border-radius: 30px;
-            padding: 1.8rem;
-            margin: 1.5rem 0;
+            border-radius: 24px;
+            padding: 1.2rem;
+            margin: 1.2rem 0;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
             color: white;
             box-shadow: 0 15px 25px -10px #061b28;
         }
+        
+        @media (min-width: 640px) {
+            .totals-panel {
+                grid-template-columns: repeat(4, 1fr);
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .totals-panel {
+                padding: 1.8rem;
+            }
+        }
+        
         .total-item {
             text-align: center;
         }
+        
         .total-label {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
             opacity: 0.7;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
+        
+        @media (min-width: 768px) {
+            .total-label {
+                font-size: 0.75rem;
+            }
+        }
+        
         .total-value {
-            font-size: 1.9rem;
+            font-size: 1.3rem;
             font-weight: 700;
             line-height: 1.2;
         }
+        
+        @media (min-width: 768px) {
+            .total-value {
+                font-size: 1.6rem;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .total-value {
+                font-size: 1.9rem;
+            }
+        }
+        
         .total-value small {
-            font-size: 0.9rem;
+            font-size: 0.7rem;
             font-weight: 400;
             opacity: 0.8;
         }
+        
+        @media (min-width: 768px) {
+            .total-value small {
+                font-size: 0.9rem;
+            }
+        }
 
-        /* action buttons */
+        /* action buttons - stacked on mobile */
         .action-bar {
             display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-top: 1.8rem;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
         }
+        
+        @media (min-width: 640px) {
+            .action-bar {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+        }
+        
         .btn {
             border: none;
-            border-radius: 50px;
-            padding: 1rem 2rem;
+            border-radius: 40px;
+            padding: 1rem 1.5rem;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
             transition: 0.15s;
             background: white;
             color: #0f3348;
             border: 2px solid #c5dff2;
+            width: 100%;
         }
+        
+        @media (min-width: 640px) {
+            .btn {
+                width: auto;
+                padding: 1rem 2rem;
+                font-size: 1rem;
+            }
+        }
+        
         .btn-primary {
             background: #fedb9f;
             border-color: #feca7a;
             color: #0f2a3b;
             font-weight: 700;
         }
+        
         .btn-primary:hover {
             background: #ffd28c;
             transform: scale(1.02);
         }
+        
         .btn-success {
             background: #1e7920;
             border-color: #1a9e3a;
             color: white;
         }
+        
         .btn-success:hover {
             background: #166318;
         }
 
+        /* toll entries - mobile optimized */
         .toll-entry {
             background: white;
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 1rem;
             margin-bottom: 0.8rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr 0.8fr 0.5fr auto;
+            display: flex;
+            flex-direction: column;
             gap: 0.8rem;
-            align-items: center;
             border: 1px solid #bcd6ec;
         }
+        
+        @media (min-width: 640px) {
+            .toll-entry {
+                display: grid;
+                grid-template-columns: 1fr 1fr 0.8fr 0.5fr auto;
+                gap: 0.8rem;
+                align-items: center;
+                padding: 1rem;
+            }
+        }
+        
+        .toll-entry input {
+            padding: 0.7rem;
+            border: 2px solid #d0e2f2;
+            border-radius: 12px;
+            width: 100%;
+        }
+        
         .remove-toll {
             background: #dc3545;
             color: white;
             border: none;
             border-radius: 30px;
-            padding: 0.4rem 1rem;
+            padding: 0.6rem 1rem;
             cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
+        
+        @media (min-width: 640px) {
+            .remove-toll {
+                padding: 0.4rem 1rem;
+            }
+        }
+        
         .response-message {
             margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 50px;
+            padding: 0.8rem;
+            border-radius: 30px;
             font-weight: 600;
             text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* right panel summary - mobile friendly */
+        .summary-stats {
+            background: #edf5fb;
+            border-radius: 24px;
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        
+        @media (min-width: 768px) {
+            .summary-stats {
+                padding: 1.5rem;
+                border-radius: 30px;
+                gap: 1rem;
+            }
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #cbdbe9;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-label {
+            font-weight: 600;
+            color: #0f3348;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .summary-value {
+            font-weight: 700;
+            color: #1d6f94;
+            font-size: 1.1rem;
+        }
+        
+        .total-highlight {
+            font-size: 1.5rem;
+            color: #0f3348;
+            text-align: right;
+            font-weight: 800;
+        }
+        
+        @media (min-width: 768px) {
+            .total-highlight {
+                font-size: 1.8rem;
+            }
+        }
+        
+        /* footer image */
+        .footer-img {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        
+        .footer-img svg {
+            max-width: 100%;
+            height: auto;
         }
     </style>
 </head>
 <body>
     <div class="character-scene">
         <div class="fuel-mascot">
-            <svg viewBox="0 0 120 120">
+            <svg viewBox="0 0 120 120" width="100%" height="100%">
                 <circle cx="60" cy="60" r="50" fill="#FEDB9F"/>
                 <circle cx="40" cy="45" r="8" fill="white"/>
                 <circle cx="80" cy="45" r="8" fill="white"/>
@@ -328,7 +635,7 @@
             </svg>
         </div>
         <div class="lube-character">
-            <svg viewBox="0 0 100 100">
+            <svg viewBox="0 0 100 100" width="100%" height="100%">
                 <path d="M30 40 L70 40 L80 70 L20 70 Z" fill="#a5d8ff"/>
                 <circle cx="35" cy="35" r="12" fill="#74c0fc"/>
                 <circle cx="65" cy="35" r="12" fill="#74c0fc"/>
@@ -336,7 +643,7 @@
             </svg>
         </div>
         <div class="toll-character">
-            <svg viewBox="0 0 80 40">
+            <svg viewBox="0 0 80 40" width="100%" height="100%">
                 <rect x="10" y="10" width="60" height="20" fill="#ffd966" rx="5"/>
                 <circle cx="25" cy="35" r="8" fill="#333"/>
                 <circle cx="55" cy="35" r="8" fill="#333"/>
@@ -349,57 +656,97 @@
         <!-- MAIN FORM CARD -->
         <div class="card">
             <div class="logo-row">
-                <div class="badge"><i class="fas fa-gas-pump"></i> ONPOINT FLEET</div>
-                <div class="sheet-id"><i class="fas fa-file-excel"></i> SHEET: Fuel Entries</div>
+                <div class="badge"><i class="fas fa-gas-pump"></i> ONPOINT</div>
+                <div class="sheet-id"><i class="fas fa-file-excel"></i> Fuel Entries</div>
             </div>
 
             <form id="fuelForm">
                 <!-- Basic Info -->
                 <div class="form-grid-3">
-                    <div class="field"><label><i class="fas fa-user"></i>Driver</label><input type="text" id="driverName" required></div>
-                    <div class="field"><label><i class="fas fa-calendar"></i>Date</label><input type="date" id="logDate" required></div>
-                    <div class="field"><label><i class="fas fa-tag"></i>Vehicle</label><input type="text" id="vehicleReg" placeholder="Reg number"></div>
+                    <div class="field">
+                        <label><i class="fas fa-user"></i>Driver *</label>
+                        <input type="text" id="driverName" placeholder="e.g. John Nkosi" required>
+                    </div>
+                    <div class="field">
+                        <label><i class="fas fa-calendar"></i>Date *</label>
+                        <input type="date" id="logDate" required>
+                    </div>
+                    <div class="field">
+                        <label><i class="fas fa-tag"></i>Vehicle</label>
+                        <input type="text" id="vehicleReg" placeholder="Reg number">
+                    </div>
                 </div>
 
                 <!-- Odometer -->
                 <div class="form-grid-2">
-                    <div class="field"><label><i class="fas fa-tachometer-alt"></i>Odo start (km)</label><input type="number" id="odoStart" step="0.1" required></div>
-                    <div class="field"><label><i class="fas fa-flag-checkered"></i>Odo finish (km)</label><input type="number" id="odoFinish" step="0.1" required></div>
+                    <div class="field">
+                        <label><i class="fas fa-tachometer-alt"></i>Odo start (km) *</label>
+                        <input type="number" id="odoStart" step="0.1" min="0" placeholder="e.g. 12450" required>
+                    </div>
+                    <div class="field">
+                        <label><i class="fas fa-flag-checkered"></i>Odo finish (km) *</label>
+                        <input type="number" id="odoFinish" step="0.1" min="0" placeholder="e.g. 12780" required>
+                    </div>
                 </div>
 
                 <!-- Fuel Section with Price per Liter -->
                 <div class="cost-section">
                     <div class="section-title"><i class="fas fa-oil-can"></i> FUEL TRANSACTION</div>
                     <div class="form-grid-3">
-                        <div class="field"><label>Fuel type</label>
-                            <select id="fuelType" required><option value="">Select</option><option value="Petrol">Petrol</option><option value="Diesel">Diesel</option></select>
+                        <div class="field">
+                            <label>Fuel type *</label>
+                            <select id="fuelType" required>
+                                <option value="">Select</option>
+                                <option value="Petrol">Petrol</option>
+                                <option value="Diesel">Diesel</option>
+                            </select>
                         </div>
-                        <div class="field"><label>Price per liter (R)</label><input type="number" id="pricePerLiter" step="0.01" min="0" required></div>
-                        <div class="field"><label>Liters</label><input type="number" id="fuelLiters" step="0.01" min="0" required></div>
+                        <div class="field">
+                            <label>Price/L (R) *</label>
+                            <input type="number" id="pricePerLiter" step="0.01" min="0" placeholder="22.50" required>
+                        </div>
+                        <div class="field">
+                            <label>Liters *</label>
+                            <input type="number" id="fuelLiters" step="0.01" min="0" placeholder="55.5" required>
+                        </div>
                     </div>
-                    <div style="text-align:right; font-weight:600; margin-top:0.8rem;">⛽ Fuel total: R<span id="fuelTotalDisplay">0.00</span></div>
+                    <div style="text-align:right; font-weight:600; margin-top:0.8rem; font-size:1.1rem;">
+                        ⛽ Fuel total: R<span id="fuelTotalDisplay">0.00</span>
+                    </div>
                 </div>
 
                 <!-- Lubrication Cost -->
                 <div class="cost-section">
-                    <div class="section-title"><i class="fas fa-oil-can"></i> LUBRICATION / FLUIDS (with cost)</div>
+                    <div class="section-title"><i class="fas fa-oil-can"></i> LUBRICATION / FLUIDS</div>
                     <div class="form-grid-3">
-                        <div class="field"><label>Lube type</label>
+                        <div class="field">
+                            <label>Lube type</label>
                             <select id="lubeType">
-                                <option value="Engine Oil">Engine oil</option><option value="Brake fluid">Brake fluid</option>
-                                <option value="Coolant">Coolant</option><option value="Transmission oil">Transmission oil</option>
+                                <option value="Engine Oil">Engine oil</option>
+                                <option value="Brake fluid">Brake fluid</option>
+                                <option value="Coolant">Coolant</option>
+                                <option value="Transmission oil">Transmission oil</option>
                                 <option value="Other">Other</option>
                             </select>
                         </div>
-                        <div class="field"><label>Quantity (L)</label><input type="number" id="lubeQty" step="0.1" min="0" value="0"></div>
-                        <div class="field"><label>Total cost (R)</label><input type="number" id="lubeCost" step="0.01" min="0" value="0"></div>
+                        <div class="field">
+                            <label>Quantity (L)</label>
+                            <input type="number" id="lubeQty" step="0.1" min="0" value="0" placeholder="2.0">
+                        </div>
+                        <div class="field">
+                            <label>Total cost (R)</label>
+                            <input type="number" id="lubeCost" step="0.01" min="0" value="0" placeholder="450.00">
+                        </div>
                     </div>
-                    <div style="margin-top:0.8rem;"><textarea id="lubeNotes" rows="2" placeholder="Additional notes about lubrication..."></textarea></div>
+                    <div style="margin-top:0.8rem;">
+                        <textarea id="lubeNotes" rows="2" placeholder="Additional notes about lubrication..." style="width:100%;"></textarea>
+                    </div>
                 </div>
 
                 <!-- Cost Center & Department -->
                 <div class="form-grid-2">
-                    <div class="field"><label><i class="fas fa-building"></i>Cost center</label>
+                    <div class="field">
+                        <label><i class="fas fa-building"></i>Cost center *</label>
                         <select id="costCenter" required>
                             <option value="">Select</option>
                             <option value="Onpoint Group HQ">Onpoint Group HQ</option>
@@ -409,14 +756,20 @@
                             <option value="Onpoint Ontime Solutions">Onpoint Ontime Solutions</option>
                         </select>
                     </div>
-                    <div class="field"><label><i class="fas fa-users"></i>Department</label>
+                    <div class="field">
+                        <label><i class="fas fa-users"></i>Department *</label>
                         <select id="department" required>
                             <option value="">Select</option>
-                            <option value="Admin">Admin</option><option value="Business Development">Business Development</option>
-                            <option value="Finance & IT">Finance & IT</option><option value="Fleet Management">Fleet Management</option>
-                            <option value="HR">HR</option><option value="Operations">Operations</option>
-                            <option value="Procurements">Procurements</option><option value="Sales">Sales</option>
-                            <option value="SHEQ">SHEQ</option><option value="Tendering">Tendering</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Business Development">Business Development</option>
+                            <option value="Finance & IT">Finance & IT</option>
+                            <option value="Fleet Management">Fleet Management</option>
+                            <option value="HR">HR</option>
+                            <option value="Operations">Operations</option>
+                            <option value="Procurements">Procurements</option>
+                            <option value="Sales">Sales</option>
+                            <option value="SHEQ">SHEQ</option>
+                            <option value="Tendering">Tendering</option>
                             <option value="Warehouse">Warehouse</option>
                         </select>
                     </div>
@@ -426,15 +779,29 @@
                 <div class="cost-section">
                     <div class="section-title"><i class="fas fa-road"></i> TOLL GATE COSTS</div>
                     <div id="tollContainer"></div>
-                    <button type="button" class="add-btn" id="addTollBtn"><i class="fas fa-plus"></i> Add toll gate</button>
+                    <button type="button" class="add-btn" id="addTollBtn">
+                        <i class="fas fa-plus"></i> Add toll gate
+                    </button>
                 </div>
 
                 <!-- GRAND TOTAL PANEL -->
                 <div class="totals-panel" id="totalsPanel">
-                    <div class="total-item"><span class="total-label">km travelled</span><div class="total-value" id="kmTraveled">0.0</div></div>
-                    <div class="total-item"><span class="total-label">km/liter</span><div class="total-value" id="kmPerLiter">0.00</div></div>
-                    <div class="total-item"><span class="total-label">fuel cost</span><div class="total-value" id="fuelCostTotal">R0</div></div>
-                    <div class="total-item"><span class="total-label">TOTAL PAID</span><div class="total-value" id="grandTotalPaid">R0</div></div>
+                    <div class="total-item">
+                        <span class="total-label">km travelled</span>
+                        <div class="total-value" id="kmTraveled">0.0</div>
+                    </div>
+                    <div class="total-item">
+                        <span class="total-label">km/liter</span>
+                        <div class="total-value" id="kmPerLiter">0.00</div>
+                    </div>
+                    <div class="total-item">
+                        <span class="total-label">fuel cost</span>
+                        <div class="total-value" id="fuelCostTotal">R0</div>
+                    </div>
+                    <div class="total-item">
+                        <span class="total-label">TOTAL PAID</span>
+                        <div class="total-value" id="grandTotalPaid">R0</div>
+                    </div>
                 </div>
 
                 <!-- hidden field for sheet ID -->
@@ -442,28 +809,51 @@
                 
                 <!-- Action Buttons -->
                 <div class="action-bar">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-cloud-upload-alt"></i> SUBMIT TO SHEETS</button>
-                    <button type="button" class="btn" id="pdfDownloadBtn"><i class="fas fa-file-pdf"></i> PDF REPORT</button>
-                    <button type="button" class="btn" id="emailPdfBtn"><i class="fas fa-envelope"></i> EMAIL PDF</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-cloud-upload-alt"></i> SUBMIT
+                    </button>
+                    <button type="button" class="btn" id="pdfDownloadBtn">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                    <button type="button" class="btn" id="emailPdfBtn">
+                        <i class="fas fa-envelope"></i> EMAIL
+                    </button>
                 </div>
                 <div id="submitResponse" class="response-message"></div>
             </form>
         </div>
 
-        <!-- RIGHT PANEL: SUMMARY & PREVIEW (optional) -->
+        <!-- RIGHT PANEL: SUMMARY & PREVIEW -->
         <div class="card">
-            <h3 style="color:#0f3348; margin-bottom:1.5rem;"><i class="fas fa-chart-pie"></i> TRIP SUMMARY</h3>
-            <div style="background:#edf5fb; border-radius:30px; padding:1.5rem;">
-                <div style="display:grid; gap:1rem;">
-                    <div><i class="fas fa-gas-pump"></i> Fuel efficiency: <strong id="summaryEfficiency">-</strong></div>
-                    <div><i class="fas fa-wrench"></i> Lube cost: <strong id="summaryLube">R0.00</strong></div>
-                    <div><i class="fas fa-toll"></i> Toll total: <strong id="summaryToll">R0.00</strong></div>
-                    <hr>
-                    <div style="font-size:1.5rem; font-weight:700;">TOTAL: <span id="summaryTotal">R0.00</span></div>
+            <h3 style="color:#0f3348; margin-bottom:1.2rem; font-size:1.2rem;">
+                <i class="fas fa-chart-pie"></i> TRIP SUMMARY
+            </h3>
+            <div class="summary-stats">
+                <div class="summary-item">
+                    <span class="summary-label"><i class="fas fa-gas-pump"></i> Efficiency:</span>
+                    <span class="summary-value" id="summaryEfficiency">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label"><i class="fas fa-wrench"></i> Lube cost:</span>
+                    <span class="summary-value" id="summaryLube">R0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label"><i class="fas fa-road"></i> Toll total:</span>
+                    <span class="summary-value" id="summaryToll">R0.00</span>
+                </div>
+                <div style="border-top: 2px solid #cbdbe9; margin: 0.5rem 0;"></div>
+                <div class="summary-item">
+                    <span class="summary-label" style="font-size:1.1rem;">TOTAL:</span>
+                    <span class="total-highlight" id="summaryTotal">R0.00</span>
                 </div>
             </div>
-            <div style="margin-top:2rem;">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Ctext x='10' y='30' font-size='14' fill='%23333'%3EOnpoint Group - Fleet Management%3C/text%3E%3Ctext x='10' y='60' font-size='10' fill='%23666'%3EAccurate logging since 2026%3C/text%3E%3C/svg%3E" style="width:100%; opacity:0.5;">
+            <div class="footer-img">
+                <svg viewBox="0 0 200 60" width="100%" height="auto">
+                    <rect width="200" height="60" fill="#f0f7fe" rx="10"/>
+                    <text x="20" y="25" font-size="12" fill="#0f3348">Onpoint Group</text>
+                    <text x="20" y="45" font-size="10" fill="#4a6f8a">Fleet Management System</text>
+                    <text x="150" y="40" font-size="20" fill="#7aa7c9">⛽</text>
+                </svg>
             </div>
         </div>
     </div>
@@ -534,10 +924,11 @@
                 const div = document.createElement('div');
                 div.className = 'toll-entry';
                 div.innerHTML = `
-                    <input type="text" placeholder="Toll name" class="toll-name" value="${tollData.name}">
+                    <input type="text" placeholder="Toll name (e.g. N3)" class="toll-name" value="${tollData.name}">
                     <input type="number" step="0.01" placeholder="Cost (R)" class="toll-cost" value="${tollData.cost}">
                     <button type="button" class="remove-toll"><i class="fas fa-trash"></i> Remove</button>
                 `;
+                
                 const nameInput = div.querySelector('.toll-name');
                 const costInput = div.querySelector('.toll-cost');
                 const removeBtn = div.querySelector('.remove-toll');
@@ -546,10 +937,12 @@
                     tollEntries[index].name = nameInput.value;
                     updateTotals();
                 });
+                
                 costInput.addEventListener('input', () => {
                     tollEntries[index].cost = parseFloat(costInput.value) || 0;
                     updateTotals();
                 });
+                
                 removeBtn.addEventListener('click', () => {
                     div.remove();
                     tollEntries.splice(index, 1);
@@ -557,15 +950,20 @@
                     document.querySelectorAll('.toll-entry').forEach((el, i) => {
                         const nameIn = el.querySelector('.toll-name');
                         const costIn = el.querySelector('.toll-cost');
-                        nameIn.removeEventListener('input', updateTotals);
-                        costIn.removeEventListener('input', updateTotals);
-                        // Re-attach with correct index
-                        nameIn.addEventListener('input', () => {
-                            tollEntries[i].name = nameIn.value;
+                        
+                        // Remove old listeners
+                        const newNameIn = nameIn.cloneNode(true);
+                        const newCostIn = costIn.cloneNode(true);
+                        nameIn.parentNode.replaceChild(newNameIn, nameIn);
+                        costIn.parentNode.replaceChild(newCostIn, costIn);
+                        
+                        // Add new listeners
+                        newNameIn.addEventListener('input', () => {
+                            tollEntries[i].name = newNameIn.value;
                             updateTotals();
                         });
-                        costIn.addEventListener('input', () => {
-                            tollEntries[i].cost = parseFloat(costIn.value) || 0;
+                        newCostIn.addEventListener('input', () => {
+                            tollEntries[i].cost = parseFloat(newCostIn.value) || 0;
                             updateTotals();
                         });
                     });
@@ -600,13 +998,23 @@
                 const fuelType = document.getElementById('fuelType').value;
                 const price = parseFloat(pricePerLiter.value);
                 const liters = parseFloat(fuelLiters.value);
+                
+                // Validation
+                if (!driver || !date || !fuelType || !document.getElementById('costCenter').value || !document.getElementById('department').value) {
+                    showMessage('Please fill all required fields (*)', 'error');
+                    return;
+                }
+                
+                if (finish <= start) {
+                    showMessage('Odometer finish must be greater than start', 'error');
+                    return;
+                }
+                
                 const fuelTotal = liters * price;
                 const lubeType = document.getElementById('lubeType').value;
                 const lubeQty = parseFloat(document.getElementById('lubeQty').value) || 0;
                 const lubeTotal = parseFloat(lubeCost.value) || 0;
                 const lubeNotes = document.getElementById('lubeNotes').value;
-                const costCenter = document.getElementById('costCenter').value;
-                const department = document.getElementById('department').value;
                 
                 // Toll data
                 const tolls = tollEntries.map(t => `${t.name}:R${t.cost.toFixed(2)}`).join('; ');
@@ -616,35 +1024,87 @@
                 const kmPerL = liters > 0 ? km / liters : 0;
                 const grandTotal = fuelTotal + lubeTotal + tollTotal;
                 
+                // Build lubrication string
+                let lubricationStr = '';
+                if (lubeType && lubeQty > 0) {
+                    lubricationStr = `${lubeType} - ${lubeQty}L`;
+                }
+                if (lubeNotes) {
+                    lubricationStr += (lubricationStr ? ' | ' : '') + lubeNotes;
+                }
+                
                 const payload = {
-                    sheetId: document.getElementById('sheetId').value,
                     timestamp: new Date().toISOString(),
-                    driver, date, vehicle,
-                    odoStart: start, odoFinish: finish,
-                    fuelType, pricePerLiter: price, fuelLiters: liters, fuelTotal,
-                    lubrication: `${lubeType} ${lubeQty}L cost R${lubeTotal} (${lubeNotes})`,
+                    date: date,
+                    driver: driver,
+                    vehicle: vehicle,
+                    odoStart: start,
+                    odoFinish: finish,
+                    fuelType: fuelType,
+                    pricePerLiter: price,
+                    fuelLiters: liters,
+                    fuelTotal: fuelTotal,
+                    lubrication: lubricationStr || 'None',
                     lubeCost: lubeTotal,
-                    tolls, tollTotal,
-                    costCenter, department,
-                    kmTraveled: km, kmPerLiter: kmPerL, grandTotal
+                    tolls: tolls || 'None',
+                    tollTotal: tollTotal,
+                    grandTotal: grandTotal,
+                    costCenter: document.getElementById('costCenter').value,
+                    department: document.getElementById('department').value,
+                    notes: lubeNotes,
+                    kmTraveled: km,
+                    kmPerLiter: kmPerL
                 };
                 
-                const scriptURL = 'https://script.google.com/macros/s/AKfycbwfjaWojwcICJJKBgkJdt3f1anW8_SjJsQMf6My2khsVpSMhR3buG30Tb1STYa5cDs3/exec';
+                // Use your actual Apps Script URL here
+                const scriptURL = 'https://script.google.com/macros/s/AKfycbxZSM59fzrqlUL5px_H5cedP3dsBA7pvAYGvI35prDafx2nMn6vBuKtGut_YDyuRHpq/exec';
                 
-                document.getElementById('submitResponse').innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Submitting...';
+                showMessage('<i class="fas fa-spinner fa-pulse"></i> Submitting...', 'info');
                 
                 try {
-                    await fetch(scriptURL, {
+                    const response = await fetch(scriptURL, {
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                    document.getElementById('submitResponse').innerHTML = '<span style="color:#0f6d31;">✅ Successfully logged to Google Sheets</span>';
+                    
+                    showMessage('✅ Successfully logged to Google Sheets! PDF report generated.', 'success');
+                    
+                    // Reset form but keep date
+                    document.getElementById('fuelForm').reset();
+                    document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+                    
+                    // Clear toll entries
+                    tollContainer.innerHTML = '';
+                    tollEntries = [];
+                    
+                    // Reset lube fields
+                    document.getElementById('lubeQty').value = '0';
+                    document.getElementById('lubeCost').value = '0';
+                    
+                    updateTotals();
+                    
                 } catch (error) {
-                    document.getElementById('submitResponse').innerHTML = '<span style="color:#b13e3e;">❌ Submission failed</span>';
+                    console.error('Submission error:', error);
+                    showMessage('❌ Submission failed. Please check connection.', 'error');
                 }
             });
+
+            // Helper function to show messages
+            function showMessage(message, type) {
+                const responseDiv = document.getElementById('submitResponse');
+                responseDiv.innerHTML = message;
+                responseDiv.style.backgroundColor = type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#fff3cd';
+                responseDiv.style.color = type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#856404';
+                
+                if (type !== 'info') {
+                    setTimeout(() => {
+                        responseDiv.innerHTML = '';
+                        responseDiv.style.backgroundColor = 'transparent';
+                    }, 5000);
+                }
+            }
 
             // PDF Generation
             window.jsPDF = window.jspdf.jsPDF;
@@ -652,27 +1112,57 @@
                 const doc = new jsPDF();
                 
                 // Build PDF content
-                doc.setFontSize(20);
-                doc.text('ONPOINT GROUP - FUEL LOG REPORT', 20, 20);
-                doc.setFontSize(12);
-                doc.text(`Driver: ${document.getElementById('driverName').value || 'N/A'}`, 20, 40);
-                doc.text(`Date: ${document.getElementById('logDate').value}`, 20, 50);
-                doc.text(`Vehicle: ${document.getElementById('vehicleReg').value || 'N/A'}`, 20, 60);
-                doc.text(`Odometer: ${odoStart.value || 0} km → ${odoFinish.value || 0} km`, 20, 70);
-                doc.text(`Distance: ${kmTraveledSpan.innerText} km`, 20, 80);
-                doc.text(`Fuel: ${fuelLiters.value || 0} L × R${pricePerLiter.value || 0} = R${fuelTotalDisplay.innerText}`, 20, 90);
-                doc.text(`Lubrication cost: R${lubeCost.value || 0}`, 20, 100);
-                doc.text(`Toll gates: ${tollEntries.length} entries total R${summaryToll.innerText.replace('R','')}`, 20, 110);
-                doc.text(`GRAND TOTAL PAID: R${grandTotalSpan.innerText.replace('R','')}`, 20, 130);
-                doc.text(`Cost center: ${document.getElementById('costCenter').value} / ${document.getElementById('department').value}`, 20, 150);
+                const driver = document.getElementById('driverName').value || 'N/A';
+                const date = document.getElementById('logDate').value || 'N/A';
+                const vehicle = document.getElementById('vehicleReg').value || 'N/A';
+                const start = odoStart.value || '0';
+                const finish = odoFinish.value || '0';
+                const fuelType = document.getElementById('fuelType').value || 'N/A';
+                const price = pricePerLiter.value || '0';
+                const liters = fuelLiters.value || '0';
+                const lube = lubeCost.value || '0';
+                const costCenter = document.getElementById('costCenter').value || 'N/A';
+                const dept = document.getElementById('department').value || 'N/A';
                 
-                doc.save(`fuel_log_${document.getElementById('logDate').value}.pdf`);
+                doc.setFontSize(20);
+                doc.text('ONPOINT FUEL LOG REPORT', 20, 20);
+                doc.setFontSize(10);
+                
+                let y = 40;
+                const lineHeight = 8;
+                
+                doc.text(`Driver: ${driver}`, 20, y); y += lineHeight;
+                doc.text(`Date: ${date}`, 20, y); y += lineHeight;
+                doc.text(`Vehicle: ${vehicle}`, 20, y); y += lineHeight;
+                doc.text(`Odometer: ${start} km → ${finish} km`, 20, y); y += lineHeight;
+                doc.text(`Distance: ${kmTraveledSpan.innerText} km`, 20, y); y += lineHeight;
+                doc.text(`Fuel: ${liters} L × R${price} = R${fuelTotalDisplay.innerText}`, 20, y); y += lineHeight;
+                doc.text(`Efficiency: ${kmPerLiterSpan.innerText} km/L`, 20, y); y += lineHeight;
+                doc.text(`Lubrication cost: R${lube}`, 20, y); y += lineHeight;
+                doc.text(`Toll total: ${summaryToll.innerText}`, 20, y); y += lineHeight;
+                doc.text(`GRAND TOTAL: ${grandTotalSpan.innerText}`, 20, y); y += lineHeight * 2;
+                doc.text(`Cost center: ${costCenter}`, 20, y); y += lineHeight;
+                doc.text(`Department: ${dept}`, 20, y); y += lineHeight;
+                doc.text(`Submission: ${new Date().toLocaleString()}`, 20, y);
+                
+                doc.save(`fuel_log_${date}.pdf`);
             });
 
-            // Email PDF (dummy - opens mail client)
+            // Email PDF (opens mail client)
             document.getElementById('emailPdfBtn').addEventListener('click', function() {
                 const subject = `Fuel Log Report ${document.getElementById('logDate').value}`;
-                const body = `Please find attached the fuel log report.\n\nTotal paid: ${grandTotalSpan.innerText}`;
+                const body = `ONPOINT FUEL LOG REPORT\n\n` +
+                    `Driver: ${document.getElementById('driverName').value || 'N/A'}\n` +
+                    `Date: ${document.getElementById('logDate').value}\n` +
+                    `Vehicle: ${document.getElementById('vehicleReg').value || 'N/A'}\n` +
+                    `Distance: ${kmTraveledSpan.innerText} km\n` +
+                    `Fuel cost: ${fuelCostTotalSpan.innerText}\n` +
+                    `Lube cost: ${summaryLube.innerText}\n` +
+                    `Toll total: ${summaryToll.innerText}\n` +
+                    `GRAND TOTAL: ${grandTotalSpan.innerText}\n\n` +
+                    `Cost center: ${document.getElementById('costCenter').value || 'N/A'}\n` +
+                    `Department: ${document.getElementById('department').value || 'N/A'}`;
+                
                 window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             });
 
@@ -680,5 +1170,3 @@
     </script>
 </body>
 </html>
-
-
