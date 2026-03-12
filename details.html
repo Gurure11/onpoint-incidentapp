@@ -206,6 +206,21 @@
         }
 
         /* form grids - mobile first (stack vertically) */
+        .form-grid-4 {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .form-grid-4 {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1.2rem;
+            }
+        }
+        
         .form-grid-3, .form-grid-2 {
             display: flex;
             flex-direction: column;
@@ -661,8 +676,8 @@
             </div>
 
             <form id="fuelForm">
-                <!-- Basic Info -->
-                <div class="form-grid-3">
+                <!-- Basic Info with NEW fields: ER No. and Merchant -->
+                <div class="form-grid-4">
                     <div class="field">
                         <label><i class="fas fa-user"></i>Driver *</label>
                         <input type="text" id="driverName" placeholder="e.g. John Nkosi" required>
@@ -674,6 +689,28 @@
                     <div class="field">
                         <label><i class="fas fa-tag"></i>Vehicle</label>
                         <input type="text" id="vehicleReg" placeholder="Reg number">
+                    </div>
+                    <div class="field">
+                        <label><i class="fas fa-hashtag"></i>ER No.</label>
+                        <input type="text" id="erNumber" placeholder="ER Number">
+                    </div>
+                </div>
+
+                <!-- Merchant Field (NEW) -->
+                <div class="form-grid-2" style="margin-top: 0;">
+                    <div class="field">
+                        <label><i class="fas fa-store"></i>Merchant *</label>
+                        <select id="merchant" required>
+                            <option value="">Select Merchant...</option>
+                            <option value="Shell">Shell</option>
+                            <option value="Engen">Engen</option>
+                            <option value="Redan">Redan</option>
+                            <option value="Caltex">Caltex</option>
+                            <option value="Alstron">Alstron</option>
+                            <option value="Sasol">Sasol</option>
+                            <option value="BP">BP</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                 </div>
 
@@ -923,56 +960,83 @@
                 const index = tollEntries.length;
                 const div = document.createElement('div');
                 div.className = 'toll-entry';
+                div.setAttribute('data-index', index);
                 div.innerHTML = `
                     <input type="text" placeholder="Toll name (e.g. N3)" class="toll-name" value="${tollData.name}">
                     <input type="number" step="0.01" placeholder="Cost (R)" class="toll-cost" value="${tollData.cost}">
                     <button type="button" class="remove-toll"><i class="fas fa-trash"></i> Remove</button>
                 `;
                 
+                tollContainer.appendChild(div);
+                tollEntries.push({ name: tollData.name, cost: parseFloat(tollData.cost) || 0 });
+                
+                // Add event listeners to new inputs
+                attachTollListeners(div, index);
+                updateTotals();
+            }
+
+            function attachTollListeners(div, index) {
                 const nameInput = div.querySelector('.toll-name');
                 const costInput = div.querySelector('.toll-cost');
                 const removeBtn = div.querySelector('.remove-toll');
                 
-                nameInput.addEventListener('input', () => {
-                    tollEntries[index].name = nameInput.value;
+                nameInput.addEventListener('input', function() {
+                    tollEntries[index].name = this.value;
                     updateTotals();
                 });
                 
-                costInput.addEventListener('input', () => {
-                    tollEntries[index].cost = parseFloat(costInput.value) || 0;
+                costInput.addEventListener('input', function() {
+                    tollEntries[index].cost = parseFloat(this.value) || 0;
                     updateTotals();
                 });
                 
-                removeBtn.addEventListener('click', () => {
+                removeBtn.addEventListener('click', function() {
                     div.remove();
                     tollEntries.splice(index, 1);
                     // Re-index remaining entries
-                    document.querySelectorAll('.toll-entry').forEach((el, i) => {
+                    const remainingDivs = document.querySelectorAll('.toll-entry');
+                    remainingDivs.forEach((el, i) => {
+                        el.setAttribute('data-index', i);
+                        // Re-attach listeners with new indices
                         const nameIn = el.querySelector('.toll-name');
                         const costIn = el.querySelector('.toll-cost');
+                        const remove = el.querySelector('.remove-toll');
                         
-                        // Remove old listeners
+                        // Remove old listeners by cloning and replacing
                         const newNameIn = nameIn.cloneNode(true);
                         const newCostIn = costIn.cloneNode(true);
+                        const newRemove = remove.cloneNode(true);
+                        
                         nameIn.parentNode.replaceChild(newNameIn, nameIn);
                         costIn.parentNode.replaceChild(newCostIn, costIn);
+                        remove.parentNode.replaceChild(newRemove, remove);
                         
                         // Add new listeners
-                        newNameIn.addEventListener('input', () => {
-                            tollEntries[i].name = newNameIn.value;
+                        newNameIn.addEventListener('input', function() {
+                            tollEntries[i].name = this.value;
                             updateTotals();
                         });
-                        newCostIn.addEventListener('input', () => {
-                            tollEntries[i].cost = parseFloat(newCostIn.value) || 0;
+                        
+                        newCostIn.addEventListener('input', function() {
+                            tollEntries[i].cost = parseFloat(this.value) || 0;
+                            updateTotals();
+                        });
+                        
+                        newRemove.addEventListener('click', function() {
+                            el.remove();
+                            tollEntries.splice(i, 1);
+                            // After removal, re-index all remaining entries
+                            const updatedDivs = document.querySelectorAll('.toll-entry');
+                            updatedDivs.forEach((updatedEl, updatedIdx) => {
+                                updatedEl.setAttribute('data-index', updatedIdx);
+                                // Re-attach listeners recursively
+                                attachTollListeners(updatedEl, updatedIdx);
+                            });
                             updateTotals();
                         });
                     });
                     updateTotals();
                 });
-                
-                tollContainer.appendChild(div);
-                tollEntries.push({ name: tollData.name, cost: parseFloat(tollData.cost) || 0 });
-                updateTotals();
             }
 
             addTollBtn.addEventListener('click', () => addTollRow());
@@ -993,6 +1057,8 @@
                 const driver = document.getElementById('driverName').value;
                 const date = document.getElementById('logDate').value;
                 const vehicle = document.getElementById('vehicleReg').value;
+                const erNumber = document.getElementById('erNumber').value;
+                const merchant = document.getElementById('merchant').value;
                 const start = parseFloat(odoStart.value);
                 const finish = parseFloat(odoFinish.value);
                 const fuelType = document.getElementById('fuelType').value;
@@ -1000,13 +1066,23 @@
                 const liters = parseFloat(fuelLiters.value);
                 
                 // Validation
-                if (!driver || !date || !fuelType || !document.getElementById('costCenter').value || !document.getElementById('department').value) {
+                if (!driver || !date || !fuelType || !merchant || !document.getElementById('costCenter').value || !document.getElementById('department').value) {
                     showMessage('Please fill all required fields (*)', 'error');
                     return;
                 }
                 
                 if (finish <= start) {
                     showMessage('Odometer finish must be greater than start', 'error');
+                    return;
+                }
+                
+                if (isNaN(price) || price <= 0) {
+                    showMessage('Please enter a valid price per liter', 'error');
+                    return;
+                }
+                
+                if (isNaN(liters) || liters <= 0) {
+                    showMessage('Please enter a valid fuel amount', 'error');
                     return;
                 }
                 
@@ -1038,6 +1114,8 @@
                     date: date,
                     driver: driver,
                     vehicle: vehicle,
+                    erNumber: erNumber,
+                    merchant: merchant,
                     odoStart: start,
                     odoFinish: finish,
                     fuelType: fuelType,
@@ -1069,7 +1147,7 @@
                         body: JSON.stringify(payload)
                     });
                     
-                    showMessage('✅ Successfully logged to Google Sheets! PDF report generated.', 'success');
+                    showMessage('✅ Successfully logged to Google Sheets!', 'success');
                     
                     // Reset form but keep date
                     document.getElementById('fuelForm').reset();
@@ -1115,6 +1193,8 @@
                 const driver = document.getElementById('driverName').value || 'N/A';
                 const date = document.getElementById('logDate').value || 'N/A';
                 const vehicle = document.getElementById('vehicleReg').value || 'N/A';
+                const erNumber = document.getElementById('erNumber').value || 'N/A';
+                const merchant = document.getElementById('merchant').value || 'N/A';
                 const start = odoStart.value || '0';
                 const finish = odoFinish.value || '0';
                 const fuelType = document.getElementById('fuelType').value || 'N/A';
@@ -1134,6 +1214,8 @@
                 doc.text(`Driver: ${driver}`, 20, y); y += lineHeight;
                 doc.text(`Date: ${date}`, 20, y); y += lineHeight;
                 doc.text(`Vehicle: ${vehicle}`, 20, y); y += lineHeight;
+                doc.text(`ER No.: ${erNumber}`, 20, y); y += lineHeight;
+                doc.text(`Merchant: ${merchant}`, 20, y); y += lineHeight;
                 doc.text(`Odometer: ${start} km → ${finish} km`, 20, y); y += lineHeight;
                 doc.text(`Distance: ${kmTraveledSpan.innerText} km`, 20, y); y += lineHeight;
                 doc.text(`Fuel: ${liters} L × R${price} = R${fuelTotalDisplay.innerText}`, 20, y); y += lineHeight;
@@ -1155,6 +1237,8 @@
                     `Driver: ${document.getElementById('driverName').value || 'N/A'}\n` +
                     `Date: ${document.getElementById('logDate').value}\n` +
                     `Vehicle: ${document.getElementById('vehicleReg').value || 'N/A'}\n` +
+                    `ER No.: ${document.getElementById('erNumber').value || 'N/A'}\n` +
+                    `Merchant: ${document.getElementById('merchant').value || 'N/A'}\n` +
                     `Distance: ${kmTraveledSpan.innerText} km\n` +
                     `Fuel cost: ${fuelCostTotalSpan.innerText}\n` +
                     `Lube cost: ${summaryLube.innerText}\n` +
