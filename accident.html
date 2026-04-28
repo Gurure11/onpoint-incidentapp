@@ -4,20 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>OnPoint Fleet · accident report + cost center</title>
-    <!-- Font & icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <!-- QR code generator (lightweight) -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-    <!-- Google Maps Geocoding API - Using a valid API key -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places&callback=initMap" async defer></script>
+    <!-- External font/icon links removed for security. -->
+    <!-- External QR library removed for security. -->
+    <!-- External Google Maps script removed for security. Location now uses browser GPS only. -->
     <style>
         /* All your existing CSS remains exactly the same */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
         body {
             background: #0b2b5c;
@@ -434,23 +430,17 @@
 </head>
 <body>
     <!-- Floating WhatsApp button -->
-    <a href="https://wa.me/27672557297?text=Hello%20OnPoint%20Fleet%2C%20I%20need%20to%20report%20an%20incident" 
+    <a href="#" 
        class="floating-wa" 
-       target="_blank" 
-       title="Chat with OnPoint on WhatsApp">
+       title="WhatsApp link removed for security"
+       onclick="alert('External WhatsApp redirect removed for security. Please contact fleet control directly.'); return false;">
         <i class="fab fa-whatsapp"></i>
     </a>
-
-    <!-- Modified counter pill: embedded counter12 + "Incidents 2026" below -->
+    <!-- Local counter pill: external visitor counter removed for security -->
     <div class="counter-pill">
         <div style="display: flex; align-items: center; gap: 12px; justify-content: center;">
-            <!-- Fixed counter12 implementation -->
-            <div align="center">
-                <a href='https://www.counter12.com'><img src='https://www.counter12.com/img-3yZY1ZZwa29AB3dd-40.gif' border='0' alt='counter'></a>
-                <script type='text/javascript' src='https://www.counter12.com/ad.js?id=3yZY1ZZwa29AB3dd'></script>
-            </div>
+            <span class="counter-badge" id="localVisitCounter">0</span>
         </div>
-        <!-- label below: App Visit 2026 -->
         <div class="incident-label"><i class="fas fa-car-crash"></i> App Visit 2026</div>
     </div>
 
@@ -473,7 +463,7 @@
         <div class="live-characters">
             <div class="character"><i class="fas fa-smile"></i></div>
             <div class="character"><i class="fas fa-truck"></i></div>
-            <div class="character"><i class="fas fa-shield-hal"></i></div>
+            <div class="character"><i class="fas fa-shield-alt"></i></div>
         </div>
 
         <div class="subhead">
@@ -496,9 +486,8 @@
                     <span class="scan-note"><i class="fas fa-camera"></i> scan QR to download APK</span>
                 </div>
             </div>
-            <a href="https://drive.google.com/file/d/1aFy2cAbXoWM8Oy7AzpqCWYXRDHnL1mk3/view?usp=drive_link" 
-               class="app-link" target="_blank" rel="noopener">
-                <i class="fas fa-download"></i> get app (google drive)
+            <a href="#" class="app-link" onclick="alert('External Google Drive download link removed for security.'); return false;">
+                <i class="fas fa-download"></i> app download link removed
             </a>
         </div>
         
@@ -541,6 +530,7 @@
                 <div class="input-field">
                     <label><i class="fas fa-map-pin"></i> Location / street</label>
                     <input type="text" id="location" name="location" placeholder="Enter address or use GPS detect" value="" required>
+                    <button type="button" id="useLocationBtn" style="margin-top:8px;border:0;border-radius:20px;background:#0b2b5c;color:white;padding:9px 14px;font-weight:700;cursor:pointer;">Use current location</button>
                 </div>
             </div>
 
@@ -720,7 +710,7 @@
                 <i class="fas fa-cloud-upload-alt"></i>
                 <div class="upload-text">attach accident image with GPS & date stamp</div>
                 <div class="upload-hint">tap to browse — overlay will be added automatically</div>
-                <input type="file" id="fileInput" accept="image/*">
+                <input type="file" id="fileInput" accept="image/*" capture="environment">
             </div>
 
             <!-- live preview -->
@@ -846,37 +836,31 @@
                 if (gpsCoords.lat && gpsCoords.lon) {
                     const lat = gpsCoords.lat.toFixed(6);
                     const lon = gpsCoords.lon.toFixed(6);
-                    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+                    const localGeoText = `${lat}, ${lon}`;
                     capturedLat.value = lat;
                     capturedLon.value = lon;
-                    capturedGeoUrl.value = mapsUrl;
-                    dynamicMapLink.href = mapsUrl;
-                    dynamicMapLink.innerHTML = `${lat}, ${lon} · live map`;
-
-                    if (window.google && google.maps) {
-                        const geocoder = new google.maps.Geocoder();
-                        geocoder.geocode({ location: { lat: gpsCoords.lat, lng: gpsCoords.lon } }, (results, status) => {
-                            if (status === 'OK' && results[0]) {
-                                const address = results[0].formatted_address;
-                                locationInput.value = address;
-                                attachmentStatus.innerHTML = `<i class="fas fa-check-circle"></i> Address detected: ${address.substring(0, 50)}...`;
-                            } else {
-                                locationInput.value = `${lat}, ${lon} (address unavailable)`;
-                                attachmentStatus.innerHTML = `<i class="fas fa-map-pin"></i> GPS locked, no address details`;
-                            }
-                        });
-                    } else {
-                        locationInput.value = `${lat}, ${lon}`;
-                        attachmentStatus.innerHTML = `<i class="fas fa-map-pin"></i> GPS locked (coordinates only)`;
-                    }
+                    capturedGeoUrl.value = localGeoText;
+                    dynamicMapLink.href = '#';
+                    dynamicMapLink.removeAttribute('target');
+                    dynamicMapLink.innerHTML = `${localGeoText} · GPS captured`;
+                    locationInput.value = `GPS ${localGeoText}`;
+                    attachmentStatus.innerHTML = `<i class="fas fa-check-circle"></i> Location captured: ${localGeoText}`;
                 } else {
                     dynamicMapLink.href = '#';
                     dynamicMapLink.innerHTML = 'waiting for GPS …';
                 }
             }
 
-            // get location
-            if (navigator.geolocation) {
+            function requestDriverLocation() {
+                if (!navigator.geolocation) {
+                    gpsCoords.lat = -25.9989;
+                    gpsCoords.lon = 28.1213;
+                    updateMapLink();
+                    locationInput.value = 'GPS not supported - default Midrand location';
+                    attachmentStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> GPS not supported – using default';
+                    return;
+                }
+                attachmentStatus.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> requesting driver location...';
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
                         gpsCoords.lat = pos.coords.latitude;
@@ -884,22 +868,22 @@
                         gpsCoords.accuracy = pos.coords.accuracy;
                         updateMapLink();
                     },
-                    (err) => {
-                        console.warn('GPS failed, fallback to Midrand default');
-                        gpsCoords.lat = -25.9989; 
+                    () => {
+                        gpsCoords.lat = -25.9989;
                         gpsCoords.lon = 28.1213;
                         updateMapLink();
                         locationInput.value = '71 Pretorius Rd, President Park, Midrand (default)';
                         attachmentStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> GPS denied – using default Midrand address';
                     },
-                    { enableHighAccuracy: true, timeout: 10000 }
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
                 );
-            } else {
-                gpsCoords.lat = -25.9989; gpsCoords.lon = 28.1213;
-                updateMapLink();
-                locationInput.value = '71 Pretorius Rd, President Park, Midrand (default)';
-                attachmentStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> GPS not supported – using default';
             }
+
+            const useLocationBtn = document.getElementById('useLocationBtn');
+            if (useLocationBtn) useLocationBtn.addEventListener('click', requestDriverLocation);
+
+            // get location
+            requestDriverLocation();
 
             // ---------- STAMP IMAGE WITH LOCATION + DATE ----------
             function stampImageWithOverlay(file) {
@@ -952,6 +936,7 @@
 
             async function handleFileSelect(file) {
                 if (!file) return;
+                requestDriverLocation();
                 if (!file.type.startsWith('image/')) {
                     alert('Please select an image');
                     return;
@@ -1090,17 +1075,19 @@
 
             submitBtn.addEventListener('click', submitToGoogleAppsScript);
 
-            window.initMap = function() {
-                if (gpsCoords.lat && gpsCoords.lon) updateMapLink();
-            };
-
             // ---------- QR CODE ----------
-            const appLink = "https://drive.google.com/file/d/1aFy2cAbXoWM8Oy7AzpqCWYXRDHnL1mk3/view?usp=drive_link";
             const qrCanvas = document.getElementById('qrCanvas');
             if (qrCanvas) {
-                QRCode.toCanvas(qrCanvas, appLink, { width: 60, margin: 0, color: { dark: '#0b2b5c', light: '#ffffff' } }, (error) => {
-                    if (error) console.error('QR error', error);
-                });
+                const qctx = qrCanvas.getContext('2d');
+                qctx.fillStyle = '#ffffff'; qctx.fillRect(0, 0, 60, 60);
+                qctx.fillStyle = '#0b2b5c';
+                qctx.fillRect(6, 6, 14, 14); qctx.fillRect(40, 6, 14, 14); qctx.fillRect(6, 40, 14, 14); qctx.fillRect(26, 26, 8, 8);
+            }
+            const counterEl = document.getElementById('localVisitCounter');
+            if (counterEl) {
+                const visits = Number(localStorage.getItem('onpoint_app_visits') || '0') + 1;
+                localStorage.setItem('onpoint_app_visits', String(visits));
+                counterEl.textContent = String(visits);
             }
         })();
     </script>
