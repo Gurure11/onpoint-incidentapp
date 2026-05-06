@@ -483,14 +483,14 @@
         <!-- NEW: APP DOWNLOAD QR CODE (updated link) -->
         <div class="app-download-row" id="appQrRow">
             <div class="qr-container">
-                <canvas id="qrCanvas" width="60" height="60"></canvas>
+                <img id="qrCanvas" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAcgAAAHIAQAAAADi2kdHAAAEWklEQVR4nO1ca4/bMAwjh/z/v8x9ECm7wLC73R61Z6f3aJoQjSBIpinZFL54fPsq8CIv8iI/eTwA650AEBAoioAogBCBegPUJ757LztPQT4oT4Kg2D4VQRBS+S+OpPruzew8Ckk66vofBShhCYASlPd194Z2HoZkHCradxQdms63/NPfeZF/Fvm8nCkBSbES7LggKtH6m995kX8P+QCIl8T6E79VRNYAWvQI09172XkKEhpu+twrsL3sPAXJKYOOwbMDksnBFEbg/uZ3XuTfQ0KSOkgr/uRP67J/65UA1Y3PhZECUQ6UfwgUxyUF0tS2RlUJuvPPRZFs7QdQKwrWDMxqZanBuZnA1YcWRlIiKEzyULQgVijGh2P2og3tPAUplsAX17EcWk6mR1RVBiai7O5n5xFIjtQ68u0suyOpGDO55c23ayIf1OBIiJbzBvXpVKsI8Ryywl52noTsuaUnoOU5p1uOU4ewxfv97DwGSapYLGpuAohy0n0RhTAl4w3tPABZ+m0VyDxCjjpoaipyidt8V2972ov86HBYZkKSJgQN185T0tAnXT60KDJ6QusKzXVLTYjUAKfhlNN2s/MgZNU5SaoL156flLRAZN7Zo+rV+5ZHplWoB9OQIEZQUISGuripnQcgJUqkUNI7IhNVGnbdLHNSELd/aF1kie1zNDqdJlwBpGkBL9L8XnaegmS0WkxsZ1KHMCjRJDi862kv8qOj+m/LZ/EcUD7NWY+gcGs1eOtlKyPTWeIusCpvoyPUp2mUt4M3tPMMpAadZXtwEKBSb5so1WzmfU97kT89st5hhOIYI9O+2W25bsq9+u3SyApKZQKqYrKEO8FMmVLcVj7fzs5jkHJRJYpBSQehuhk+mwN7XcR+dp6AzHqHKZ3O05V0gdEiIHtI3czOg5CpoDCNttbiXQ2Nl3tBodX77ew8AvlYEnJ9E3gpuYywtCdzw9WHFkXC7fFqnd3d8nK0pkM+Z3Vy16+si6SXM0TDDbctZlS+7S6wZrn72XkKssqeXQ7j+ASWAYEuans+c/ntosiRTqepJeY2sE65ybnOyXvZeRySvQC7F3pSTXZ7rYNYzHdbO/9/ZPeXyMqtKLbb8s+F7Orwu/OVVZGPlaGXrvgsVtHoA5tW9fJ9T3uRn0DKOdTdJk11rSJAobfpFrvrP9dFPo5Hz02mHoRBdWW5yPVuve9pL/LDQyavM43NJSjXB+GN6nD57ZLINLy7Fd5k9mXJoPu/RnvY7R9aFzntb9Krr13HdnZNW/xYGlrX9rLzFOS8v6Zl9yzJ7rWCvoPZJoOXDy2LnPbXHMXPSH5jIA1hGqshNrPzFOQDRJvNipWarEgc/k0TGNNT9KanvchfQfYGGOzmhGkHXJoHpxDz7qe9yA+QtJLA5rw9QxlR2U3z737ai/zhMe2vKS/FVkqiDJ+dnOxIvePnoshpf80k0t6mT5h6FEbN7NbLFkbO+2v+q++8yIu8yM8d3wFbfscIg4d5dQAAAABJRU5ErkJggg==" alt="QR code to download OnPoint driver app">
                 <div>
                     <div style="font-weight:700; color:#0f2d55;">📲 OnPoint driver app</div>
                     <span class="scan-note"><i class="fas fa-camera"></i> scan QR to download APK</span>
                 </div>
             </div>
-            <a href="https://drive.google.com/file/d/1myhSxGUZt5mQRdsH_yRk6duo-ejA3LdW/view?usp=sharing" class="app-link" onclick="alert('Download from Google Drive .'); return True;">
-                <i class="fas fa-download"></i> 
+            <a href="https://drive.google.com/file/d/1myhSxGUZt5mQRdsH_yRk6duo-ejA3LdW/view?usp=drive_link" class="app-link" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-download"></i> Download App
             </a>
         </div>
         
@@ -1079,12 +1079,10 @@
             submitBtn.addEventListener('click', submitToGoogleAppsScript);
 
             // ---------- QR CODE ----------
+            // QR image is embedded above and points to the app download link.
             const qrCanvas = document.getElementById('qrCanvas');
             if (qrCanvas) {
-                const qctx = qrCanvas.getContext('2d');
-                qctx.fillStyle = '#ffffff'; qctx.fillRect(0, 0, 60, 60);
-                qctx.fillStyle = '#0b2b5c';
-                qctx.fillRect(6, 6, 14, 14); qctx.fillRect(40, 6, 14, 14); qctx.fillRect(6, 40, 14, 14); qctx.fillRect(26, 26, 8, 8);
+                qrCanvas.title = 'Scan to download the OnPoint driver app';
             }
             const counterEl = document.getElementById('localVisitCounter');
             if (counterEl) {
