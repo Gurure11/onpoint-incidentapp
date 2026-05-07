@@ -759,6 +759,10 @@
                             <option value="Timothy Wadzema">Timothy Wadzema</option>
                             <option value="Rayman Mugaramanja">Rayman Mugaramanja</option>
                         </select>
+                        <button type="button" class="add-btn" style="margin-top:8px;" onclick="addNewOption('driverName')">
+                            <i class="fas fa-plus"></i> Add Driver
+                        </button>
+
                     </div>
                     <div class="field">
                         <label><i class="fas fa-calendar"></i>Date *</label>
@@ -789,6 +793,10 @@
                             <option value="BP">BP</option>
                             <option value="Other">Other</option>
                         </select>
+                        <button type="button" class="add-btn" style="margin-top:8px;" onclick="addNewOption('merchant')">
+                            <i class="fas fa-plus"></i> Add Merchant
+                        </button>
+
                     </div>
                 </div>
 
@@ -870,6 +878,10 @@
                             <option value="Nkanyezi Projects">Nkanyezi Projects</option>
                             <option value="Onpoint Ontime Solutions">Onpoint Ontime Solutions</option>
                         </select>
+                        <button type="button" class="add-btn" style="margin-top:8px;" onclick="addNewOption('costCenter')">
+                            <i class="fas fa-plus"></i> Add Cost Center
+                        </button>
+
                     </div>
                     <div class="field">
                         <label><i class="fas fa-users"></i>Department *</label>
@@ -887,6 +899,10 @@
                             <option value="Tendering">Tendering</option>
                             <option value="Warehouse">Warehouse</option>
                         </select>
+                        <button type="button" class="add-btn" style="margin-top:8px;" onclick="addNewOption('department')">
+                            <i class="fas fa-plus"></i> Add Department
+                        </button>
+
                     </div>
                 </div>
 
@@ -1330,5 +1346,21 @@
 
         })();
     </script>
+
+<script>
+function addNewOption(selectId) {
+    const select = document.getElementById(selectId);
+    const newValue = prompt("Enter new name if not listed:");
+    
+    if (newValue && newValue.trim() !== "") {
+        const option = document.createElement("option");
+        option.value = newValue.trim();
+        option.text = newValue.trim();
+        select.appendChild(option);
+        select.value = newValue.trim();
+    }
+}
+</script>
+
 </body>
 </html>
