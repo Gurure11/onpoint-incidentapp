@@ -352,7 +352,7 @@
 
                 <div class="form-group password-toggle">
                     <label for="password">Password *</label>
-                    <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
                     <span class="toggle-password" onclick="togglePassword()">👁️</span>
                 </div>
 
@@ -389,13 +389,15 @@
                         <label>Username *</label>
                         <input type="text" id="regUsername" placeholder="johndoe" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group password-toggle">
                         <label>Password *</label>
-                        <input type="password" id="regPassword" placeholder="Create password" required>
+                        <input type="password" id="regPassword" name="regPassword" placeholder="Create password" required autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+                        <span class="toggle-password" onclick="togglePasswordField('regPassword', this)">👁️</span>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group password-toggle">
                         <label>Confirm Password *</label>
-                        <input type="password" id="regConfirmPassword" placeholder="Confirm password" required>
+                        <input type="password" id="regConfirmPassword" name="regConfirmPassword" placeholder="Confirm password" required autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+                        <span class="toggle-password" onclick="togglePasswordField('regConfirmPassword', this)">👁️</span>
                     </div>
                     <div class="form-group">
                         <label>Employee Number</label>
@@ -428,35 +430,61 @@
 
     <script>
         // ============================================
-        // CONFIGURATION - REPLACE WITH YOUR APPS SCRIPT URL
+        // CONFIGURATION - GOOGLE SHEETS DATA SOURCE
         // ============================================
         const CONFIG = {
             // Your Google Apps Script Web App URL (from deployment)
-            GAS_URL: 'https://script.google.com/macros/s/AKfycbxFhlaIFEJGYnzX8r9cEx47X31tiXtn-xGFvUS2z6bjixFj8MK0_ffIlE_1Dqrkyym_Hg/exec',
-            
+            GAS_URL: 'https://script.google.com/macros/s/AKfycbxPR19sKQ0jGFO1yXrqKe2vJlD1jhjupHKv1gCxENrj9hwQR8MSsCdC2yVBWqXr3FXvdg/exec',
+
+            // Google Sheet details for user data
+            SPREADSHEET_ID: '1UOOBScKX64TTIGQRyA89OeVPybIPw031eVhjpvHP7_c',
+            SHEET_NAME: 'Distinct',
+            TABLE_NAME: 'Users',
+
             // Redirect URL after successful login (your fuel app)
             REDIRECT_URL: 'accident.html', // or full URL like 'https://yourdomain.com/accident.html'
-            
+
             // Session timeout in milliseconds (8 hours)
             SESSION_TIMEOUT: 8 * 60 * 60 * 1000
         };
 
-        // Store registered users in localStorage (for demo purposes)
-        // In production, this would be handled by your backend
-        let registeredUsers = [];
+        // Send all user data requests to Google Apps Script / Google Sheet.
+        // The Apps Script should read/write the Users table on the Distinct sheet.
+        async function callUsersSheet(action, data = {}) {
+            const response = await fetch(CONFIG.GAS_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    // text/plain avoids unnecessary CORS preflight issues with Google Apps Script.
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    action: action,
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    sheetId: CONFIG.SPREADSHEET_ID,
+                    sheetName: CONFIG.SHEET_NAME,
+                    tableName: CONFIG.TABLE_NAME,
+                    table: CONFIG.TABLE_NAME,
+                    ...data
+                })
+            });
 
-        // Load registered users from localStorage on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const stored = localStorage.getItem('onpoint_registered_users');
-            if (stored) {
-                registeredUsers = JSON.parse(stored);
+            const text = await response.text();
+
+            try {
+                return JSON.parse(text);
+            } catch (error) {
+                throw new Error('Invalid response from Google Apps Script: ' + text);
             }
-            
-            const session = localStorage.getItem('onpoint_session');
+        }
+
+        // Load active login session only; user records are fetched from Google Sheet
+        document.addEventListener('DOMContentLoaded', function() {
+            const session = localStorage.getItem('onpoint_session') || sessionStorage.getItem('onpoint_session');
             if (session) {
                 const sessionData = JSON.parse(session);
                 const now = new Date().getTime();
-                
+
                 // Check if session is still valid
                 if (now - sessionData.timestamp < CONFIG.SESSION_TIMEOUT) {
                     // Auto-login
@@ -464,30 +492,54 @@
                 } else {
                     // Session expired
                     localStorage.removeItem('onpoint_session');
+                    sessionStorage.removeItem('onpoint_session');
                 }
             }
         });
 
         // Toggle password visibility
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.querySelector('.toggle-password');
-            
+        function togglePasswordField(inputId, toggleIcon) {
+            const passwordInput = document.getElementById(inputId);
+            if (!passwordInput) return;
+
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                toggleIcon.textContent = '👁️‍🗨️';
+                toggleIcon.textContent = '🙈';
             } else {
                 passwordInput.type = 'password';
                 toggleIcon.textContent = '👁️';
             }
         }
 
+        function togglePassword() {
+            const toggleIcon = document.querySelector('#loginForm .toggle-password');
+            togglePasswordField('password', toggleIcon);
+        }
+
         // Forgot password handler
-        function forgotPassword() {
+        async function forgotPassword() {
             const email = prompt('Enter your email address to reset password:');
-            if (email) {
-                alert('Password reset link has been sent to ' + email);
-                // In production, this would call your Apps Script to send reset email
+            if (!email) return;
+
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            try {
+                const result = await callUsersSheet('forgotPassword', {
+                    email: email,
+                    timestamp: new Date().toISOString()
+                });
+
+                document.getElementById('loadingOverlay').style.display = 'none';
+
+                if (result.status === 'success') {
+                    alert(result.message || 'Password reset link has been sent to ' + email);
+                } else {
+                    alert(result.message || 'Unable to process password reset. Please try again.');
+                }
+            } catch (error) {
+                console.error('Forgot password error:', error);
+                document.getElementById('loadingOverlay').style.display = 'none';
+                alert('Connection error. Please try again.');
             }
         }
 
@@ -512,134 +564,62 @@
         // Handle login form submission
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
             const rememberMe = document.getElementById('rememberMe').checked;
-            
+
             if (!username || !password) {
                 showError('Please enter both username and password');
                 return;
             }
-            
+
             // Show loading
             document.getElementById('loadingOverlay').style.display = 'flex';
             document.getElementById('loginBtn').disabled = true;
-            
+
             try {
-                // Check against registered users first (for demo)
-                const registeredUser = registeredUsers.find(u => 
-                    (u.username === username || u.email === username) && u.password === password
-                );
-                
-                // Demo credentials
-                const isDemoUser = (username === 'admin@onpoint.co.za' && password === 'password123') ||
-                                  (username === 'driver1' && password === 'password123');
-                
-                if (registeredUser || isDemoUser) {
-                    
-                    // Simulate API delay
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    
-                    // Determine user info
-                    let userInfo;
-                    if (registeredUser) {
-                        userInfo = {
-                            userId: registeredUser.email,
-                            username: registeredUser.username,
-                            email: registeredUser.email,
-                            fullName: registeredUser.fullName,
-                            role: registeredUser.role
-                        };
-                    } else {
-                        userInfo = {
-                            userId: username,
-                            username: username,
-                            email: username.includes('@') ? username : username + '@onpoint.co.za',
-                            fullName: username === 'admin@onpoint.co.za' ? 'Admin User' : 'Driver User',
-                            role: username === 'admin@onpoint.co.za' ? 'admin' : 'driver'
-                        };
-                    }
-                    
-                    // Create session
-                    const sessionData = {
-                        ...userInfo,
-                        timestamp: new Date().getTime(),
-                        expires: new Date().getTime() + CONFIG.SESSION_TIMEOUT
-                    };
-                    
-                    if (rememberMe) {
-                        localStorage.setItem('onpoint_session', JSON.stringify(sessionData));
-                    } else {
-                        sessionStorage.setItem('onpoint_session', JSON.stringify(sessionData));
-                    }
-                    
-                    // Show success
-                    document.getElementById('successMessage').style.display = 'block';
-                    document.getElementById('errorMessage').style.display = 'none';
-                    
-                    // Redirect to fuel app
-                    setTimeout(() => {
-                        window.location.href = CONFIG.REDIRECT_URL;
-                    }, 1500);
-                    
-                } else {
-                    showError('Invalid username or password');
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                    document.getElementById('loginBtn').disabled = false;
-                }
-                
-                // Production code - uncomment when using with Apps Script
-                /*
-                // Call Google Apps Script for authentication
-                const response = await fetch(CONFIG.GAS_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'login',
-                        username: username,
-                        password: password,
-                        timestamp: new Date().toISOString()
-                    })
+                // Authenticate against the Users table in the Distinct sheet
+                const result = await callUsersSheet('login', {
+                    username: username,
+                    password: password,
+                    timestamp: new Date().toISOString()
                 });
-                
-                const result = await response.json();
-                
+
                 if (result.status === 'success') {
                     // Create session
                     const sessionData = {
-                        userId: result.userId,
-                        username: result.username,
-                        email: result.email,
-                        fullName: result.fullName,
-                        role: result.role,
+                        userId: result.userId || result.email || username,
+                        username: result.username || username,
+                        email: result.email || (username.includes('@') ? username : username + '@onpoint.co.za'),
+                        fullName: result.fullName || result.name || username,
+                        role: result.role || 'driver',
+                        employeeNumber: result.employeeNumber || '',
                         timestamp: new Date().getTime(),
                         expires: new Date().getTime() + CONFIG.SESSION_TIMEOUT
                     };
-                    
+
                     if (rememberMe) {
                         localStorage.setItem('onpoint_session', JSON.stringify(sessionData));
                     } else {
                         sessionStorage.setItem('onpoint_session', JSON.stringify(sessionData));
                     }
-                    
+
                     // Show success
                     document.getElementById('successMessage').style.display = 'block';
                     document.getElementById('errorMessage').style.display = 'none';
-                    
+
                     // Redirect to fuel app
                     setTimeout(() => {
                         window.location.href = CONFIG.REDIRECT_URL;
                     }, 1500);
-                    
+
                 } else {
                     showError(result.message || 'Invalid username or password');
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    document.getElementById('loginBtn').disabled = false;
                 }
-                */
-                
+
             } catch (error) {
                 console.error('Login error:', error);
                 showError('Connection error. Please try again.');
@@ -651,126 +631,74 @@
         // Handle registration form submission
         document.getElementById('registerUserForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const fullName = document.getElementById('regFullName').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const username = document.getElementById('regUsername').value.trim();
-            const password = document.getElementById('regPassword').value.trim();
-            const confirmPassword = document.getElementById('regConfirmPassword').value.trim();
+            const passwordInput = document.getElementById('regPassword');
+            const confirmPasswordInput = document.getElementById('regConfirmPassword');
+
+            // Read the two password fields directly at submit time.
+            // Using String(...).trim() prevents false mismatches from accidental leading/trailing spaces
+            // while keeping the value sent to Apps Script exactly the same as the validated value.
+            const password = String(passwordInput.value || '').trim();
+            const confirmPassword = String(confirmPasswordInput.value || '').trim();
             const employeeNumber = document.getElementById('regEmployeeNumber').value.trim();
             const role = document.getElementById('regRole').value;
-            
+
             // Validate
             if (!fullName || !email || !username || !password) {
                 alert('Please fill in all required fields');
                 return;
             }
-            
+
             if (password !== confirmPassword) {
-                alert('Passwords do not match');
+                // Make both fields visible so the user can immediately see and correct the typo.
+                passwordInput.type = 'text';
+                confirmPasswordInput.type = 'text';
+                alert('Passwords do not match. Please check both password fields and try again.');
+                confirmPasswordInput.focus();
                 return;
             }
-            
+
             if (password.length < 6) {
                 alert('Password must be at least 6 characters long');
                 return;
             }
-            
-            // Check if username or email already exists
-            if (registeredUsers.some(u => u.username === username)) {
-                alert('Username already exists. Please choose another one.');
-                return;
-            }
-            
-            if (registeredUsers.some(u => u.email === email)) {
-                alert('Email already registered. Please use another email or login.');
-                return;
-            }
-            
+
             // Show loading
             document.getElementById('loadingOverlay').style.display = 'flex';
-            
+
             try {
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // Create new user object
-                const newUser = {
-                    fullName,
-                    email,
-                    username,
-                    password, // In production, this should be hashed
-                    employeeNumber,
-                    role,
-                    registeredAt: new Date().toISOString()
-                };
-                
-                // Add to registered users array
-                registeredUsers.push(newUser);
-                
-                // Save to localStorage (for demo persistence)
-                localStorage.setItem('onpoint_registered_users', JSON.stringify(registeredUsers));
-                
-                // Hide loading
-                document.getElementById('loadingOverlay').style.display = 'none';
-                
-                // Show success message on login form
-                document.getElementById('registerSuccessMessage').style.display = 'block';
-                
-                // Clear registration form
-                document.getElementById('registerUserForm').reset();
-                
-                // Switch to login form
-                showLogin();
-                
-                // Pre-fill login form with registered username
-                document.getElementById('username').value = username;
-                document.getElementById('password').value = '';
-                
-                // Auto-hide success message after 5 seconds
-                setTimeout(() => {
-                    document.getElementById('registerSuccessMessage').style.display = 'none';
-                }, 5000);
-                
-                // Production code - uncomment when using with Apps Script
-                /*
-                const response = await fetch(CONFIG.GAS_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'register',
-                        fullName: fullName,
-                        email: email,
-                        username: username,
-                        password: password,
-                        employeeNumber: employeeNumber,
-                        role: role,
-                        timestamp: new Date().toISOString()
-                    })
+                // Save new user to the Users table in the Distinct sheet
+                const result = await callUsersSheet('register', {
+                    fullName: fullName,
+                    email: email,
+                    username: username,
+                    password: password,
+                    employeeNumber: employeeNumber,
+                    role: role,
+                    registeredAt: new Date().toISOString(),
+                    timestamp: new Date().toISOString()
                 });
-                
-                const result = await response.json();
-                
+
                 if (result.status === 'success') {
                     // Hide loading
                     document.getElementById('loadingOverlay').style.display = 'none';
-                    
-                    // Show success message on login form
-                    document.getElementById('registerSuccessMessage').style.display = 'block';
-                    
+
                     // Clear registration form
                     document.getElementById('registerUserForm').reset();
-                    
+
                     // Switch to login form
                     showLogin();
-                    
+
+                    // Show success message on login form
+                    document.getElementById('registerSuccessMessage').style.display = 'block';
+
                     // Pre-fill login form with registered username
                     document.getElementById('username').value = username;
                     document.getElementById('password').value = '';
-                    
+
                     // Auto-hide success message after 5 seconds
                     setTimeout(() => {
                         document.getElementById('registerSuccessMessage').style.display = 'none';
@@ -779,8 +707,7 @@
                     document.getElementById('loadingOverlay').style.display = 'none';
                     alert(result.message || 'Registration failed');
                 }
-                */
-                
+
             } catch (error) {
                 console.error('Registration error:', error);
                 document.getElementById('loadingOverlay').style.display = 'none';
@@ -793,7 +720,7 @@
             const errorEl = document.getElementById('errorMessage');
             errorEl.textContent = '❌ ' + message;
             errorEl.style.display = 'block';
-            
+
             setTimeout(() => {
                 errorEl.style.display = 'none';
             }, 5000);
@@ -809,25 +736,26 @@
         // Check authentication on protected pages
         function checkAuth() {
             const session = localStorage.getItem('onpoint_session') || sessionStorage.getItem('onpoint_session');
-            
+
             if (!session) {
                 window.location.href = 'login.html';
                 return null;
             }
-            
+
             const sessionData = JSON.parse(session);
             const now = new Date().getTime();
-            
+
             if (now - sessionData.timestamp > CONFIG.SESSION_TIMEOUT) {
                 logout();
                 return null;
             }
-            
+
             return sessionData;
         }
 
         // Make functions globally available
         window.togglePassword = togglePassword;
+        window.togglePasswordField = togglePasswordField;
         window.forgotPassword = forgotPassword;
         window.showRegister = showRegister;
         window.showLogin = showLogin;
