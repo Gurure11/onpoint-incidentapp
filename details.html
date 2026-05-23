@@ -665,6 +665,38 @@
             color: green;
             background-color: yellow;
         }
+            .top-link-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 0.5rem 0 1.4rem;
+        }
+
+        .bow, .top-link-bar a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 0.75rem 1.25rem;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #0f3348 0%, #1d6f94 100%);
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.65);
+            box-shadow: 0 10px 20px -12px rgba(6,27,40,0.75);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+        }
+
+        .bow:hover, .top-link-bar a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 26px -14px rgba(6,27,40,0.9);
+            opacity: 0.92;
+            cursor: pointer;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -706,7 +738,10 @@
                 <div class="badge"><i class="fas fa-gas-pump"></i> ONPOINT</div>
                 <div class="sheet-id"><i class="fas fa-file-excel"></i> Fuel Entries</div>
             </div><br><br>
-            <a class="bow" href="accident.html">Home</a> <a href="contacts.html">Hand Over</a><br><br>
+            <div class="top-link-bar">
+                <a class="bow" href="accident.html"><i class="fas fa-home"></i> Home</a>
+                <a href="contacts.html"><i class="fas fa-truck-moving"></i> Hand Over</a>
+            </div>
 
             <form id="fuelForm">
                 <!-- Basic Info with Driver dropdown -->
@@ -1124,6 +1159,25 @@
             
             let tollEntries = [];
 
+            function getOdoMemoryKey() {
+                const vehicle = document.getElementById('vehicleReg')?.value || '';
+                return vehicle ? 'onpoint_last_odo_finish_' + vehicle : 'onpoint_last_odo_finish_general';
+            }
+
+            function loadRememberedOdoStart() {
+                const key = getOdoMemoryKey();
+                const remembered = localStorage.getItem(key);
+                if (remembered && odoStart && !odoStart.value) {
+                    odoStart.value = remembered;
+                    updateTotals();
+                }
+            }
+
+            function rememberOdoFinish() {
+                if (!odoFinish || !odoFinish.value) return;
+                localStorage.setItem(getOdoMemoryKey(), odoFinish.value);
+            }
+
             const erNumberInput = document.getElementById('erNumber');
 
             function getFormattedErNumber(showWarning = false) {
@@ -1198,6 +1252,14 @@
 
             // Set today's date
             document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+
+            const vehicleRegInput = document.getElementById('vehicleReg');
+            if (vehicleRegInput) {
+                vehicleRegInput.addEventListener('change', function() {
+                    if (!odoStart.value) loadRememberedOdoStart();
+                });
+            }
+            loadRememberedOdoStart();
 
             // Update all calculations
             function updateTotals() {
@@ -1434,6 +1496,7 @@
                     // Reset form but keep date
                     document.getElementById('fuelForm').reset();
                     document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+                    if (odoStart) odoStart.value = localStorage.getItem(getOdoMemoryKey()) || '';
                     
                     // Clear toll entries
                     tollContainer.innerHTML = '';
