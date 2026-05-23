@@ -337,7 +337,27 @@
                 opacity: 0.8;
             }
         }
-    </style>
+    
+        .add-option-btn{
+            margin-top:10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color:white;
+            border:none;
+            padding:10px 14px;
+            border-radius:10px;
+            font-size:13px;
+            font-weight:600;
+            cursor:pointer;
+            transition:0.3s;
+            width:100%;
+        }
+
+        .add-option-btn:hover{
+            opacity:0.9;
+            transform:translateY(-1px);
+        }
+
+</style>
 </head>
 <body>
     <div class="container">
@@ -421,6 +441,9 @@
     <option value="Timothy Wadzema">Timothy Wadzema</option>
     <option value="Rayman Mugaramanja">Rayman Mugaramanja</option>
 </select>
+                        <button type="button" class="add-option-btn" onclick="addNewOption('employeeName', 'Enter new employee name and surname:')">
+                            ➕ Add New Name
+                        </button>
                     </div>
                     <div class="form-group">
                         <label>Employee Number *</label>
@@ -428,8 +451,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Employee No. *</label>
-                        <input type="text" id="idNumber" placeholder="EMP001" required>
+                    <label>Contact Cell *</label>
+                        <input type="tel" id="idNumber" placeholder="+27 71 234 5678" required>
                     </div>
                 <div class="form-group">
                     <label>Department</label>
@@ -529,6 +552,9 @@
                             <option value="LK76BGGP">LK76BGGP</option>
                             <option value="MK85PWGP">MK85PWGP</option>
                         </select>
+                        <button type="button" class="add-option-btn" onclick="addNewOption('vehicleReg', 'Enter new vehicle registration:')">
+                            ➕ Add Vehicle Registration
+                        </button>
                     </div>
                     <div class="form-group">
                         <label>Vehicle Model</label>
@@ -874,6 +900,32 @@
                 document.getElementById('submitBtn').disabled = false;
             }
         }
+
+
+        function addNewOption(selectId, message) {
+            const select = document.getElementById(selectId);
+            const newValue = prompt(message);
+
+            if (newValue && newValue.trim() !== '') {
+                const cleanValue = selectId === 'vehicleReg'
+                    ? newValue.trim().toUpperCase()
+                    : newValue.trim();
+
+                const exists = Array.from(select.options).some(
+                    option => option.value.toUpperCase() === cleanValue.toUpperCase()
+                );
+
+                if (!exists) {
+                    const option = document.createElement('option');
+                    option.value = cleanValue;
+                    option.text = cleanValue;
+                    select.appendChild(option);
+                }
+
+                select.value = cleanValue;
+            }
+        }
+
 
         // Make function globally available
         window.submitForm = submitForm;
