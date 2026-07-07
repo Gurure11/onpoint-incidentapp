@@ -472,6 +472,48 @@
                 </div>
             </div>
 
+            <!-- Project Information Section -->
+            <div class="form-section">
+                <h2><i>🏗️</i> Project Information</h2>
+                <div class="form-group">
+                    <label>Project *</label>
+                    <select id="projectName" onchange="toggleOtherProject()" required>
+                        <option value="">Select Project...</option>
+                        <option value="Emfuleni line">Emfuleni line</option>
+                        <option value="COE Street Light">COE Street Light</option>
+                        <option value="Midvaal Substation">Midvaal Substation</option>
+                        <option value="DBSA GENERATORS">DBSA GENERATORS</option>
+                        <option value="ESKOM KZN SPU">ESKOM KZN SPU</option>
+                        <option value="COT Metering">COT Metering</option>
+                        <option value="ESKOM LOU GB">ESKOM LOU GB</option>
+                        <option value="CENTLEC CD11">CENTLEC CD11</option>
+                        <option value="CENTLEC CD78">CENTLEC CD78</option>
+                        <option value="CENTLEC CD45">CENTLEC CD45</option>
+                        <option value="CENTLEC CD32">CENTLEC CD32</option>
+                        <option value="TRANSNET PE HIGH MAST">TRANSNET PE HIGH MAST</option>
+                        <option value="MOQHAKA STREET LIGHTS">MOQHAKA STREET LIGHTS</option>
+                        <option value="MOQHAKA METERING">MOQHAKA METERING</option>
+                        <option value="ROOOIWAL">ROOOIWAL</option>
+                        <option value="TEMBA">TEMBA</option>
+                        <option value="KZN Chivelstone">KZN Chivelstone</option>
+                        <option value="AMAKHEMFUNDO">AMAKHEMFUNDO</option>
+                        <option value="KZN BUILDING WESTVILLE">KZN BUILDING WESTVILLE</option>
+                        <option value="KZN BUILDING ATHENE">KZN BUILDING ATHENE</option>
+                        <option value="KZN BUILDING PLUMBING EMERGENCY">KZN BUILDING PLUMBING EMERGENCY</option>
+                        <option value="MBONWA">MBONWA</option>
+                        <option value="ZAMAFUTHI">ZAMAFUTHI</option>
+                        <option value="JOE GQABI">JOE GQABI</option>
+                        <option value="OSINGISINGINI">OSINGISINGINI</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group" id="projectOtherGroup" style="display:none;">
+                    <label>Other Project Name *</label>
+                    <input type="text" id="projectOther" placeholder="Enter project name">
+                </div>
+            </div>
+
+
             <!-- Vehicle Information Section -->
             <div class="form-section">
                 <h2><i>🚙</i> Vehicle Information</h2>
@@ -856,7 +898,7 @@
     <script>
         // Configuration
         const CONFIG = {
-            GAS_URL: 'https://script.google.com/macros/s/AKfycbwfSPNn0Df_hr-prULOJ73q-_NXx3KGPmnSr4V3ayOUNog1XFXsmafWP5qd0cn7HHZu7A/exec',
+            GAS_URL: 'https://script.google.com/macros/s/AKfycbwYrDKqpG8laVqCzX4v3G4-NiMa4ajLlGsGpyrkrYdxdmLpPfpJCdWKEkMkdGkq6BDq/exec',
             SHEET_ID: '1vBDeyPBy3LLYg0EM2OFgceI3deVFhXL2Nr-IpdveZoU',
             DRIVE_FOLDER_ID: '13BuqOSAdUlfZJIm36A_R3mbF4HwHCfZY',
             SHEET_NAME: 'Vehicle Handovers',
@@ -912,15 +954,41 @@
             });
         }
 
+
+        function toggleOtherProject() {
+            const projectSelect = document.getElementById('projectName');
+            const otherGroup = document.getElementById('projectOtherGroup');
+            const otherInput = document.getElementById('projectOther');
+            const isOther = projectSelect && projectSelect.value === 'Other';
+            if (otherGroup) otherGroup.style.display = isOther ? 'block' : 'none';
+            if (otherInput) {
+                otherInput.required = isOther;
+                if (!isOther) otherInput.value = '';
+            }
+        }
+
+        function getSelectedProject() {
+            const projectSelect = document.getElementById('projectName');
+            const otherInput = document.getElementById('projectOther');
+            if (projectSelect && projectSelect.value === 'Other') {
+                return (otherInput && otherInput.value.trim()) ? otherInput.value.trim() : '';
+            }
+            return projectSelect ? projectSelect.value : '';
+        }
+
         // Submit form function
         async function submitForm() {
             // Validate required fields
-            const requiredFields = ['employeeName', 'employeeNumber', 'idNumber', 'vehicleReg', 'mileage', 'handoverDate', 'handoverTime'];
+            const requiredFields = ['employeeName', 'employeeNumber', 'idNumber', 'projectName', 'vehicleReg', 'mileage', 'handoverDate', 'handoverTime'];
             for(let field of requiredFields) {
                 if(!document.getElementById(field).value.trim()) {
                     alert(`Please fill in all required fields`);
                     return;
                 }
+            }
+            if (document.getElementById('projectName').value === 'Other' && !document.getElementById('projectOther').value.trim()) {
+                alert('Please enter the Other project name.');
+                return;
             }
 
             // Show loading overlay
@@ -943,6 +1011,7 @@
                     employeeNumber: document.getElementById('employeeNumber').value,
                     idNumber: document.getElementById('idNumber').value,
                     department: document.getElementById('department').value || 'Not Specified',
+                    project: getSelectedProject() || 'Not Specified',
                     
                     vehicleReg: document.getElementById('vehicleReg').value,
                     vehicleModel: document.getElementById('vehicleModel').value || 'Not Specified',
