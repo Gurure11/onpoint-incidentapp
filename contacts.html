@@ -210,6 +210,33 @@
             border: 2px solid #eef2f6;
         }
 
+        .photo-slot {
+            background: #f8fafc;
+            border: 2px solid #eef2f6;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .photo-slot-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .photo-slot .form-row {
+            align-items: end;
+        }
+
+        .photo-slot input[type="file"] {
+            background: white;
+        }
+
+        .photo-slot-preview {
+            margin-top: 10px;
+        }
+
         .abnormality-item {
             background: #fff9c4;
             border-left: 4px solid #fbc02d;
@@ -646,18 +673,120 @@
                 <h2><i>📸</i> Abnormalities / Damage Report</h2>
                 <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Please document any dents, scratches, or abnormalities</p>
                 
-                <!-- Photo Upload Area -->
+                <!-- Labelled Photo Upload Area - up to 5 photos -->
                 <div class="photo-upload-area" id="photoUploadArea">
-                    <input type="file" id="vehiclePhotos" accept="image/*" multiple capture="environment">
-                    <label for="vehiclePhotos">
-                        <div style="font-size: 40px; margin-bottom: 10px;">📷</div>
-                        <div style="font-weight: 600; margin-bottom: 5px;">Tap to take photos</div>
-                        <div style="font-size: 12px; color: #888;">Upload images of any damage or abnormalities</div>
-                    </label>
+                    <div style="font-size: 40px; margin-bottom: 10px;">📷</div>
+                    <div style="font-weight: 600; margin-bottom: 5px;">Upload up to 5 labelled vehicle photos</div>
+                    <div style="font-size: 12px; color: #888;">Select the vehicle area label for each photo before submitting.</div>
                 </div>
 
-                <!-- Photo Preview -->
-                <div class="photo-preview" id="photoPreview"></div>
+                <div id="labelledPhotoSlots">
+                    <div class="photo-slot">
+                        <div class="photo-slot-title">Photo 1</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Photo Area Label</label>
+                                <select id="photoLabel1">
+                                    <option value="">Select area...</option>
+                                    <option value="Rear Left">Rear Left</option>
+                                    <option value="Rear Right">Rear Right</option>
+                                    <option value="Front Right">Front Right</option>
+                                    <option value="Front Left">Front Left</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Upload Photo</label>
+                                <input type="file" id="vehiclePhoto1" accept="image/*" capture="environment">
+                            </div>
+                        </div>
+                        <div class="photo-preview photo-slot-preview" id="photoPreview1"></div>
+                    </div>
+                    <div class="photo-slot">
+                        <div class="photo-slot-title">Photo 2</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Photo Area Label</label>
+                                <select id="photoLabel2">
+                                    <option value="">Select area...</option>
+                                    <option value="Rear Left">Rear Left</option>
+                                    <option value="Rear Right">Rear Right</option>
+                                    <option value="Front Right">Front Right</option>
+                                    <option value="Front Left">Front Left</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Upload Photo</label>
+                                <input type="file" id="vehiclePhoto2" accept="image/*" capture="environment">
+                            </div>
+                        </div>
+                        <div class="photo-preview photo-slot-preview" id="photoPreview2"></div>
+                    </div>
+                    <div class="photo-slot">
+                        <div class="photo-slot-title">Photo 3</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Photo Area Label</label>
+                                <select id="photoLabel3">
+                                    <option value="">Select area...</option>
+                                    <option value="Rear Left">Rear Left</option>
+                                    <option value="Rear Right">Rear Right</option>
+                                    <option value="Front Right">Front Right</option>
+                                    <option value="Front Left">Front Left</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Upload Photo</label>
+                                <input type="file" id="vehiclePhoto3" accept="image/*" capture="environment">
+                            </div>
+                        </div>
+                        <div class="photo-preview photo-slot-preview" id="photoPreview3"></div>
+                    </div>
+                    <div class="photo-slot">
+                        <div class="photo-slot-title">Photo 4</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Photo Area Label</label>
+                                <select id="photoLabel4">
+                                    <option value="">Select area...</option>
+                                    <option value="Rear Left">Rear Left</option>
+                                    <option value="Rear Right">Rear Right</option>
+                                    <option value="Front Right">Front Right</option>
+                                    <option value="Front Left">Front Left</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Upload Photo</label>
+                                <input type="file" id="vehiclePhoto4" accept="image/*" capture="environment">
+                            </div>
+                        </div>
+                        <div class="photo-preview photo-slot-preview" id="photoPreview4"></div>
+                    </div>
+                    <div class="photo-slot">
+                        <div class="photo-slot-title">Photo 5</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Photo Area Label</label>
+                                <select id="photoLabel5">
+                                    <option value="">Select area...</option>
+                                    <option value="Rear Left">Rear Left</option>
+                                    <option value="Rear Right">Rear Right</option>
+                                    <option value="Front Right">Front Right</option>
+                                    <option value="Front Left">Front Left</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Upload Photo</label>
+                                <input type="file" id="vehiclePhoto5" accept="image/*" capture="environment">
+                            </div>
+                        </div>
+                        <div class="photo-preview photo-slot-preview" id="photoPreview5"></div>
+                    </div>
+                </div>
 
                 <!-- Abnormality Description -->
                 <div class="abnormality-item">
@@ -727,7 +856,7 @@
     <script>
         // Configuration
         const CONFIG = {
-            GAS_URL: 'https://script.google.com/macros/s/AKfycbxfbfFdl1mD5DSL-UBZIwmWj0lKmdlMGSk_0aTGM52GPfUBZDuSqrW4XYzNg45yi8IXrw/exec',
+            GAS_URL: 'https://script.google.com/macros/s/AKfycbwfSPNn0Df_hr-prULOJ73q-_NXx3KGPmnSr4V3ayOUNog1XFXsmafWP5qd0cn7HHZu7A/exec',
             SHEET_ID: '1vBDeyPBy3LLYg0EM2OFgceI3deVFhXL2Nr-IpdveZoU',
             DRIVE_FOLDER_ID: '13BuqOSAdUlfZJIm36A_R3mbF4HwHCfZY',
             SHEET_NAME: 'Vehicle Handovers',
@@ -745,25 +874,26 @@
             document.getElementById('handoverTime').value = `${hours}:${minutes}`;
         });
 
-        // Photo upload preview
-        document.getElementById('vehiclePhotos').addEventListener('change', function(e) {
-            const preview = document.getElementById('photoPreview');
-            preview.innerHTML = '';
-            
-            for(let i = 0; i < this.files.length; i++) {
-                const file = this.files[i];
+        // Labelled photo upload previews - up to 5 photos
+        function bindPhotoPreview(slotNumber) {
+            const input = document.getElementById('vehiclePhoto' + slotNumber);
+            const preview = document.getElementById('photoPreview' + slotNumber);
+            if (!input || !preview) return;
+            input.addEventListener('change', function() {
+                preview.innerHTML = '';
+                const file = this.files && this.files[0];
+                if (!file) return;
                 const reader = new FileReader();
-                
                 reader.onload = function(e) {
                     const img = document.createElement('img');
                     img.src = e.target.result;
                     img.className = 'preview-image';
                     preview.appendChild(img);
-                }
-                
+                };
                 reader.readAsDataURL(file);
-            }
-        });
+            });
+        }
+        [1,2,3,4,5].forEach(bindPhotoPreview);
 
         // Convert file to base64
         function fileToBase64(file) {
@@ -837,12 +967,15 @@
                     photos: []
                 };
 
-                // Convert photos to base64
-                const photoInput = document.getElementById('vehiclePhotos');
-                if (photoInput.files.length > 0) {
-                    for (let i = 0; i < photoInput.files.length; i++) {
-                        const file = photoInput.files[i];
-                        const base64Photo = await fileToBase64(file);
+                // Convert labelled photos to base64. Maximum 5 photos, saved into separate sheet columns.
+                for (let i = 1; i <= 5; i++) {
+                    const photoInput = document.getElementById('vehiclePhoto' + i);
+                    const labelInput = document.getElementById('photoLabel' + i);
+                    if (photoInput && photoInput.files && photoInput.files.length > 0) {
+                        const label = (labelInput && labelInput.value) ? labelInput.value : 'Not Labelled';
+                        const base64Photo = await fileToBase64(photoInput.files[0]);
+                        base64Photo.label = label;
+                        base64Photo.slot = i;
                         formData.photos.push(base64Photo);
                     }
                 }
@@ -872,7 +1005,7 @@
                     document.getElementById('handoverDate').value = new Date().toISOString().split('T')[0];
                     document.getElementById('handoverTime').value = 
                         `${String(new Date().getHours()).padStart(2,'0')}:${String(new Date().getMinutes()).padStart(2,'0')}`;
-                    document.getElementById('photoPreview').innerHTML = '';
+                    [1,2,3,4,5].forEach(i => { const p = document.getElementById('photoPreview' + i); if (p) p.innerHTML = ''; });
                     
                     document.getElementById('handover').checked = true;
                     document.getElementById('half').checked = true;
