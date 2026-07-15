@@ -400,15 +400,11 @@
                         <span class="toggle-password" onclick="togglePasswordField('regConfirmPassword', this)">👁️</span>
                     </div>
                     <div class="form-group">
-                        <label>Employee Number</label>
-                        <input type="text" id="regEmployeeNumber" placeholder="EMP001">
-                    </div>
-                    <div class="form-group">
                         <label>Role</label>
                         <select id="regRole">
-                            <option value="driver">Driver</option>
-                            <option value="manager">Fleet Manager</option>
-                            <option value="admin">Administrator</option>
+                            <option value="Mechanic">Mechanic</option>
+                            <option value="Executive">Executive</option>
+                            <option value="Manager">Manager</option>
                         </select>
                     </div>
                     <button type="submit" class="login-btn" style="background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);">
@@ -643,7 +639,6 @@
             // while keeping the value sent to Apps Script exactly the same as the validated value.
             const password = String(passwordInput.value || '').trim();
             const confirmPassword = String(confirmPasswordInput.value || '').trim();
-            const employeeNumber = document.getElementById('regEmployeeNumber').value.trim();
             const role = document.getElementById('regRole').value;
 
             // Validate
@@ -676,7 +671,6 @@
                     email: email,
                     username: username,
                     password: password,
-                    employeeNumber: employeeNumber,
                     role: role,
                     registeredAt: new Date().toISOString(),
                     timestamp: new Date().toISOString()
