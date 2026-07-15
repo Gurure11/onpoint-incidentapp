@@ -741,6 +741,46 @@
                 </select>
             </div>
 
+            <div class="input-field">
+                <label><i class="fas fa-hard-hat"></i> Project</label>
+                <select id="project" name="project" required>
+                    <option value="" disabled selected>– select project –</option>
+                    <option value="Emfuleni VO">Emfuleni VO</option>
+                    <option value="COE Street Light">COE Street Light</option>
+                    <option value="COT Metering">COT Metering</option>
+                    <option value="Midvaal Substation">Midvaal Substation</option>
+                    <option value="DBSA GENERATORS">DBSA GENERATORS</option>
+                    <option value="ESKOM LOU GB">ESKOM LOU GB</option>
+                    <option value="MSUNDUZI STREET LIGHTS">MSUNDUZI STREET LIGHTS</option>
+                    <option value="ESKOM SPU KZN">ESKOM SPU KZN</option>
+                    <option value="COT mv/lv">COT mv/lv</option>
+                    <option value="MIDVAAL MECHANICAL">MIDVAAL MECHANICAL</option>
+                    <option value="CENTLEC CD11">CENTLEC CD11</option>
+                    <option value="CENTLEC CD78">CENTLEC CD78</option>
+                    <option value="CENTLEC CD45">CENTLEC CD45</option>
+                    <option value="CENTLEC CD32">CENTLEC CD32</option>
+                    <option value="TRANSNET PE HIGH MAST">TRANSNET PE HIGH MAST</option>
+                    <option value="MOQHAKA STREET LIGHTS">MOQHAKA STREET LIGHTS</option>
+                    <option value="MOQHAKA METERING">MOQHAKA METERING</option>
+                    <option value="ROOOIWAL">ROOOIWAL</option>
+                    <option value="KZN Chivelstone">KZN Chivelstone</option>
+                    <option value="KZN BUILDING INGULA">KZN BUILDING INGULA</option>
+                    <option value="KZN BUILDING WESTVILLE">KZN BUILDING WESTVILLE</option>
+                    <option value="KZN BUILDING ATHENE">KZN BUILDING ATHENE</option>
+                    <option value="KZN BUILDING PLUMBING EMERGENCY">KZN BUILDING PLUMBING EMERGENCY</option>
+                    <option value="MBONWA">MBONWA</option>
+                    <option value="ZAMAFUTHI">ZAMAFUTHI</option>
+                    <option value="JOE GQABI">JOE GQABI</option>
+                    <option value="Avon Emergency">Avon Emergency</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="input-field" id="otherProjectField" style="display:none;">
+                <label><i class="fas fa-pen"></i> Other Project Name</label>
+                <input type="text" id="otherProject" name="otherProject" placeholder="Enter project name">
+            </div>
+
             <div class="two-cols">
                 <div class="input-field">
                     <label><i class="fas fa-user"></i> Driver's name *</label>
@@ -915,7 +955,7 @@
 
     <script>
         (function() {
-            const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1tH13Rj66_T1F1uesDzia1dbn8eIuB9fnyn6XP9-y56WFaW8M2cXQky8NiiULqkk3/exec';
+            const GAS_URL = 'https://script.google.com/macros/s/AKfycbzzOKbryXRGV-4uOtxnEXSQYst8t8H5HcM9Nb7rhP-d9ENAiLYfcVcxTcT43BSzrxO2Qg/exec';
             const SHEET_ID = '1vhtaNNmY-YsyDiaA2IFodoBYdQsEcL09F7BgMJo4utI';
             const DRIVE_FOLDER_ID = '1al8guXtgk-PJWwdNvd2umUXYv4AvwXSM';
 
@@ -959,6 +999,19 @@
             const dynamicMapLink = document.getElementById('dynamicMapLink');
             const locationInput = document.getElementById('location');
             const submitBtn = document.getElementById('submitToGAS');
+            const projectSelect = document.getElementById('project');
+            const otherProjectField = document.getElementById('otherProjectField');
+            const otherProjectInput = document.getElementById('otherProject');
+
+            function toggleOtherProject() {
+                const isOther = projectSelect && projectSelect.value === 'Other';
+                if (otherProjectField) otherProjectField.style.display = isOther ? 'flex' : 'none';
+                if (otherProjectInput) {
+                    otherProjectInput.required = isOther;
+                    if (!isOther) otherProjectInput.value = '';
+                }
+            }
+            if (projectSelect) projectSelect.addEventListener('change', toggleOtherProject);
 
             let selectedFile = null;
             let currentBase64 = '';
@@ -1044,6 +1097,7 @@
                 if (stampLocationSpan) stampLocationSpan.innerText = 'locating…';
                 if (attachmentStatus) attachmentStatus.innerHTML = '<i class="fas fa-info-circle"></i> No image — detecting address…';
                 applyFaintDefaults();
+                toggleOtherProject();
                 requestDriverLocation();
             }
 
@@ -1186,6 +1240,10 @@
                     accidentType: document.getElementById('accidentType').value,
                     department: document.getElementById('department').value,
                     costCenter: document.getElementById('costCenter').value,
+                    project: document.getElementById('project').value === 'Other'
+                        ? document.getElementById('otherProject').value.trim()
+                        : document.getElementById('project').value,
+                    projectSelection: document.getElementById('project').value,
                     driverName: document.getElementById('driverName').value,
                     driverPhone: document.getElementById('driverPhone').value,
                     description: document.getElementById('description').value,
@@ -1209,11 +1267,11 @@
             function validateForm(data) {
                 const required = [
                     data.date, data.time, data.vehicleReg, data.location,
-                    data.accidentType, data.department, data.costCenter,
+                    data.accidentType, data.department, data.costCenter, data.project,
                     data.driverName, data.driverPhone, data.description
                 ];
                 if (required.some(f => !f)) {
-                    alert('Please fill all required fields including Cost Center and Driver Name');
+                    alert('Please fill all required fields including Cost Center, Project and Driver Name');
                     return false;
                 }
                 return true;
@@ -1259,6 +1317,7 @@
             loadSavedOptions('vehicleReg', 'onpoint_saved_vehicle_regs');
             loadSavedOptions('driverName', 'onpoint_saved_driver_names');
             applyFaintDefaults();
+            toggleOtherProject();
         })();
     </script>
 </body>
